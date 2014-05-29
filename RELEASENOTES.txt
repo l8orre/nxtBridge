@@ -1,0 +1,96 @@
+
+Welcome to nxtBridge beta 0.1.1 - June 01, 2014
+
+developed on Ubuntu 13.10
+
+requirements:
+
+python3
+PyQt4
+werkzeug
+jsonrpc
+requests
+
+
+
+The followong bitcoin commands can be accessed:
+
+# number is the ordinal of appearance in bitcoind help listing:
+
+# 14 getbalance
+# 21 getconnectioncount
+# 25 getinfo 
+# 33 getreceivedbyaccount
+# 34 getreceivedbyaddress
+# 35 gettransaction
+# 52 sendfrom
+# 58 settxfee
+# 63 validateaddress
+
+
+
+
+
+
+Below are examples for the implemented bitcoind calls using the curl tool, given with two different parameter syntaxes.
+These have been tested on Ubuntu13.10
+
+
+NXT:
+curl param encoding 1
+-----------------------
+ 
+curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getinfo", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}' http://localhost:7879/jsonrpc
+
+curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getbalance", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}' http://localhost:7879/jsonrpc
+
+curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getconnectioncount", "params": {}, "id": 12}' http://localhost:7879/jsonrpc
+
+curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getreceivedbyaccount", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}' http://localhost:7879/jsonrpc
+
+curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getreceivedbyaddress", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}' http://localhost:7879/jsonrpc
+
+curl -i -X POST -d '{"jsonrpc": "2.0", "method": "gettransaction", "params": {"txid":"1448848043607985937"}, "id": 12}' http://localhost:7879/jsonrpc
+
+curl -i -X POST -d '{"jsonrpc": "2.0", "method": "sendfrom", "params": {"amount":0.00001, "fromaccount":"PASSPHRASE",  "tobitcoinaddress":"2865886802744497404",  "minconf":1,  "comment":"" , "comment-to":"" }, "id": 12}' http://localhost:7879/jsonrpc
+
+curl -i -X POST -d '{"jsonrpc": "2.0", "method": "settxfee", "params": {}, "id": 12}' http://localhost:7879/jsonrpc
+
+curl -i -X POST -d '{"jsonrpc": "2.0", "method": "validateaddress", "params": {"PASSPHRASE":"PASSPHRASE"}, "id": 12}' http://localhost:7879/jsonrpc
+
+ 
+
+
+NXT:
+curl param encoding 2
+-----------------------
+
+curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"getinfo","params": {} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
+
+curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"getbalance","params": {"account":"16159101027034403504"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
+
+curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"getconnectioncount","params": {} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
+ 
+curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"getreceivedbyaccount","params":  {"account":"16159101027034403504"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
+
+curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"getreceivedbyaddress","params":  {"account":"16159101027034403504"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
+ 
+curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"gettransaction","params":  {"txid":"1448848043607985937"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
+  
+curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"sendfrom","params":  {"amount":0.00003, "fromaccount":"PASSPHRASE",  "tobitcoinaddress":"2865886802744497404",  "minconf":1,  "comment":"" , "comment-to":"" } }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
+
+curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"settxfee","params":  {} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
+ 
+curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"validateaddress","params": {"PASSPHRASE":"17oreosetc17oreosetc"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
+ 
+
+
+
+Donations Welcome! NXT: 1674414626317090683
+
+Comments, Questions: l8orre - nxtforum.org 
+
+
+
+
+

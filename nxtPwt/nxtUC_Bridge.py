@@ -223,6 +223,7 @@ class BridgeThread(QObject):
     
     # housekeeping ogf the threads may have to be taken care of
     def __init__(self, host, port):
+        print(3*"****************")
         super(QObject, self).__init__( parent = None)
         self.qPool=QtCore.QThreadPool.globalInstance()
         self.qPool.setMaxThreadCount(2500) # robustness
@@ -351,8 +352,13 @@ class JSON_Runner(QtCore.QRunnable):
         {"result": {"16159101027034403504": "4061839895698"}, "id": 12, "jsonrpc": "2.0"}azure@boxfish:~/workbench/nxtDev/BRIDGE$ 
 
 
+
+
         """
+        print("\n\n####### getbalance\n" + str(kwargs))
+        # only gets 'params' - but jsonHandler needs full json
         ACCOUNT = kwargs["account"] #kwargs['account']
+        
         payload = { "requestType" : "getBalance" } #getTime"   }
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
@@ -361,11 +367,22 @@ class JSON_Runner(QtCore.QRunnable):
         preppedReq = NxtReq.prepare()
         response = session.send(preppedReq)
         NxtResp = response.json()
+
+        print("NxtResp" + str(NxtResp))
+
         Nxt2Btc = {}
-        Nxt2Btc =  {
-                    ACCOUNT:NxtResp['balanceNQT']
-                    }
-        
+        try:
+                
+            Nxt2Btc =  {
+                        ACCOUNT:NxtResp['balanceNQT']
+                        }
+            #Nxt2Btc = {'A':'B'}
+        except:
+            print("KEY ERRRRROR! - use default val")
+            Nxt2Btc =  {
+                        ACCOUNT:'0'
+                        }
+            
         return Nxt2Btc  
  
  
@@ -1268,7 +1285,10 @@ class JSON_Runner(QtCore.QRunnable):
         return Nxt2Btc  
 
 
- 
+
+    def argParse(self, werkzeugRequest):
+        print(str(werkzeugRequest))
+        return werkzeugRequest
  
  
 
@@ -1285,9 +1305,126 @@ class JSON_Runner(QtCore.QRunnable):
              8 NXT format	
              9 Implementation Rules How to map a NXT API return to a XXXCOIND API return
             """
+# 
+        print(3*"\n++++++++++++" +str(request.__dir__()))
+#        print(3*"\n++++++++++++" +str(type(request)))
+        print(3*"\n++++++++++++" +str(request.environ))
+#        
+#        envi = request.environ
+        
+        print("self --- " + str(self))
+        print(3*"\n++request.get_data()+++++" +str(request.get_data()))
          
-        response = JSONRPCResponseManager.handle(request.get_data(cache=False, as_text=True), dispatcher)
+#        print(3*"\n+++++++++++++++" +str(request.data))
+#        print(3*"\n++++++++++++" +str(request.get_data(cache=False, as_text=True)))
+        
+       
+       
+
+        origDataRaw = request.get_data()
+        origDataEval = eval(origDataRaw)
+        
+        print("origDataRaw" + str(origDataRaw))
+        print("origDataEval" + str(origDataEval))
+        origParams = origDataEval['params']
+        
+        try:
+        
+             
+            account = str(origParams[0])
+            minconf = str(origParams[1])
+            print("account" + str(account))
+            
+            parmsDi = {'account':account, 'minconf': minconf}                
+            origDataEval['params'] = parmsDi
+            origDataEval['jsonrpc'] = '2.0'
+            print("inLI origData" + str(origDataEval))
+            
+            
+        except:
+            origDataEval['params'] = origParams
+            print("inDI origData" + str(origDataEval))
+            
+        print("eval- origData" + str(origDataEval))
+            
+        print("---->" + request.get_data(cache=False, as_text=True))
+
+
+        #   OK!:
+        rawStr= '{"jsonrpc": "2.0", "method": "getbalance", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}'
+        evalStr = str(origDataEval)
+        #this is unspeakable!!!!
+        print(evalStr)
+        evalStr = evalStr.replace("'", '"')
+        print(evalStr)
+        
+        
+        #rawStr= "{'jsonrpc': '2.0', 'method': 'getbalance', 'params': {'account':'16159101027034403504','minconf':'1'}, 'id': 12}"
+
+        response = JSONRPCResponseManager.handle( evalStr, dispatcher)
+        
+        #response = JSONRPCResponseManager.handle( str(origDataEval ), dispatcher)
+        #response = JSONRPCResponseManager.handle( rawStr, dispatcher)
+        
+        
+        print(type(origDataEval))
+# 
+
+
+
+
+
+
+        print("response.json)" +str(response.json))
+        
+        #print(str(response1.json))
+        
+        # ONLY params dict goes into dispatcher
+        #response = JSONRPCResponseManager.handle(request.get_data(), dispatcher)
+        #response = JSONRPCResponseManager.handle(request.get_data(cache=False, as_text=True), dispatcher)
+        
         return    Response(response.json, mimetype='application/json') 
+
+
+
+
+#type(ll) == list
+#Out[11]: True
+#
+#type(dd)==dict
+#Out[14]: True
+
+
+       
+#        ++++++++++++  bitcoind rpc has this:
+#++++++++++++
+#++++++++++++b'{"method":"getbalance","params":[],"id":1}\n'
+#
+#++++++++++++
+#++++++++++++
+#++++++++++++{"method":"getbalance","params":[],"id":1}
+#
+#
+#
+
+#                     CURL HAS THIS:
+#++++++++++++
+#++++++++++++
+#++++++++++++b'{"jsonrpc": "2.0", "method": "getbalance", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}'
+#
+#++++++++++++
+#++++++++++++
+#++++++++++++{"jsonrpc": "2.0", "method": "getbalance", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}
+#
+#
+#
+
+        # do this anyway to be a bit more flexible :
+        #              BAD right now:    "params":[]
+        #           GOOD right now "params": {"account":"16159101027034403504","minconf":"1"}
+
+
+
 
     def run(self,):
         run_simple('localhost', 7879, self.application,  )

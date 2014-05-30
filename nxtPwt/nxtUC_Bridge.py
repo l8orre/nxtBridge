@@ -148,7 +148,10 @@ class UC_Bridge1(nxtUseCaseMeta):
             
             
             
-tested examples for the BTC-NXT mappings implemented below, using two different curl syntax methods.
+tested examples for the BTC-NXT mappings implemented below, 
+using two different curl syntax methods.
+
+
 
 NXT:
 curl param encoding 1
@@ -199,31 +202,47 @@ curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","met
  
  
  
+using bitcoind as jsonrpc relay:
+----------------------------------
+note: bitcoind does not seem to deliver well formed jsonrpc! 
+
+./bitcoind -rpcport=7879 getbalance 2865886802744497404 1
+
+./bitcoind -rpcport=7879 getconnectioncount
+
+./bitcoind -rpcport=7879 getinfo
+
+./bitcoind -rpcport=7879 getreceivedbyaccount 2865886802744497404
+
+./bitcoind -rpcport=7879 getreceivedbyaddress 2865886802744497404
+
+./bitcoind -rpcport=7879 gettransaction 1448848043607985937
+
+./bitcoind -rpcport=7879 sendfrom XXXXXXXXXXXXXXXX 16159101027034403504 1.2340 1 comm1 commTo 
+
+./bitcoind -rpcport=7879 settxfee
+
+./bitcoind -rpcport=7879 validateaddress XXXXXXXXXXXXXXXX
+
+
             """
   
 
     def __init__(self, sessMan, host = 'localhost', port = '6876'  ):
         super(UC_Bridge1   , self   ).__init__(sessMan)
-        #self.app = app # we need to know app
         self.sessMan = sessMan
         self.meta = {'caller':'Bridge1'}
-        defPass17 = '0' # '17oreosetc17oreosetc'
+        defPass17 = '0' 
         acctSecKey = defPass17
         print(host + port)
         self.mm = BridgeThread( host  , port   )
-        # self start w/o BridgeCtrl mm.jsonServ_Slot()
-
-#
-# this might go into a models-like class 
-##################################################################
- 
- 
+         
  
 class BridgeThread(QObject):
     
-    # housekeeping ogf the threads may have to be taken care of
+    # housekeeping of the threads may have to be taken care of
     def __init__(self, host, port):
-        print(3*"****************")
+        # print(3*"****************")
         super(QObject, self).__init__( parent = None)
         self.qPool=QtCore.QThreadPool.globalInstance()
         self.qPool.setMaxThreadCount(2500) # robustness
@@ -233,7 +252,6 @@ class BridgeThread(QObject):
     @pyqtSlot() # 61
     def jsonServ_Slot(self, ):
         self.json_Runner = JSON_Runner( self.host, self.port ) # json_Emitter, self to THIS !!!!!!
-          
         self.qPool.start(self.json_Runner)
          
         
@@ -246,13 +264,11 @@ class JSON_Runner(QtCore.QRunnable):
         global session # this must be global to be accessible from the dispatcher methods
         session = Session()
         headers = {'content-type': 'application/json'}
-        #sessUrl = 'http://localhost:6876/nxt?' 
         sessUrl = 'http://' + host + ':' + port + '/nxt?' 
         global NxtReq
         NxtReq = Req( method='POST', url = sessUrl, params = {}, headers = headers        )
         #print("\n1111######" + str(self)  )
- 
-        # can't access self.NAMESPACE here !?!?!?!
+  
 ############################
  # 2 generic Nxt APIs
     @dispatcher.add_method
@@ -355,7 +371,7 @@ class JSON_Runner(QtCore.QRunnable):
 
 
         """
-        print("\n\n####### getbalance\n" + str(kwargs))
+        #print("\n\n####### getbalance\n" + str(kwargs))
         # only gets 'params' - but jsonHandler needs full json
         ACCOUNT = kwargs["account"] #kwargs['account']
         
@@ -376,9 +392,7 @@ class JSON_Runner(QtCore.QRunnable):
             Nxt2Btc =  {
                         ACCOUNT:NxtResp['balanceNQT']
                         }
-            #Nxt2Btc = {'A':'B'}
         except:
-            print("KEY ERRRRROR! - use default val")
             Nxt2Btc =  {
                         ACCOUNT:'0'
                         }
@@ -435,7 +449,7 @@ class JSON_Runner(QtCore.QRunnable):
         9   return numberOfPeers
         
         """
-        payload = { "requestType" : "getState" } #getTime"   }
+        payload = { "requestType" : "getState" }  
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
         NxtReq.params=NxtApi # same obj, only replace params
@@ -857,13 +871,7 @@ class JSON_Runner(QtCore.QRunnable):
           ],
           "hex" : "data"         (string) Raw data for transaction
         }
-        
-        bExamples
-        > bitcoin-cli gettransaction "1075db55d416d3ca199f55b6084e2115b9345e16c5cf302fc80e9d5fbf5d48d"
-        > curl --user myusername --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "gettransaction", "params": ["1075db55d416d3ca199f55b6084e2115b9345e16c5cf302fc80e9d5fbf5d48d"] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/
-
-
-
+          
         
         BITCOIN TX REPLY:
         curl --user 'rpcNxtBitcoin:4JLstlAJ6gJyV1DHv2' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"gettransaction","params":["f0b20213346b14361795a9a387ac28078dc9a8a14fd9ced4f7b32eab9966820f"]}' -H 'content-type:text/plain;' http://127.0.0.1:8332
@@ -958,15 +966,20 @@ class JSON_Runner(QtCore.QRunnable):
         response = session.send(preppedReq)
         NxtResp = response.json()
         
-         
-        CONFIRMS = NxtResp['confirmations']
+
+        try:        
+            CONFIRMS = NxtResp['confirmations']
+        except:
+            CONFIRMS = 0
+            print(str(NxtResp))
         TRANSID = NxtResp['transaction']
         TIME = NxtResp['timestamp']
         SENDER = NxtResp['sender']
         RECIPIENT = NxtResp['recipient']
         
         AMOUNT = NxtResp['amountNQT']
-        
+        AMOUNT =  float(AMOUNT)
+        AMOUNT = AMOUNT * 0.00000001
         #print(str(NxtResp))
         Nxt2Btc = {}
         Nxt2Btc =  {
@@ -1027,7 +1040,7 @@ class JSON_Runner(QtCore.QRunnable):
             
             9   Would have preferred a better bitcond call here as I swap the use of accont and address but I dont see any other option
             use the <fromaccount> to pass the secretphrase for the NXT account, <tobitcoinaddress> becomes the nxt account number, need to convert the float amount into NQT the fee should be defaulted to the minimum or set using set tx fee command, convert the json to pass back the transaction id
-
+            # NOTE: THE AMOUNT IS PASSED IN AS NXT.NQT AND IS CONVERTED TO NQT HERE
             
             EXAMPLES:
             
@@ -1052,9 +1065,12 @@ class JSON_Runner(QtCore.QRunnable):
 
  
         payload = { "requestType" : "sendMoney" }  
+        #print(str(kwargs))
 
-        amountNQT = int( float(kwargs['amount'] ) * 100000000)
+        # NOTE: THE AMOUNT IS PASSED IN AS NXT.NQT AND IS CONVERTED TO NQT HERE
+        amountNQT = int( float(kwargs['amount'] ) * 100000000 )
         
+        #print(str(amountNQT))
 
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
@@ -1073,10 +1089,13 @@ class JSON_Runner(QtCore.QRunnable):
         response = session.send(preppedReq)
         NxtResp = response.json()
         
-          
-        TX_ID = NxtResp['transaction']
+        #print(str(NxtResp))
         
-        print(str(NxtResp))
+        try:
+            
+            TX_ID = NxtResp['transaction']
+        except:
+            TX_ID = 'errorDescription'
         Nxt2Btc = {}
         Nxt2Btc =  {
                 
@@ -1138,7 +1157,7 @@ class JSON_Runner(QtCore.QRunnable):
         EXAMPLES:
         
         """
-        print("settxfee"+str(kwargs))   
+        #print("settxfee"+str(kwargs))   
         payload = { "requestType" : "getState" } #getTime"   }
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
@@ -1203,13 +1222,13 @@ class JSON_Runner(QtCore.QRunnable):
         EXAMPLES:
         
         
-        curl -i -X POST -d '{"jsonrpc": "2.0", "method": "validateaddress", "params": {"PASSPHRASE":"17oreosetc17oreosetc"}, "id": 12}' http://localhost:7879/jsonrpc
+        curl -i -X POST -d '{"jsonrpc": "2.0", "method": "validateaddress", "params": {"PASSPHRASE":"XXXXXXXXXXXXXXXX"}, "id": 12}' http://localhost:7879/jsonrpc
         
         {"jsonrpc": "2.0", "result": {"ismine": true, "address": "16159101027034403504", "isvalid": true}, "id": 12}azure@boxfish:~/workbench/nxtDev/BRIDGE$ ^C
         
         
         
-        curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"validateaddress","params": {"PASSPHRASE":"17oreosetc17oreosetc"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
+        curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"validateaddress","params": {"PASSPHRASE":"XXXXXXXXXXXXXXXX"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
         
         {"jsonrpc": "2.0", "result": {"ismine": false, "address": "16159101027034403504", "isvalid": true}, "id": "curltext"}azure@boxfish:~/workbench/nxtDev/BRIDGE$  
 
@@ -1241,13 +1260,7 @@ class JSON_Runner(QtCore.QRunnable):
         preppedReq = NxtReq.prepare()
         response = session.send(preppedReq)
         NxtResp2 = response.json()
-        #print(str(NxtResp2))
-#
-#        self.getForging= {
-#                                        "requestType" : "getForging" , \
-#                                        "secretPhrase" : "PASSPHRASE"   ,\
-#                                        }
-
+ 
         if "errorCode" in NxtResp2.keys():
             isForging = False
         elif "remaining" in NxtResp2.keys():
@@ -1266,9 +1279,7 @@ class JSON_Runner(QtCore.QRunnable):
         preppedReq = NxtReq.prepare()
         response = session.send(preppedReq)
         NxtResp3 = response.json()
-        
-        #print(str(NxtResp3))
-
+         
         if "errorCode" in NxtResp3.keys():
             isvalid = False
         elif "publicKey" in NxtResp3.keys():
@@ -1284,17 +1295,15 @@ class JSON_Runner(QtCore.QRunnable):
         
         return Nxt2Btc  
 
-
-
-    def argParse(self, werkzeugRequest):
-        print(str(werkzeugRequest))
-        return werkzeugRequest
  
  
 
     @Request.application
     def application(self, request ):
-        """    Nxt2Btc_Mapping_Comments
+        """
+        
+        Nxt2Btc_Mapping_Comments: These are the comment keys as detailed in each dispatcher function docstring 
+        
              1 BitcoinD Command/RPC	
              2 Parameters	
              3 Description	
@@ -1304,124 +1313,203 @@ class JSON_Runner(QtCore.QRunnable):
              7 NXT API	
              8 NXT format	
              9 Implementation Rules How to map a NXT API return to a XXXCOIND API return
+
+
+Note: using bitcoind as a relay to send jsonrpc to another server with a whitespace separated list apparently produces not quite well formed json requests.
+./bitcoind -rpcport=7879 getbalance 2865886802744497404 1
+
+This is needs to be corrected here.
+
+
+# 14 getbalance
+# 21 getconnectioncount
+# 25 getinfo 
+# 33 getreceivedbyaccount
+# 34 getreceivedbyaddress
+# 35 gettransaction
+# 52 sendfrom
+# 58 settxfee
+# 63 validateaddress
+
+
             """
-# 
-        print(3*"\n++++++++++++" +str(request.__dir__()))
-#        print(3*"\n++++++++++++" +str(type(request)))
-        print(3*"\n++++++++++++" +str(request.environ))
-#        
-#        envi = request.environ
-        
-        print("self --- " + str(self))
-        print(3*"\n++request.get_data()+++++" +str(request.get_data()))
+
+        ############################################################
+        # argument extraction from list here in these local functions.
+        #
+        # bitcoind seems to send NOT well formed jsonrpc calls!       
+        #
+        #        
+        def parse_getbalance(jsonParms):
+            account = str(jsonParms[0])
+            minconf = str(jsonParms[1])
+            #print("account" + str(account))
+            parmsDi = {'account':account, 'minconf': minconf}             
+            return parmsDi
          
-#        print(3*"\n+++++++++++++++" +str(request.data))
-#        print(3*"\n++++++++++++" +str(request.get_data(cache=False, as_text=True)))
+        def parse_getconnectioncount(jsonParms):
+            parmsDi = {} 
+            return parmsDi
         
-       
-       
+        def parse_getinfo(jsonParms):
+            parmsDi = {} 
+            return parmsDi
+        
+        def parse_getreceivedbyaccount(jsonParms):
+            parmsDi = {} 
+            account = str(jsonParms[0])
+            parmsDi = {'account':account}             
+            return parmsDi
+        
+        def parse_getreceivedbyaddress(jsonParms):
+            parmsDi = {} 
+            account = str(jsonParms[0])
+            parmsDi = {'account':account}             
+            return parmsDi
+        
+        def parse_gettransaction(jsonParms):
+            parmsDi = {} 
+            txid = str(jsonParms[0])
+            parmsDi = {'txid':txid}             
+            return parmsDi
+        
+        def parse_sendfrom(jsonParms):
+            
+#./bitcoind -rpcport=7879 sendfrom XXXXXXXXXXXXXXXX 16159101027034403504 100000000.0 1 comm1 commTo
 
-        origDataRaw = request.get_data()
-        origDataEval = eval(origDataRaw)
-        
-        print("origDataRaw" + str(origDataRaw))
-        print("origDataEval" + str(origDataEval))
-        origParams = origDataEval['params']
-        
-        try:
-        
+
+            parmsDi = {} 
+            
+            fromaccount = str(jsonParms[0])
+            parmsDi['fromaccount']  = fromaccount             
+
+            tobitcoinaddress = str(jsonParms[1])
+            parmsDi['tobitcoinaddress']  = tobitcoinaddress
              
-            account = str(origParams[0])
-            minconf = str(origParams[1])
-            print("account" + str(account))
+            amount = str(jsonParms[2])
+            parmsDi['amount']  = amount
             
-            parmsDi = {'account':account, 'minconf': minconf}                
-            origDataEval['params'] = parmsDi
-            origDataEval['jsonrpc'] = '2.0'
-            print("inLI origData" + str(origDataEval))
+            try:
+                minconf = str(jsonParms[3])
+                parmsDi['minconf']  = minconf
+            except:
+                parmsDi = {'minconf':1}             
+            try:
+                comment = str(jsonParms[4])
+                parmsDi['comment']  = comment
+            except:
+                parmsDi = {'comment':''}
+            try:
+                comment_to = str(jsonParms[5])
+                parmsDi['comment_to']  = comment_to
+            except:
+                parmsDi = {'comment_to':''}
+            
+            print(str(parmsDi))
+            return parmsDi
+        
+        def parse_settxfee(jsonParms):
+            parmsDi = {} 
+            return parmsDi
+        
+        def parse_validateaddress(jsonParms):
+            parmsDi = {} 
+            PASSPHRASE = str(jsonParms[0])
+            parmsDi = {'PASSPHRASE':PASSPHRASE}             
+            
+            return parmsDi
+        
+        
+        
+        jsonRaw = request.get_data()
+        # str: full json content
+        print(str(jsonRaw))
+        # b'{"jsonrpc": "2.0", "method": "getbalance", "params": {"account":"2865886802744497404","minconf":"1"}, "id": 12}'
+        #
+        #--------------------------
+        # dict: full json content
+        #        
+        jsonEval = eval(jsonRaw)
+        print(str(jsonEval))
+        #
+        # params payload is handed in as EITHER dict or list 
+        # dict:
+        # {'jsonrpc': '2.0', 'params': {'minconf': '1', 'account': '2865886802744497404'}, 'method': 'getbalance', 'id': 12}
+        #
+        # list:
+        # {'params': ['2865886802744497404', 1], 'method': 'getbalance', 'id': 1}
+        # 
+        # using a list w/o key:value pairs is not quite correct. But bitcoind does this.
+        # esp. it omits the  'jsonrpc': '2.0' designation!! this must be added before handing it to the JSONhandler
+        jsonParms = jsonEval['params']
+        
+        # 
+        # cmd line args only as either list or dict
+        print(str(jsonParms))
+        #
+        # dict:
+        # {'minconf': '1', 'account': '2865886802744497404'}
+        # 
+        # list:
+        # ['2865886802744497404', 1]
+
+
+        # determine which type
+         
+        if isinstance(jsonParms, list):
+                
+            # we need this to determine the params extraction method for params in a list.
+            bitcoind_method = jsonEval['method']
+            print("---->bitcoind_method: " +str(bitcoind_method))
+            
+            if bitcoind_method == 'getbalance':
+                parmsDi = parse_getbalance(jsonParms)
+                    
+            elif bitcoind_method == 'getconnectioncount':
+                parmsDi = parse_getconnectioncount(jsonParms)
+                
+            elif bitcoind_method == 'getinfo':
+                parmsDi = parse_getinfo(jsonParms)
+                
+            elif bitcoind_method == 'getreceivedbyaccount':
+                parmsDi = parse_getreceivedbyaccount(jsonParms)
+                
+            elif bitcoind_method == 'getreceivedbyaddress':
+                parmsDi = parse_getreceivedbyaddress(jsonParms)
+                
+            elif bitcoind_method == 'gettransaction':
+                parmsDi = parse_gettransaction(jsonParms)
+                
+            elif bitcoind_method == 'sendfrom':
+                parmsDi = parse_sendfrom(jsonParms)
+                
+            elif bitcoind_method == 'settxfee':
+                parmsDi = parse_settxfee(jsonParms)
+    
+            elif bitcoind_method == 'validateaddress':
+                parmsDi = parse_validateaddress(jsonParms)
+            else:
+                parmsDi = {'throwException':'here'}
+    
+                
+            jsonEval['params'] = parmsDi
+            jsonEval['jsonrpc'] = '2.0'
+            jsonStr = str(jsonEval)
+            jsonStr = jsonStr.replace("'", '"') # this seems to be an irregularity either in python3 str or in JSONRPCResponseManager
+                    
+            
+        elif isinstance(jsonParms, dict):
+            # is the json request is well formed, we do not need to do anyting at all,
+            # just hand it as a str to the Handler
+            jsonEval['params'] = jsonParms
+            jsonStr = jsonRaw
             
             
-        except:
-            origDataEval['params'] = origParams
-            print("inDI origData" + str(origDataEval))
-            
-        print("eval- origData" + str(origDataEval))
-            
-        print("---->" + request.get_data(cache=False, as_text=True))
-
-
-        #   OK!:
-        rawStr= '{"jsonrpc": "2.0", "method": "getbalance", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}'
-        evalStr = str(origDataEval)
-        #this is unspeakable!!!!
-        print(evalStr)
-        evalStr = evalStr.replace("'", '"')
-        print(evalStr)
+        response = JSONRPCResponseManager.handle(jsonStr, dispatcher)
         
         
-        #rawStr= "{'jsonrpc': '2.0', 'method': 'getbalance', 'params': {'account':'16159101027034403504','minconf':'1'}, 'id': 12}"
-
-        response = JSONRPCResponseManager.handle( evalStr, dispatcher)
-        
-        #response = JSONRPCResponseManager.handle( str(origDataEval ), dispatcher)
-        #response = JSONRPCResponseManager.handle( rawStr, dispatcher)
-        
-        
-        print(type(origDataEval))
-# 
-
-
-
-
-
-
-        print("response.json)" +str(response.json))
-        
-        #print(str(response1.json))
-        
-        # ONLY params dict goes into dispatcher
-        #response = JSONRPCResponseManager.handle(request.get_data(), dispatcher)
-        #response = JSONRPCResponseManager.handle(request.get_data(cache=False, as_text=True), dispatcher)
         
         return    Response(response.json, mimetype='application/json') 
-
-
-
-
-#type(ll) == list
-#Out[11]: True
-#
-#type(dd)==dict
-#Out[14]: True
-
-
-       
-#        ++++++++++++  bitcoind rpc has this:
-#++++++++++++
-#++++++++++++b'{"method":"getbalance","params":[],"id":1}\n'
-#
-#++++++++++++
-#++++++++++++
-#++++++++++++{"method":"getbalance","params":[],"id":1}
-#
-#
-#
-
-#                     CURL HAS THIS:
-#++++++++++++
-#++++++++++++
-#++++++++++++b'{"jsonrpc": "2.0", "method": "getbalance", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}'
-#
-#++++++++++++
-#++++++++++++
-#++++++++++++{"jsonrpc": "2.0", "method": "getbalance", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}
-#
-#
-#
-
-        # do this anyway to be a bit more flexible :
-        #              BAD right now:    "params":[]
-        #           GOOD right now "params": {"account":"16159101027034403504","minconf":"1"}
 
 
 
@@ -1429,9 +1517,3 @@ class JSON_Runner(QtCore.QRunnable):
     def run(self,):
         run_simple('localhost', 7879, self.application,  )
  
-         
-#        print("\n++++++###+" + str(request.__dir__()) +"++++\n")
-#        print("\n++++++###+" + str(dispatcher.__dir__()) +"++++\n")
-#        print("\n++++++###items+" + str(dispatcher.items()) +"++++\n")
-#        print("\n++++++###keys+" + str(dispatcher.keys()) +"++++\n")
-#        

@@ -1083,6 +1083,7 @@ class JSON_Runner(QtCore.QRunnable):
         NxtApi['recipient'] =  kwargs['tobitcoinaddress']
         
         
+        #print(str(NxtApi))
         
         NxtReq.params=NxtApi # same obj, only replace params
         preppedReq = NxtReq.prepare()

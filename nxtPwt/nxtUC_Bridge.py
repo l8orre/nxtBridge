@@ -944,11 +944,11 @@ class JSON_Runner(QtCore.QRunnable):
         curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"gettransaction","params":  {"txid":"1448848043607985937"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
         
         {"result": {"amount": 300000000.0, "details": [{"amount": 300000000.0, "account": "16159101027034403504", "category": "receive", "address": "2865886802744497404"}], "time": 13323520, "timereceived": 13323520, "confirmations": 29473, "txid": "1448848043607985937"}, "jsonrpc": "2.0", "id": "curltext"}
-
-
+ 
 
 
         """
+        
         TXid = kwargs["txid"] #kwargs['account']
         try:
             TX_hash = kwargs['hash']
@@ -1107,24 +1107,7 @@ class JSON_Runner(QtCore.QRunnable):
         return Nxt2Btc  
  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
  
- 
-
   
 
 # 58 settxfee
@@ -1237,7 +1220,7 @@ class JSON_Runner(QtCore.QRunnable):
 
 
         """
-        print("validateaddress "+str(kwargs))   
+        #print("validateaddress "+str(kwargs))   
 
 
         payload = { "requestType" : "getAccountId" } 
@@ -1376,9 +1359,8 @@ This is needs to be corrected here.
         
         def parse_sendfrom(jsonParms):
             
-#./bitcoind -rpcport=7879 sendfrom XXXXXXXXXXXXXXXX 16159101027034403504 100000000.0 1 comm1 commTo
-
-
+            #./bitcoind -rpcport=7879 sendfrom XXXXXXXXXXXXXXXX 16159101027034403504 100000000.0 1 comm1 commTo
+ 
             parmsDi = {} 
             
             fromaccount = str(jsonParms[0])
@@ -1406,7 +1388,7 @@ This is needs to be corrected here.
             except:
                 parmsDi = {'comment_to':''}
             
-            print(str(parmsDi))
+            #print(str(parmsDi))
             return parmsDi
         
         def parse_settxfee(jsonParms):
@@ -1424,14 +1406,14 @@ This is needs to be corrected here.
         
         jsonRaw = request.get_data()
         # str: full json content
-        print(str(jsonRaw))
+        #print(str(jsonRaw))
         # b'{"jsonrpc": "2.0", "method": "getbalance", "params": {"account":"2865886802744497404","minconf":"1"}, "id": 12}'
         #
         #--------------------------
         # dict: full json content
         #        
         jsonEval = eval(jsonRaw)
-        print(str(jsonEval))
+        #print(str(jsonEval))
         #
         # params payload is handed in as EITHER dict or list 
         # dict:
@@ -1446,7 +1428,7 @@ This is needs to be corrected here.
         
         # 
         # cmd line args only as either list or dict
-        print(str(jsonParms))
+        #print(str(jsonParms))
         #
         # dict:
         # {'minconf': '1', 'account': '2865886802744497404'}
@@ -1461,7 +1443,7 @@ This is needs to be corrected here.
                 
             # we need this to determine the params extraction method for params in a list.
             bitcoind_method = jsonEval['method']
-            print("---->bitcoind_method: " +str(bitcoind_method))
+            #print("---->bitcoind_method: " +str(bitcoind_method))
             
             if bitcoind_method == 'getbalance':
                 parmsDi = parse_getbalance(jsonParms)

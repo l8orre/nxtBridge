@@ -22,23 +22,14 @@ THE SOFTWARE.
 
 """
 
-
-# import pyqtgraph as pg  
-
-
-# from PyQt4.QtCore import SIGNAL there is s.t. wrong w/ the import here!
-
+ 
 from PyQt4 import  Qt ,  QtCore # QtGui,
-#from PyQt4.QtGui import  QMainWindow
 from PyQt4.QtCore import  SIGNAL , QObject, pyqtSignal, pyqtSlot
 
 # timer:
 import os
 import time
-  
    
-
-
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
 
@@ -46,8 +37,7 @@ from jsonrpc import JSONRPCResponseManager, dispatcher
 
 
 from nxtPwt.nxtApiPrototypes import nxtQs 
-#from nxtPwt.nxtApiSigs import nxtApi
-
+ 
 
  
 class Bridge1Ctrl(QObject):

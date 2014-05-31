@@ -21,15 +21,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 """
- 
-
+  
 from PyQt4.QtCore import   QObject , pyqtSignal, pyqtSlot
-
-#import nxtPwt.nxtUseCases as nxtUseCases
-
+ 
 import nxtPwt.nxtUC_Bridge as nxtUC_Bridge
-
-
+ 
 import nxtPwt.nxtModels as nxtMods
 from nxtPwt.nxtApiSigs import nxtApi
 
@@ -92,7 +88,7 @@ connection management.
         self.app.sessMan = self #
         
         runAs = args['runAs']
-
+        #print(runAs)
         self.nxtApi = nxtApi(self) # make the apiSigs instance here!
         self.activeNRS = nxtMods.NRSconn(self)
         self.nxtApi.initSignals() # leapFrog init: account and NRSconn must be made before connecting their Sigs on nxtApi
@@ -108,7 +104,7 @@ connection management.
         if runAs == 'testNet':
             host = 'localhost'
             port = '6876'
-        elif runAs == 'Nxt':
+        elif runAs == 'NXT':
             host = 'localhost'
             port = '7876'
              

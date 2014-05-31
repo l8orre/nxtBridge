@@ -8,7 +8,7 @@ requirements:
 python3
 PyQt4
 werkzeug
-jsonrpc
+json-rpc
 requests
 
 
@@ -34,6 +34,30 @@ The followong bitcoin commands can be accessed:
 
 Below are examples for the implemented bitcoind calls using the curl tool, given with two different parameter syntaxes.
 These have been tested on Ubuntu13.10
+
+
+
+using bitcoind as jsonrpc relay:
+----------------------------------
+note: bitcoind does not seem to deliver well formed jsonrpc! 
+
+./bitcoind -rpcport=7879 getbalance 2865886802744497404 1
+
+./bitcoind -rpcport=7879 getconnectioncount
+
+./bitcoind -rpcport=7879 getinfo
+
+./bitcoind -rpcport=7879 getreceivedbyaccount 2865886802744497404
+
+./bitcoind -rpcport=7879 getreceivedbyaddress 2865886802744497404
+
+./bitcoind -rpcport=7879 gettransaction 1448848043607985937
+
+./bitcoind -rpcport=7879 sendfrom XXXXXXXXXXXXXXXX 16159101027034403504 1.2340 1 comm1 commTo 
+
+./bitcoind -rpcport=7879 settxfee
+
+./bitcoind -rpcport=7879 validateaddress XXXXXXXXXXXXXXXX
 
 
 NXT:

@@ -8,7 +8,7 @@ requirements:
 python3
 PyQt4
 werkzeug
-jsonrpc
+json-rpc
 requests
 
 
@@ -32,7 +32,8 @@ The followong bitcoin commands can be accessed:
 
 
 
-Below are examples for the implemented bitcoind calls using the curl tool, given with two different parameter syntaxes
+Below are examples for the implemented bitcoind calls using the curl tool, given with two different parameter syntaxes.
+These have been tested on Ubuntu13.10
 
 
 NXT:

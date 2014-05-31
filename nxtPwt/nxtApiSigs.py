@@ -32,9 +32,7 @@ from copy import copy
 from PyQt4 import   QtGui
 from PyQt4 import Qt,  QtCore
  
-
-#from requests.auth import HTTPBasicAuth
-
+ 
   
 
 class nxtApi(Qt.QObject):
@@ -1233,25 +1231,7 @@ class nxtApi(Qt.QObject):
         self.replyFetcher = ReplyFetcher( replyEmitter, )
         QObject.connect(self.replyFetcher.emitter, SIGNAL("NRSREPLY(PyQt_PyObject, PyQt_PyObject)"),self.catchAll_Sig)
         self.qPool.start(self.replyFetcher)
- 
-     
-#
-#    @pyqtSlot() # 62
-#    def catchAll_Slot(self, apiReq, meta = {}): # this catches everything that is thrown at it, but returns as unspecific!
-#        """ - """
-#         
-#        self.req.params=apiReq # same obj, only replace params
-#         
-#        preppedReq = self.req.prepare()
-#        self.queryURL_Sig.emit(preppedReq.url) # this is the raw request text. it goes back from here to the api access.
-#
-#        meta['qqLen'] = self.qPool.activeThreadCount() # this line is  for timing the delay in the # QThread to wait for the proper delay time
-#
-#        replyEmitter = ReplyEmitter( self.session, preppedReq  , meta )
-#        self.replyFetcher = ReplyFetcher( replyEmitter, )
-#        QObject.connect(self.replyFetcher.emitter, SIGNAL("NRSREPLY(PyQt_PyObject, PyQt_PyObject)"),self.catchAll_Sig)
-#        self.qPool.start(self.replyFetcher)
-# 
+  
 
 ###################################################################
 #

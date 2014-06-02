@@ -390,11 +390,11 @@ class JSON_Runner(QtCore.QRunnable):
         try:
                 
             Nxt2Btc =  {
-                        ACCOUNT:NxtResp['balanceNQT']
+                        ACCOUNT: float(NxtResp['balanceNQT'])
                         }
         except:
             Nxt2Btc =  {
-                        ACCOUNT:'0'
+                        ACCOUNT: 0.0
                         }
             
         return Nxt2Btc  
@@ -1488,12 +1488,65 @@ This is needs to be corrected here.
             jsonStr = jsonRaw
             
             
-        response = JSONRPCResponseManager.handle(jsonStr, dispatcher)
-        
-        
-        
-        return    Response(response.json, mimetype='application/json') 
+        response1 = JSONRPCResponseManager.handle(jsonStr, dispatcher)
 
+        #                                  vvvvvvvvvvvvvvvvv
+        response = Response( response1.json, mimetype='text/plain') 
+        
+        
+        print("response.__dict__" + str( response.__dict__       ))
+        print("++1\nresponse.__dir__()" + str( response.__dir__()       ))
+
+        print("++2\nresponse.response" + str( response.response       ))
+
+        print("++3\nresponse.default_mimetype" + str( response.default_mimetype       ))
+        print("++4\nresponse.mimetype_params" + str( response.mimetype_params       ))
+
+        print("++5\nresponse.response[]" + str( response.response[0]       ))
+        print("++6\nresponse.content_type" + str( response.content_type       ))
+        print("++7\nresponse.response[]" + str( response.response[0]       ))
+   
+   
+        #resp = Response(response.json, mimetype='application/json') 
+
+        amount = '1.234567890' # response.result['1674414626317090683'] 
+        
+        respRes = eval(response.response[0])
+        respRes['result'] = amount
+
+        respRes = str(respRes)
+        respRes = respRes.replace( "'",'"') 
+        # this seems to be an irregularity either in python3 str or in JSONRPCResponseManager
+        #!!!!!!!!!!!!YESYESYES!!
+        
+        response.response[0] = respRes
+             
+        return    response
+             
+#
+     
+        
+        #response.__dict__{'_status': '200 OK', 'response': [b'{"jsonrpc": "2.0", "id": 1, "result": {"1674414626317090683": 2547600000000.0}}'], '_
+        
+        
+#        return    Response(response.json, mimetype='application/json') 
+        
+        #print("\nresp.__dict__" + str(resp.__dict__))
+
+        #print("\nresp.__dir__()" + str(resp.__dir__()  ))  
+        #print("\nresp" + str(resp))
+        
+#        return    Response(response.json, mimetype='application/json') 
+
+#############################
+#        
+#        
+#        Special note for `mimetype` and `content_type`:  For most mime types
+#        `mimetype` and `content_type` work the same, the difference affects
+#        only 'text' mimetypes.  If the mimetype passed with `mimetype` is a
+#        mimetype starting with `text/` it becomes a charset parameter defined
+#        with the charset of the response object.  In contrast the
+#        `content_type` parameter is always added as header unmodified.
 
 
 

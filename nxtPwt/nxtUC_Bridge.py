@@ -206,23 +206,97 @@ using bitcoind as jsonrpc relay:
 ----------------------------------
 note: bitcoind does not seem to deliver well formed jsonrpc! 
 
+
+TESTNET:
+
 ./bitcoind -rpcport=7879 getbalance 2865886802744497404 1
+50068.83570152
+
 
 ./bitcoind -rpcport=7879 getconnectioncount
+46
+
 
 ./bitcoind -rpcport=7879 getinfo
+{
+    "timeoffset" : 0,
+    "keypoolsize" : 290386944,
+    "paytxfee" : 0.00000000,
+    "balance" : 0.00000000,
+    "blocks" : 115901,
+    "errors" : "",
+    "protocolversion" : "1.1.4",
+    "testnet" : false,
+    "difficulty" : "2504768413821209",
+    "keypoololdest" : 834666496,
+    "walletversion" : "1.1.4",
+    "connections" : 46,
+    "version" : "1.1.4",
+    "proxy" : ""
+}
+
+
+
 
 ./bitcoind -rpcport=7879 getreceivedbyaccount 2865886802744497404
+50069.83570152
+
 
 ./bitcoind -rpcport=7879 getreceivedbyaddress 2865886802744497404
+50069.83570152
+
+
 
 ./bitcoind -rpcport=7879 gettransaction 1448848043607985937
+{
+    "timereceived" : 13323520,
+    "txid" : "1448848043607985937",
+    "time" : 13323520,
+    "details" : [
+        {
+            "account" : "16159101027034403504",
+            "address" : "2865886802744497404",
+            "amount" : 3.00000000,
+            "category" : "receive"
+        }
+    ],
+    "confirmations" : 34860,
+    "amount" : 3.00000000
+}
+
+
+ ./bitcoind -rpcport=7879 sendfrom XXXXXXXXXXXXXXXX 16159101027034403504 1.2340 1 comm1 commTo 
+{
+    "txid" : "11564054352935906995"
+}
 
 ./bitcoind -rpcport=7879 sendfrom XXXXXXXXXXXXXXXX 16159101027034403504 1.2340 1 comm1 commTo 
+{
+    "txid" : "2732068724802022093"
+}
+
+ 
+ 
+
 
 ./bitcoind -rpcport=7879 settxfee
+{
+    "settxfee" : "n/a"
+}
+
 
 ./bitcoind -rpcport=7879 validateaddress XXXXXXXXXXXXXXXX
+{
+    "ismine" : true,
+    "address" : "2865886802744497404",
+    "isvalid" : true
+}
+
+  
+
+
+
+
 
 
             """
@@ -375,6 +449,9 @@ class JSON_Runner(QtCore.QRunnable):
         # only gets 'params' - but jsonHandler needs full json
         ACCOUNT = kwargs["account"] #kwargs['account']
         
+        
+        # can replace the specific account no. with generic 'account' key
+        
         payload = { "requestType" : "getBalance" } #getTime"   }
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
@@ -384,14 +461,22 @@ class JSON_Runner(QtCore.QRunnable):
         response = session.send(preppedReq)
         NxtResp = response.json()
 
-        print("NxtResp" + str(NxtResp))
+        #print("NxtResp" + str(NxtResp))
 
         Nxt2Btc = {}
         try:
-                
+
+         
             Nxt2Btc =  {
-                        ACCOUNT: float(NxtResp['balanceNQT'])
+                        'ACCOUNT' : float(NxtResp['balanceNQT'] ) * 0.00000001
                         }
+         
+         
+        #            Nxt2Btc =  {
+        #                        ACCOUNT: float(NxtResp['balanceNQT'])
+        #                        }
+
+        
         except:
             Nxt2Btc =  {
                         ACCOUNT: 0.0
@@ -654,9 +739,13 @@ class JSON_Runner(QtCore.QRunnable):
         response = session.send(preppedReq)
         NxtResp = response.json()
         Nxt2Btc = {}
+
+
         Nxt2Btc =  {
-                    ACCOUNT : float(NxtResp['balanceNQT'])
+                    'ACCOUNT' : float(NxtResp['balanceNQT'] ) * 0.00000001
                     }
+     
+          
         
         return Nxt2Btc  
         
@@ -740,13 +829,15 @@ class JSON_Runner(QtCore.QRunnable):
         response = session.send(preppedReq)
         NxtResp = response.json()
         Nxt2Btc = {}
-        Nxt2Btc =  {
-                    ACCOUNT : float(NxtResp['balanceNQT'])
-                    }
+         
         
+        Nxt2Btc =  {
+                    'ACCOUNT' : float(NxtResp['balanceNQT'] ) * 0.00000001
+                    }
+     
         return Nxt2Btc  
         
-        
+         
         
         
       
@@ -1090,7 +1181,9 @@ class JSON_Runner(QtCore.QRunnable):
         response = session.send(preppedReq)
         NxtResp = response.json()
         
-        #print(str(NxtResp))
+        
+        #print("TX from NRS: ---->> \n" + str(NxtResp))
+
         
         try:
             
@@ -1220,9 +1313,7 @@ class JSON_Runner(QtCore.QRunnable):
 
 
         """
-        #print("validateaddress "+str(kwargs))   
-
-
+       
         payload = { "requestType" : "getAccountId" } 
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
@@ -1403,10 +1494,12 @@ This is needs to be corrected here.
             return parmsDi
         
         
+        # 1 extract details from the incoming request        
+        
         
         jsonRaw = request.get_data()
         # str: full json content
-        #print(str(jsonRaw))
+        # print(str(jsonRaw))
         # b'{"jsonrpc": "2.0", "method": "getbalance", "params": {"account":"2865886802744497404","minconf":"1"}, "id": 12}'
         #
         #--------------------------
@@ -1424,27 +1517,33 @@ This is needs to be corrected here.
         # 
         # using a list w/o key:value pairs is not quite correct. But bitcoind does this.
         # esp. it omits the  'jsonrpc': '2.0' designation!! this must be added before handing it to the JSONhandler
+
         jsonParms = jsonEval['params']
-        
+        # we have to do an eval to be able to access the details of the request
+        # jsonParms is a list, and it is specific to each bitcoind call
+        # eg jsonParms--------->    ['1674414626317090683', 1]
+        # is from the call  ./bitcoind -rpcport=7879 getbalance 17237348781473815051 1
+
         # 
         # cmd line args only as either list or dict
-        #print(str(jsonParms))
+        print( "\njsonParms--------->" + str(jsonParms))
+         
         #
-        # dict:
+        # dict: THIS IS CORRECT JSON:
         # {'minconf': '1', 'account': '2865886802744497404'}
         # 
-        # list:
+        # list: THIS SEEMS TO BE INCORRECT JSON:
         # ['2865886802744497404', 1]
-
-
-        # determine which type
-         
+ 
+        # 2 determine which type: bitcoind-like params list or proper json dict
+        # we are preparing for mostly list-type param passing
+        #
         if isinstance(jsonParms, list):
                 
             # we need this to determine the params extraction method for params in a list.
+
             bitcoind_method = jsonEval['method']
-            #print("---->bitcoind_method: " +str(bitcoind_method))
-            
+                        
             if bitcoind_method == 'getbalance':
                 parmsDi = parse_getbalance(jsonParms)
                     
@@ -1474,12 +1573,13 @@ This is needs to be corrected here.
             else:
                 parmsDi = {'throwException':'here'}
     
-                
+        # 3 here we forcible re-insert our custom made request into the request object
+                   
             jsonEval['params'] = parmsDi
             jsonEval['jsonrpc'] = '2.0'
             jsonStr = str(jsonEval)
             jsonStr = jsonStr.replace("'", '"') # this seems to be an irregularity either in python3 str or in JSONRPCResponseManager
-                    
+
             
         elif isinstance(jsonParms, dict):
             # is the json request is well formed, we do not need to do anyting at all,
@@ -1488,65 +1588,111 @@ This is needs to be corrected here.
             jsonStr = jsonRaw
             
             
-        response1 = JSONRPCResponseManager.handle(jsonStr, dispatcher)
-
-        #                                  vvvvvvvvvvvvvvvvv
-        response = Response( response1.json, mimetype='text/plain') 
+            
+        # 4 send request to the NRS        
+        responseFromNxt = JSONRPCResponseManager.handle(jsonStr, dispatcher)
+        #response = Response( response1.json, mimetype='text/plain') 
+        response = Response( responseFromNxt.json, mimetype='application/json') 
         
+        # *SOME* of the replies do not seem to be correct JSON format in {key:value} format.
         
-        print("response.__dict__" + str( response.__dict__       ))
-        print("++1\nresponse.__dir__()" + str( response.__dir__()       ))
-
-        print("++2\nresponse.response" + str( response.response       ))
-
-        print("++3\nresponse.default_mimetype" + str( response.default_mimetype       ))
-        print("++4\nresponse.mimetype_params" + str( response.mimetype_params       ))
-
-        print("++5\nresponse.response[]" + str( response.response[0]       ))
-        print("++6\nresponse.content_type" + str( response.content_type       ))
-        print("++7\nresponse.response[]" + str( response.response[0]       ))
-   
-   
-        #resp = Response(response.json, mimetype='application/json') 
-
-        amount = '1.234567890' # response.result['1674414626317090683'] 
+        # 5 prepare the details of the response in non-JSON but bitcoind compliant format
+        # to be sent back to the original requester
         
-        respRes = eval(response.response[0])
-        respRes['result'] = amount
-
-        respRes = str(respRes)
-        respRes = respRes.replace( "'",'"') 
-        # this seems to be an irregularity either in python3 str or in JSONRPCResponseManager
-        #!!!!!!!!!!!!YESYESYES!!
+        if bitcoind_method == 'getbalance':
+            # we MUST forcible violate the response object here because bitcoind does not use proper json
+            #print("getbalance - response.result['1674414626317090683'] " + str(response.result['1674414626317090683']))
+            parseResponse = eval(response.response[0])
+            #print("parseResponse --> " + str(parseResponse))
+            # parseResponse --> {'result': {'ACCOUNT': 2547600000000.0}, 'id': 1, 'jsonrpc': '2.0'}
+            resultJson = parseResponse['result']
+            amount  = resultJson['ACCOUNT']
+            parseResponse['result'] = amount
+            parseResponse = str(parseResponse)
+            parseResponse = parseResponse.replace( "'",'"') 
+            response.response[0] = parseResponse
+            return response
+      
         
-        response.response[0] = respRes
+        elif bitcoind_method == 'getconnectioncount':
+            parseResponse = eval(response.response[0])
+            # parseResponse --> {'result': {'ACCOUNT': 2547600000000.0}, 'id': 1, 'jsonrpc': '2.0'}
+            resultJson = parseResponse['result']
+            numberOfPeers  = resultJson['numberOfPeers']
+            parseResponse['result'] = numberOfPeers
+            parseResponse = str(parseResponse)
+            parseResponse = parseResponse.replace( "'",'"') 
+            response.response[0] = parseResponse
+            return response
+
+
+        elif bitcoind_method == 'getinfo':
+            # this is handed back as a proper json reply
+            return response            
+ 
+
+        elif bitcoind_method == 'getreceivedbyaccount':
+            parseResponse = eval(response.response[0])
+            resultJson = parseResponse['result']
+            amount  = resultJson['ACCOUNT']
+            parseResponse['result'] = amount
+            parseResponse = str(parseResponse)
+            parseResponse = parseResponse.replace( "'",'"') 
+            response.response[0] = parseResponse
+            return response
+      
+        elif bitcoind_method == 'getreceivedbyaddress':
+            parseResponse = eval(response.response[0])
+            resultJson = parseResponse['result']
+            amount  = resultJson['ACCOUNT']
+            parseResponse['result'] = amount
+            parseResponse = str(parseResponse)
+            parseResponse = parseResponse.replace( "'",'"') 
+            response.response[0] = parseResponse
+            return response
+      
+
+
+        elif bitcoind_method == 'gettransaction':
+            return response
+            
+
+
+        elif bitcoind_method == 'sendfrom':
+            #print(str(response.__dict__))
+            #print(str(response.__dir__() ))
+            return response
+
+
+
+        elif bitcoind_method == 'settxfee':
+            return response
+            
+
+
+        elif bitcoind_method == 'validateaddress':
+            #print(str(response.__dict__))
+            #print(str(response.__dir__() ))
+            return response
+            
+            
+        
+        else:
+            parmsDi = {'throwException':'here'}
+        
+         
+
+
+
+        return   0 # shoulnd't get here
              
-        return    response
-             
-#
-     
-        
-        #response.__dict__{'_status': '200 OK', 'response': [b'{"jsonrpc": "2.0", "id": 1, "result": {"1674414626317090683": 2547600000000.0}}'], '_
-        
-        
-#        return    Response(response.json, mimetype='application/json') 
-        
-        #print("\nresp.__dict__" + str(resp.__dict__))
 
-        #print("\nresp.__dir__()" + str(resp.__dir__()  ))  
-        #print("\nresp" + str(resp))
-        
-#        return    Response(response.json, mimetype='application/json') 
 
-#############################
-#        
-#        
-#        Special note for `mimetype` and `content_type`:  For most mime types
-#        `mimetype` and `content_type` work the same, the difference affects
-#        only 'text' mimetypes.  If the mimetype passed with `mimetype` is a
-#        mimetype starting with `text/` it becomes a charset parameter defined
-#        with the charset of the response object.  In contrast the
-#        `content_type` parameter is always added as header unmodified.
+
+
+
+
+
 
 
 

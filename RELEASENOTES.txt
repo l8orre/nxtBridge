@@ -1,4 +1,7 @@
 
+
+
+
 Welcome to nxtBridge beta 0.1.1 - June 01, 2014
 
 developed on Ubuntu 13.10
@@ -59,6 +62,9 @@ note: bitcoind does not seem to deliver well formed jsonrpc!
 
 ./bitcoind -rpcport=7879 validateaddress XXXXXXXXXXXXXXXX
 
+
+
+Note: curl uses proper jsonrpc, and these are currently inoperable due to focus on bitcoind operations (060514)
 
 NXT:
 curl param encoding 1

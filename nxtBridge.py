@@ -40,12 +40,12 @@ from nxtPwt import nxtBridgeCtrl
 class MainApplication:
     """  Nxt """
     
-    def __init__(self, app, args): # = None):
+    def __init__(self, app, argv): # = None):
         self.app = app
-        self.args = args
-        runAs = self.args['runAs']
+        self.argv = argv
+        #runAs = self.args['runAs']
         #here we can reboot other sessions
-        self.sessMan = nxtSessionManager(app, args ) # self = app        
+        self.sessMan = nxtSessionManager(app, argv ) # self = app        
  
 
     # these are controllers
@@ -59,15 +59,19 @@ def main(argv):
     
     sys.path += [ os.path.dirname(os.path.dirname(os.path.realpath(__file__))) ]
     argv = sys.argv
-    print(str(argv))
+    print('nxtBridge starting with cmd line:' + str(argv))
 
-    if len(argv) <2:
-        argv.append('testNet')
-    runAs = argv[1]
-    args={}
-    args['runAs'] = runAs
+#
+#    if len(argv) < 2:
+#        argv.append('testNet')
+#
+#    runAs = argv[1]
+#    
+#    args={}
+#    args['runAs'] = runAs
+
     app = QtGui.QApplication(sys.argv) # creation of the app object
-    main = MainApplication(app, args )
+    main = MainApplication(app, argv )
     
     main.startBridge( )
     done = app.exec_()

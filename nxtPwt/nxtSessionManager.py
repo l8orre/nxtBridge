@@ -45,38 +45,9 @@ connection management.
 
   
   """
-#
-#    changeConn_Sig = pyqtSignal( object )
-#
-#    # these signlas MUST be thrown by the sessMan, because the connects can only be done to singletons,
-#    # not to bork
-#
-#    # the TX signals are thrown by the sessMan
-#    TX_status_Sig = pyqtSignal(object, object) # second must have some meta
-#    #
-#    TX_sendMoney_Sig = pyqtSignal(object, object) # each TX throws its nw recepit wignal
-#    TX_issueAsset_Sig = pyqtSignal(object, object) # each TX throws its nw recepit wignal
-#    TX_placeAskOrder_Sig = pyqtSignal(object, object) # each TX throws its nw recepit wignal
-#    TX_placeBidOrder_Sig = pyqtSignal(object, object) # each TX throws its nw recepit wignal
-#    TX_cancelAskOrder_Sig = pyqtSignal(object, object) # each TX throws its nw recepit wignal
-#    TX_cancelBidOrder_Sig = pyqtSignal(object, object) # each TX throws its nw recepit wignal
-#    TX_transferAsset_Sig = pyqtSignal(object, object) # each TX throws its nw recepit wignal
-#    TX_setAccountInfo_Sig = pyqtSignal(object, object) # each TX throws its nw recepit wignal
-#    TX_lease_Sig = pyqtSignal(object, object) # each TX throws its nw recepit wignal
-#    #
-#    TX_sendMSG_Sig = pyqtSignal(object, object) # each TX throws its nw recepit wignal
-#    TX_assAlias_Sig = pyqtSignal(object, object) # each TX throws its nw recepit wignal
-#    TX_vote_Sig = pyqtSignal(object, object) # each TX throws its nw recepit wignal
-#    TX_poll_Sig = pyqtSignal(object, object) # each TX throws its nw recepit wignal
-#    #
-# 
-    #TX_receipt_Sig
-    # sessMan throws all these Signals with the different objects in them!
-    # these Signals can only be connected when the identity is known
 
 
-
-    def __init__(self, app, args ):# app, self.lastSess
+    def __init__(self, app, argv ):# app, self.lastSess
         """
         sessMan can do things himself.
         But most of the things are done in the UC instances which are clollected here.
@@ -87,19 +58,23 @@ connection management.
         self.app = app
         self.app.sessMan = self #
         
-        runAs = args['runAs']
-        #print(runAs)
         self.nxtApi = nxtApi(self) # make the apiSigs instance here!
         self.activeNRS = nxtMods.NRSconn(self)
         self.nxtApi.initSignals() # leapFrog init: account and NRSconn must be made before connecting their Sigs on nxtApi
 
         self.logShort = True
-        #self.logLong = False
+        self.logFshort = open('nxtBridge_logShort.txt', 'a')
+        
+    
+        if len(argv) < 2:
+            argv.append('testNet')
+    
+        runAs = argv[1]
+        
+        args={}
+        args['runAs'] = runAs
+        args['logfile'] = self.logFshort
 
-        self.logFshort = open('nxtPwt_logS.txt', 'a')
-        #self.logFlong = open('nxtPwt_logL.txt', 'a')
-
-        # # UCs:
 
         if runAs == 'testNet':
             host = 'localhost'
@@ -107,35 +82,13 @@ connection management.
         elif runAs == 'NXT':
             host = 'localhost'
             port = '7876'
-             
+
+        args['host'] = host
+        args['port'] = port
             
             
-        self.uc_bridge = nxtUC_Bridge.UC_Bridge1(self,host  , port )
-#            
-#        elif runAs == 'W':
-#            self.uc_bridge = nxtUC_Bridge.UC_Bridge1(self, )
-#            
-#            self.uc1_pollNRS = nxtUseCases.UC1_pollNRS(self,  ) #
-#            self.uc2_accHndlr = nxtUseCases.UC2_accountHandler(self,   ) #
-#            self.uc3_TX_monitor = nxtUseCases.UC3_TX_monitor(self)
-#            self.uc4_sendMoney = nxtUseCases.UC4_sendMoney(self,  )#
-#            #todo self.uc4_setName = nxtUseCases.UC4_setName(self,  )#
-#            self.uc29_changeConn = nxtUseCases.UC29_changeConn(self,  ) #
-#            self.uc30 = nxtUseCases.nxtUC_apiAccess(self,   ) #
-#            self.uc30.initSignals()
-#            self.uc5_AE = nxtUseCases.UC5_AE(self,  )#
-#            self.uc6_AO = nxtUseCases.UC6_AO(self,  )#
-#            self.uc7_ATX = nxtUseCases.UC7_ATX(self,  )#
-#            self.uc8_Trades = nxtUseCases.UC8_Trades(self,  )#
-#
-# 
- 
-#######################################################################
-#######################################################################
-#######################################################################
-#######################################################################
-#######################################################################
-#       
+        self.uc_bridge = nxtUC_Bridge.UC_Bridge1(self, host, port )
+       
 #        
 #if __name__ == "__main__":
 #    import sys

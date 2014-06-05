@@ -265,6 +265,15 @@ TESTNET:
 }
 
 
+
+ ./bitcoind -rpcport=7879 sendfrom xxxxx 16159101027034403504 1.98765432 1 comm1 commTo 
+
+
+
+./bitcoind -rpcport=7879 gettransaction 13184500470311816723
+
+
+
  ./bitcoind -rpcport=7879 sendfrom XXXXXXXXXXXXXXXX 16159101027034403504 1.2340 1 comm1 commTo 
 {
     "txid" : "11564054352935906995"
@@ -275,8 +284,6 @@ TESTNET:
     "txid" : "2732068724802022093"
 }
 
- 
- 
 
 
 ./bitcoind -rpcport=7879 settxfee
@@ -285,19 +292,15 @@ TESTNET:
 }
 
 
-./bitcoind -rpcport=7879 validateaddress XXXXXXXXXXXXXXXX
+./bitcoind -rpcport=7879 validateaddress   XXXXXXXXXXXXXXXX
 {
     "ismine" : true,
     "address" : "2865886802744497404",
     "isvalid" : true
 }
 
-  
 
-
-
-
-
+ 
 
             """
   
@@ -1093,12 +1096,7 @@ class JSON_Runner(QtCore.QRunnable):
  
 
 
-
-
-
-
 # 52 sendfrom
-
         
     @dispatcher.add_method
     def sendfrom( **kwargs):
@@ -1156,13 +1154,9 @@ class JSON_Runner(QtCore.QRunnable):
 
  
         payload = { "requestType" : "sendMoney" }  
-        #print(str(kwargs))
-
         # NOTE: THE AMOUNT IS PASSED IN AS NXT.NQT AND IS CONVERTED TO NQT HERE
         amountNQT = int( float(kwargs['amount'] ) * 100000000 )
         
-        #print(str(amountNQT))
-
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
         NxtApi['publicKey'] =  ""
@@ -1173,17 +1167,11 @@ class JSON_Runner(QtCore.QRunnable):
         NxtApi['amountNQT'] = amountNQT
         NxtApi['recipient'] =  kwargs['tobitcoinaddress']
         
-        
-        #print(str(NxtApi))
-        
         NxtReq.params=NxtApi # same obj, only replace params
         preppedReq = NxtReq.prepare()
         response = session.send(preppedReq)
         NxtResp = response.json()
         
-        
-        #print("TX from NRS: ---->> \n" + str(NxtResp))
-
         
         try:
             
@@ -1343,8 +1331,6 @@ class JSON_Runner(QtCore.QRunnable):
   
 
 
-
-
         payload = { "requestType" : "getAccountPublicKey" } #getTime"   }
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
@@ -1449,9 +1435,7 @@ This is needs to be corrected here.
             return parmsDi
         
         def parse_sendfrom(jsonParms):
-            
-            #./bitcoind -rpcport=7879 sendfrom XXXXXXXXXXXXXXXX 16159101027034403504 100000000.0 1 comm1 commTo
- 
+        
             parmsDi = {} 
             
             fromaccount = str(jsonParms[0])
@@ -1479,7 +1463,6 @@ This is needs to be corrected here.
             except:
                 parmsDi = {'comment_to':''}
             
-            #print(str(parmsDi))
             return parmsDi
         
         def parse_settxfee(jsonParms):
@@ -1494,20 +1477,22 @@ This is needs to be corrected here.
             return parmsDi
         
         
+        
+        
         # 1 extract details from the incoming request        
         
         
         jsonRaw = request.get_data()
-        # str: full json content
-        # print(str(jsonRaw))
+        #
+        # raw str: full json content
         # b'{"jsonrpc": "2.0", "method": "getbalance", "params": {"account":"2865886802744497404","minconf":"1"}, "id": 12}'
         #
         #--------------------------
         # dict: full json content
         #        
         jsonEval = eval(jsonRaw)
-        #print(str(jsonEval))
         #
+        # Now we can access it as a nice dict
         # params payload is handed in as EITHER dict or list 
         # dict:
         # {'jsonrpc': '2.0', 'params': {'minconf': '1', 'account': '2865886802744497404'}, 'method': 'getbalance', 'id': 12}
@@ -1515,28 +1500,32 @@ This is needs to be corrected here.
         # list:
         # {'params': ['2865886802744497404', 1], 'method': 'getbalance', 'id': 1}
         # 
-        # using a list w/o key:value pairs is not quite correct. But bitcoind does this.
-        # esp. it omits the  'jsonrpc': '2.0' designation!! this must be added before handing it to the JSONhandler
-
+        # using a list w/o key: value pairs seems not correct. But bitcoind does this.
+        # esp. it omits the  'jsonrpc': '2.0' designation!! 
+        # this must be added before handing it to the JSONhandler
+        #
+        # We want to maintain BOTH ways of handling the requests, because this is about josn after all,
+        # regardless of what unspeakable things bitcoind does.
+        #
         jsonParms = jsonEval['params']
+        #
         # we have to do an eval to be able to access the details of the request
         # jsonParms is a list, and it is specific to each bitcoind call
         # eg jsonParms--------->    ['1674414626317090683', 1]
         # is from the call  ./bitcoind -rpcport=7879 getbalance 17237348781473815051 1
-
         # 
         # cmd line args only as either list or dict
-        print( "\njsonParms--------->" + str(jsonParms))
-         
+        # print( "\njsonParms--------->" + str(jsonParms))
         #
         # dict: THIS IS CORRECT JSON:
         # {'minconf': '1', 'account': '2865886802744497404'}
         # 
         # list: THIS SEEMS TO BE INCORRECT JSON:
         # ['2865886802744497404', 1]
- 
-        # 2 determine which type: bitcoind-like params list or proper json dict
-        # we are preparing for mostly list-type param passing
+        #
+        #   determine which type: bitcoind-like params list or proper json dict
+        #   we are preparing for mostly list-type param passing
+        #
         #
         if isinstance(jsonParms, list):
                 
@@ -1582,6 +1571,8 @@ This is needs to be corrected here.
 
             
         elif isinstance(jsonParms, dict):
+            #
+            # THESE ARE CURRENTLY NOT OPERABLE, BUT THE OPTION SHALL BE MAINTAINED
             # is the json request is well formed, we do not need to do anyting at all,
             # just hand it as a str to the Handler
             jsonEval['params'] = jsonParms
@@ -1601,9 +1592,7 @@ This is needs to be corrected here.
         
         if bitcoind_method == 'getbalance':
             # we MUST forcible violate the response object here because bitcoind does not use proper json
-            #print("getbalance - response.result['1674414626317090683'] " + str(response.result['1674414626317090683']))
             parseResponse = eval(response.response[0])
-            #print("parseResponse --> " + str(parseResponse))
             # parseResponse --> {'result': {'ACCOUNT': 2547600000000.0}, 'id': 1, 'jsonrpc': '2.0'}
             resultJson = parseResponse['result']
             amount  = resultJson['ACCOUNT']
@@ -1612,7 +1601,6 @@ This is needs to be corrected here.
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
             return response
-      
         
         elif bitcoind_method == 'getconnectioncount':
             parseResponse = eval(response.response[0])
@@ -1625,11 +1613,9 @@ This is needs to be corrected here.
             response.response[0] = parseResponse
             return response
 
-
         elif bitcoind_method == 'getinfo':
             # this is handed back as a proper json reply
             return response            
- 
 
         elif bitcoind_method == 'getreceivedbyaccount':
             parseResponse = eval(response.response[0])
@@ -1650,29 +1636,17 @@ This is needs to be corrected here.
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
             return response
-      
-
 
         elif bitcoind_method == 'gettransaction':
             return response
-            
-
 
         elif bitcoind_method == 'sendfrom':
-            #print(str(response.__dict__))
-            #print(str(response.__dir__() ))
             return response
-
-
 
         elif bitcoind_method == 'settxfee':
             return response
-            
-
 
         elif bitcoind_method == 'validateaddress':
-            #print(str(response.__dict__))
-            #print(str(response.__dir__() ))
             return response
             
             

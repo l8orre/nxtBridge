@@ -1,0 +1,21 @@
+2014-06-06 12:18:53,414 - nxtBridge listening on localhost:6876
+2014-06-06 12:19:18,924 - nxtBridge rcvd req: {'params': ['2865886802744497404', 1], 'method': 'getbalance', 'id': 1} 
+2014-06-06 12:19:18,931 - nxtBridge returning: {"result": 50062.37947932, "jsonrpc": "2.0", "id": 1} 
+2014-06-06 12:19:24,631 - nxtBridge rcvd req: {'params': [], 'method': 'getconnectioncount', 'id': 1} 
+2014-06-06 12:19:24,648 - nxtBridge returning: {"result": 48, "jsonrpc": "2.0", "id": 1} 
+2014-06-06 12:19:31,215 - nxtBridge rcvd req: {'params': [], 'method': 'getinfo', 'id': 1} 
+2014-06-06 12:19:31,232 - nxtBridge returning: b'{"jsonrpc": "2.0", "result": {"walletversion": "1.1.4", "paytxfee": 0.0, "errors": "", "keypoololdest": 486539264, "difficulty": "2509834652766416", "proxy": "", "blocks": 118779, "timeoffset": 0, "protocolversion": "1.1.4", "connections": 48, "keypoolsize": 57764624, "version": "1.1.4", "balance": 0.0, "testnet": false}, "id": 1}' 
+2014-06-06 12:19:38,204 - nxtBridge rcvd req: {'params': ['2865886802744497404'], 'method': 'getreceivedbyaccount', 'id': 1} 
+2014-06-06 12:19:38,209 - nxtBridge returning: {"result": 50062.37947932, "jsonrpc": "2.0", "id": 1} 
+2014-06-06 12:19:45,418 - nxtBridge rcvd req: {'params': ['2865886802744497404'], 'method': 'getreceivedbyaddress', 'id': 1} 
+2014-06-06 12:19:45,424 - nxtBridge returning: {"result": 50062.37947932, "jsonrpc": "2.0", "id": 1} 
+2014-06-06 12:19:50,779 - nxtBridge rcvd req: {'params': ['1448848043607985937'], 'method': 'gettransaction', 'id': 1} 
+2014-06-06 12:19:50,801 - nxtBridge returning: b'{"jsonrpc": "2.0", "result": {"confirmations": 37727, "txid": "1448848043607985937", "timereceived": 13323520, "details": [{"address": "2865886802744497404", "category": "receive", "account": "16159101027034403504", "amount": 3.0}], "amount": 3.0, "time": 13323520}, "id": 1}' 
+2014-06-06 12:20:17,459 - nxtBridge rcvd req: {'params': ['14oreosetc14oreosetc', '16159101027034403504', 1.98765432, 1, 'comm1', 'commTo'], 'method': 'sendfrom', 'id': 1} 
+2014-06-06 12:20:20,596 - nxtBridge returning: b'{"jsonrpc": "2.0", "result": {"txid": "17431072893168067053"}, "id": 1}' 
+2014-06-06 12:20:29,027 - nxtBridge rcvd req: {'params': ['13184500470311816723'], 'method': 'gettransaction', 'id': 1} 
+2014-06-06 12:20:29,034 - nxtBridge returning: b'{"jsonrpc": "2.0", "result": {"confirmations": 817, "txid": "13184500470311816723", "timereceived": 16678507, "details": [{"address": "16159101027034403504", "category": "receive", "account": "2865886802744497404", "amount": 1.98765432}], "amount": 1.98765432, "time": 16678507}, "id": 1}' 
+2014-06-06 12:21:11,013 - nxtBridge rcvd req: {'params': [], 'method': 'settxfee', 'id': 1} 
+2014-06-06 12:21:11,014 - nxtBridge returning: b'{"jsonrpc": "2.0", "result": {"settxfee": "n/a"}, "id": 1}' 
+2014-06-06 12:22:00,693 - nxtBridge rcvd req: {'params': ['14oreosetc14oreosetc'], 'method': 'validateaddress', 'id': 1} 
+2014-06-06 12:22:00,715 - nxtBridge returning: b'{"jsonrpc": "2.0", "result": {"address": "2865886802744497404", "ismine": false, "isvalid": true}, "id": 1}' 

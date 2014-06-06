@@ -30,8 +30,11 @@ from PyQt4 import QtGui
 import nxtPwt
 from nxtPwt.nxtSessionManager import nxtSessionManager
 
+import logging as lg
+
 #import argparse
 #import configparser
+
 
 
 from nxtPwt import nxtBridgeCtrl
@@ -47,6 +50,26 @@ class MainApplication:
         #here we can reboot other sessions
         self.sessMan = nxtSessionManager(app, argv ) # self = app        
  
+# 
+#        mainLg = lg.getLogger('mainL')
+#        mainLg.setLevel(lg.INFO)        
+#        fh=lg.FileHandler('mainL.log')
+#        
+        
+#        logFile = 'nxtBridge.log'
+#        lg.basicConfig( filename=logFile, level=lg.INFO, format='%(asctime)s %(message)s')
+#        lg.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+#        lg.debug('This message should appear on the console')
+#        lg.info('So should this')
+#        lg.warning('And this, too')
+#        lg.basicConfig(format='%(asctime)s %(message)s')
+#        lg.warning('is when this event was logged.')
+#        lg.info('%i int %f float START test', 12, 3.12)
+#        lg.info('start')
+        
+
+
+
 
     # these are controllers
     def startBridge(self):

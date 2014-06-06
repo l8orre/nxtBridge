@@ -30,6 +30,8 @@ import nxtPwt.nxtModels as nxtMods
 from nxtPwt.nxtApiSigs import nxtApi
 
 
+import logging as lg
+
 # Here we can do some control on whether or not to do testing 
 #import nxtPwt.nxtTestCases as nxtTestCases
 
@@ -62,9 +64,6 @@ connection management.
         self.activeNRS = nxtMods.NRSconn(self)
         self.nxtApi.initSignals() # leapFrog init: account and NRSconn must be made before connecting their Sigs on nxtApi
 
-        self.logShort = True
-        self.logFshort = open('nxtBridge_logShort.txt', 'a')
-        
     
         if len(argv) < 2:
             argv.append('testNet')
@@ -73,8 +72,7 @@ connection management.
         
         args={}
         args['runAs'] = runAs
-        args['logfile'] = self.logFshort
-
+        
 
         if runAs == 'testNet':
             host = 'localhost'

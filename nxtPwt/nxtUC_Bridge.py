@@ -34,6 +34,8 @@ from nxtPwt.nxtApiPrototypes import nxtQs
 import time
 
 
+import logging as lg
+
 
 # jsonrpc stuff
 from requests import Request as Req
@@ -266,7 +268,7 @@ TESTNET:
 
 
 
- ./bitcoind -rpcport=7879 sendfrom xxxxx 16159101027034403504 1.98765432 1 comm1 commTo 
+./bitcoind -rpcport=7879 sendfrom xxxxxxxxxx 16159101027034403504 1.98765432 1 comm1 commTo 
 
 
 
@@ -274,7 +276,7 @@ TESTNET:
 
 
 
- ./bitcoind -rpcport=7879 sendfrom XXXXXXXXXXXXXXXX 16159101027034403504 1.2340 1 comm1 commTo 
+ ./bitcoind -rpcport=7879 sendfrom 14oreosetc14oreosetc 16159101027034403504 1.2340 1 comm1 commTo 
 {
     "txid" : "11564054352935906995"
 }
@@ -292,7 +294,7 @@ TESTNET:
 }
 
 
-./bitcoind -rpcport=7879 validateaddress   XXXXXXXXXXXXXXXX
+./bitcoind -rpcport=7879 validateaddress   xxxxxxxxxxxx
 {
     "ismine" : true,
     "address" : "2865886802744497404",
@@ -311,7 +313,11 @@ TESTNET:
         self.meta = {'caller':'Bridge1'}
         defPass17 = '0' 
         acctSecKey = defPass17
-        print(host + port)
+
+        #print(host + port)
+        
+#        lg.info('nxtBridge listening on host %s : port %s', host, port)
+        
         self.mm = BridgeThread( host  , port   )
          
  
@@ -325,10 +331,31 @@ class BridgeThread(QObject):
         self.qPool.setMaxThreadCount(2500) # robustness
         self.host = host
         self.port = port
-        #self.qPool.activeThreadCount() this is how many we have running?!
+        
+        #%(name)s - %(levelname)s 
+        #formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+
+        self.bridgeLogger = lg.getLogger('bridgeLogger')
+        self.bridgeLogger.setLevel(lg.INFO)        
+        fh=lg.FileHandler('bridge.log')
+        fh.setLevel(lg.INFO)
+        fter = lg.Formatter('%(asctime)s - %(message)s')
+        fh.setFormatter(fter)
+        self.bridgeLogger.addHandler(fh)
+        self.bridgeLogger.info('nxtBridge listening on %s:%s', host, port)
+        #        
+        self.consLogger = lg.getLogger('consoleDebugger')
+        self.consLogger.setLevel(lg.INFO)        
+        ch = lg.StreamHandler()
+        ch.setLevel(lg.DEBUG)
+        ch.setFormatter(fh)
+        self.consLogger.addHandler(ch)
+        
+    
     @pyqtSlot() # 61
     def jsonServ_Slot(self, ):
-        self.json_Runner = JSON_Runner( self.host, self.port ) # json_Emitter, self to THIS !!!!!!
+        self.json_Runner = JSON_Runner( self.host, self.port, self.bridgeLogger, self.consLogger ) # json_Emitter, self to THIS !!!!!!
         self.qPool.start(self.json_Runner)
          
         
@@ -336,7 +363,7 @@ class JSON_Runner(QtCore.QRunnable):
     """- This is what needs to be put into the QThreadpool """
     nxtApi = nxtApi
     
-    def __init__(self,   host = 'localhost', port = '6876' ): #emitter, 
+    def __init__(self,   host = 'localhost', port = '6876', fileLogger = None, consLogger = None  ): #emitter, 
         super(QtCore.QRunnable, self).__init__()
         global session # this must be global to be accessible from the dispatcher methods
         session = Session()
@@ -344,7 +371,9 @@ class JSON_Runner(QtCore.QRunnable):
         sessUrl = 'http://' + host + ':' + port + '/nxt?' 
         global NxtReq
         NxtReq = Req( method='POST', url = sessUrl, params = {}, headers = headers        )
-        #print("\n1111######" + str(self)  )
+        self.bridgeLogger = fileLogger
+        self.consLogger = consLogger
+        
   
 ############################
  # 2 generic Nxt APIs
@@ -1478,11 +1507,14 @@ This is needs to be corrected here.
         
         
         
-        
         # 1 extract details from the incoming request        
         
         
         jsonRaw = request.get_data()
+
+
+        #self.bridgeLogger.debug('nxtBridge rcvd raw: %s ', jsonRaw )
+        
         #
         # raw str: full json content
         # b'{"jsonrpc": "2.0", "method": "getbalance", "params": {"account":"2865886802744497404","minconf":"1"}, "id": 12}'
@@ -1491,6 +1523,11 @@ This is needs to be corrected here.
         # dict: full json content
         #        
         jsonEval = eval(jsonRaw)
+        
+        self.bridgeLogger.info('nxtBridge rcvd req: %s ', str(jsonEval) )
+        
+        self.consLogger.info('nxtBridge rcvd req: %s ', str(jsonEval) )
+         
         #
         # Now we can access it as a nice dict
         # params payload is handed in as EITHER dict or list 
@@ -1590,6 +1627,10 @@ This is needs to be corrected here.
         # 5 prepare the details of the response in non-JSON but bitcoind compliant format
         # to be sent back to the original requester
         
+        
+        self.consLogger.debug('response = Response( responseFromNxt.json, ) = %s ', str(jsonEval) )
+        
+        
         if bitcoind_method == 'getbalance':
             # we MUST forcible violate the response object here because bitcoind does not use proper json
             parseResponse = eval(response.response[0])
@@ -1600,7 +1641,10 @@ This is needs to be corrected here.
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
+            
+            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
+
         
         elif bitcoind_method == 'getconnectioncount':
             parseResponse = eval(response.response[0])
@@ -1611,11 +1655,13 @@ This is needs to be corrected here.
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
+
+            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
 
         elif bitcoind_method == 'getinfo':
-            # this is handed back as a proper json reply
-            return response            
+            self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
+            return response
 
         elif bitcoind_method == 'getreceivedbyaccount':
             parseResponse = eval(response.response[0])
@@ -1625,6 +1671,8 @@ This is needs to be corrected here.
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
+
+            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
       
         elif bitcoind_method == 'getreceivedbyaddress':
@@ -1635,20 +1683,29 @@ This is needs to be corrected here.
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
+
+            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
 
         elif bitcoind_method == 'gettransaction':
+
+            self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             return response
 
         elif bitcoind_method == 'sendfrom':
+
+            self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             return response
 
         elif bitcoind_method == 'settxfee':
-            return response
-
-        elif bitcoind_method == 'validateaddress':
+            
+            self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             return response
             
+        elif bitcoind_method == 'validateaddress':
+
+            self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
+            return response            
             
         
         else:
@@ -1661,12 +1718,7 @@ This is needs to be corrected here.
         return   0 # shoulnd't get here
              
 
-
-
-
-
-
-
+ 
 
 
 

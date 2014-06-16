@@ -724,7 +724,7 @@ class NRSconn(nxtMeta):
             self.comp['url'] = newComp
 
             #print(self.comp['url'])
-        print(str(self.comp))
+        #print(str(self.comp))
         self.state = State(self)
         self.block = Block(self)
         #

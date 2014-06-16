@@ -49,6 +49,7 @@ from werkzeug.serving import run_simple
 
 from jsonrpc import JSONRPCResponseManager, dispatcher
 
+import sys
 
 
 
@@ -314,7 +315,6 @@ TESTNET:
         defPass17 = '0' 
         acctSecKey = defPass17
 
-        #print(host + port)
         
 #        lg.info('nxtBridge listening on host %s : port %s', host, port)
         
@@ -386,7 +386,7 @@ class JSON_Runner(QtCore.QRunnable):
         preppedReq = NxtReq.prepare()
         response = session.send(preppedReq)
         NxtResp = response.json()
-        #print(str(type(NxtResp)))
+        
         Nxt2Btc = {}
         return NxtResp  
 
@@ -399,7 +399,7 @@ class JSON_Runner(QtCore.QRunnable):
         preppedReq = NxtReq.prepare()
         response = session.send(preppedReq)
         NxtResp = response.json()
-        #print(str(type(NxtResp))) # dct of cpurse
+        
         Nxt2Btc = {}
         return NxtResp  
 
@@ -418,6 +418,12 @@ class JSON_Runner(QtCore.QRunnable):
 # 52 sendfrom
 # 58 settxfee
 # 63 validateaddress
+
+# 15 getbestblockhash
+# 16 getblock
+# 17 getblockcount  <----
+# 18 getblockhash
+
 
 
              
@@ -1385,6 +1391,103 @@ class JSON_Runner(QtCore.QRunnable):
         
         return Nxt2Btc  
 
+
+
+
+
+
+####################################
+####################################
+####################################
+####################################
+####################################
+
+
+
+
+
+
+
+# 15 getblockcount
+ 
+    @dispatcher.add_method
+    def getblockcount( **kwargs):
+        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
+         
+        """
+        payload = { "requestType" : "getState" }  
+        NxtApi = {}
+        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
+        
+        NxtReq.params=NxtApi # same obj, only replace params
+        preppedReq = NxtReq.prepare()
+        response = session.send(preppedReq)
+        NxtResp = response.json()
+        try:
+            numberOfBlocks = NxtResp['numberOfBlocks']
+        except:
+            numberOfBlocks = 'errorDescription'
+        Nxt2Btc = {}
+        Nxt2Btc =  {
+                "numberOfBlocks" : numberOfBlocks,
+                            }
+        return Nxt2Btc  
+
+        #"numberOfBlocks": 127310,
+
+
+    @dispatcher.add_method
+    def getbestblockhash( **kwargs):
+        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
+         
+        """
+
+        # 2 calls: gestate first, then getBlock!!
+        payload = { "requestType" : "getState" }  
+        NxtApi = {}
+        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
+        
+        NxtReq.params=NxtApi # same obj, only replace params
+        preppedReq = NxtReq.prepare()
+        response = session.send(preppedReq)
+        NxtResp = response.json()
+        
+        try:
+            lastBlock = NxtResp['lastBlock']
+        except:
+            numberOfBlocks = 'errorDescription'
+
+                            
+                            
+        # special: double call: now getBlock
+        payload = { "requestType" : "getBlock" }  
+        NxtApi = {}
+        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
+        NxtApi['block'] =  lastBlock # here we translate BTC params to NXT params
+
+
+        print(lastBlock)  # + " ----------_" +str(NxtResp))
+                             
+
+        Nxt2Btc = {}
+        Nxt2Btc =  {
+                "lastBlock" : lastBlock,
+                            }
+                            
+        return Nxt2Btc  
+
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
  
  
 
@@ -1430,6 +1533,42 @@ This is needs to be corrected here.
         # bitcoind seems to send NOT well formed jsonrpc calls!       
         #
         #        
+
+
+        # FOUR steps:
+                #
+        # 1
+        #
+        # def parse_BTCcall(jsonParms):
+        #
+        # 2
+        # 
+        # call parse_BTCcall to get parmsDi
+        #
+        # 3
+        # 
+        # call dispatcher with parmsdi
+        #
+        # 4
+        #
+        # extract and re-constitute BTC reply object
+        #
+
+
+        def parse_getblockcount(jsonParms):
+            parmsDi = {} 
+            return parmsDi
+
+        def parse_getbestblockhash(jsonParms):
+            parmsDi = {} 
+            return parmsDi
+
+
+
+
+
+            
+
         def parse_getbalance(jsonParms):
             account = str(jsonParms[0])
             minconf = str(jsonParms[1])
@@ -1444,6 +1583,8 @@ This is needs to be corrected here.
         def parse_getinfo(jsonParms):
             parmsDi = {} 
             return parmsDi
+            
+        
         
         def parse_getreceivedbyaccount(jsonParms):
             parmsDi = {} 
@@ -1504,6 +1645,9 @@ This is needs to be corrected here.
             parmsDi = {'PASSPHRASE':PASSPHRASE}             
             
             return parmsDi
+            
+            
+            
         
         
         
@@ -1569,10 +1713,25 @@ This is needs to be corrected here.
             # we need this to determine the params extraction method for params in a list.
 
             bitcoind_method = jsonEval['method']
-                        
+            
+
             if bitcoind_method == 'getbalance':
                 parmsDi = parse_getbalance(jsonParms)
-                    
+
+            ##### new calls 061514
+            elif bitcoind_method == 'getblockcount':
+                parmsDi = parse_getblockcount(jsonParms)
+
+            elif bitcoind_method == 'getbestblockhash':
+                parmsDi = parse_getbestblockhash(jsonParms)
+ 
+
+
+             
+             
+             
+             
+             
             elif bitcoind_method == 'getconnectioncount':
                 parmsDi = parse_getconnectioncount(jsonParms)
                 
@@ -1596,6 +1755,9 @@ This is needs to be corrected here.
     
             elif bitcoind_method == 'validateaddress':
                 parmsDi = parse_validateaddress(jsonParms)
+
+ 
+
             else:
                 parmsDi = {'throwException':'here'}
     
@@ -1619,8 +1781,7 @@ This is needs to be corrected here.
             
         # 4 send request to the NRS        
         responseFromNxt = JSONRPCResponseManager.handle(jsonStr, dispatcher)
-        #response = Response( response1.json, mimetype='text/plain') 
-        response = Response( responseFromNxt.json, mimetype='application/json') 
+        response = Response( responseFromNxt.json, mimetype='application/json') #, mimetype='text/plain') 
         
         # *SOME* of the replies do not seem to be correct JSON format in {key:value} format.
         
@@ -1707,6 +1868,43 @@ This is needs to be corrected here.
             self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             return response            
             
+            
+            
+            
+
+
+
+      
+        elif bitcoind_method == 'getblockcount':
+            parseResponse = eval(response.response[0])
+            resultJson = parseResponse['result']
+            blockcount  = resultJson['numberOfBlocks']
+            parseResponse['result'] = blockcount
+            parseResponse = str(parseResponse)
+            parseResponse = parseResponse.replace( "'",'"') 
+            response.response[0] = parseResponse
+
+            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
+            return response
+
+
+
+        elif bitcoind_method == 'getbestblockhash':
+            parseResponse = eval(response.response[0])
+            resultJson = parseResponse['result']
+            blockcount  = resultJson['lastBlock']
+            parseResponse['result'] = blockcount
+            parseResponse = str(parseResponse)
+            parseResponse = parseResponse.replace( "'",'"') 
+            response.response[0] = parseResponse
+
+            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
+            return response
+
+
+
+
+
         
         else:
             parmsDi = {'throwException':'here'}
@@ -1715,9 +1913,16 @@ This is needs to be corrected here.
 
 
 
+
+
+
+
         return   0 # shoulnd't get here
              
 
+ 
+ 
+ 
  
 
 

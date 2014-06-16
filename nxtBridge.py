@@ -49,28 +49,7 @@ class MainApplication:
         #runAs = self.args['runAs']
         #here we can reboot other sessions
         self.sessMan = nxtSessionManager(app, argv ) # self = app        
- 
-# 
-#        mainLg = lg.getLogger('mainL')
-#        mainLg.setLevel(lg.INFO)        
-#        fh=lg.FileHandler('mainL.log')
-#        
-        
-#        logFile = 'nxtBridge.log'
-#        lg.basicConfig( filename=logFile, level=lg.INFO, format='%(asctime)s %(message)s')
-#        lg.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
-#        lg.debug('This message should appear on the console')
-#        lg.info('So should this')
-#        lg.warning('And this, too')
-#        lg.basicConfig(format='%(asctime)s %(message)s')
-#        lg.warning('is when this event was logged.')
-#        lg.info('%i int %f float START test', 12, 3.12)
-#        lg.info('start')
-        
-
-
-
-
+     
     # these are controllers
     def startBridge(self):
         """ This means that PowerTools can also be run WITHOUT windows!   """
@@ -83,15 +62,7 @@ def main(argv):
     sys.path += [ os.path.dirname(os.path.dirname(os.path.realpath(__file__))) ]
     argv = sys.argv
     print('nxtBridge starting with cmd line:' + str(argv))
-
-#
-#    if len(argv) < 2:
-#        argv.append('testNet')
-#
-#    runAs = argv[1]
-#    
-#    args={}
-#    args['runAs'] = runAs
+ 
 
     app = QtGui.QApplication(sys.argv) # creation of the app object
     main = MainApplication(app, argv )

@@ -92,3 +92,29 @@
 2014-06-16 18:25:24,429 - nxtBridge returning: {"id": 1, "result": "18145466695796997669", "jsonrpc": "2.0"} 
 2014-06-16 18:28:53,729 - nxtBridge rcvd req: {'params': [], 'method': 'getbestblockhash', 'id': 1} 
 2014-06-16 18:28:53,758 - nxtBridge returning: {"id": 1, "result": "16695876921556180272", "jsonrpc": "2.0"} 
+2014-06-16 20:33:22,617 - nxtBridge listening on localhost:7876
+2014-06-16 20:33:27,252 - nxtBridge rcvd req: {'method': 'getbestblockhash', 'id': 1, 'params': []} 
+2014-06-16 20:33:27,796 - nxtBridge returning: {"result": "18152026076308298187", "id": 1, "jsonrpc": "2.0"} 
+2014-06-16 21:39:40,677 - nxtBridge listening on localhost:7876
+2014-06-16 21:40:11,384 - nxtBridge rcvd req: {'id': 1, 'params': [], 'method': 'getbestblockhash'} 
+2014-06-16 21:40:11,434 - nxtBridge returning: {"result": "15984948765345917885", "id": 1, "jsonrpc": "2.0"} 
+2014-06-16 21:40:27,631 - nxtBridge rcvd req: {'id': 1, 'params': ['15984948765345917885'], 'method': 'getblock'} 
+2014-06-16 21:47:09,679 - nxtBridge listening on localhost:7876
+2014-06-16 21:47:17,317 - nxtBridge rcvd req: {'params': ['15984948765345917885'], 'id': 1, 'method': 'getblock'} 
+2014-06-16 21:51:03,409 - nxtBridge listening on localhost:7876
+2014-06-16 21:51:08,122 - nxtBridge rcvd req: {'method': 'getblock', 'params': ['15984948765345917885'], 'id': 1} 
+2014-06-16 22:09:50,350 - nxtBridge listening on localhost:7876
+2014-06-16 22:09:53,281 - nxtBridge rcvd req: {'params': ['15984948765345917885'], 'id': 1, 'method': 'getblock'} 
+2014-06-16 22:09:53,292 - nxtBridge returning: b'{"id": 1, "result": {"errorCode": 1, "errorDescription": "Incorrect request"}, "jsonrpc": "2.0"}' 
+2014-06-16 22:14:07,292 - nxtBridge listening on localhost:7876
+2014-06-16 22:16:28,584 - nxtBridge listening on localhost:7876
+2014-06-16 22:16:32,975 - nxtBridge rcvd req: {'id': 1, 'method': 'getblock', 'params': ['15984948765345917885']} 
+2014-06-16 22:16:33,109 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "result": {"errorCode": 1, "errorDescription": "Incorrect request"}}' 
+2014-06-16 22:19:21,164 - nxtBridge listening on localhost:7876
+2014-06-16 22:19:27,853 - nxtBridge rcvd req: {'method': 'getblock', 'id': 1, 'params': ['15984948765345917885']} 
+2014-06-16 22:19:27,979 - nxtBridge returning: b'{"result": {"generationSignature": "3bda0ed8910b1b033d5d9b4a9ecd019a6699c59148605331ac16035ab905a068", "totalAmountNQT": "3000000000", "payloadLength": 480, "blockSignature": "28367be2b10146085f938d855c35bf8d2935a57e1fcb97f634517802c651a70dd91f85009eb099b21865acd1d580c06221e5fd235dd04422d22f488c65b38352", "totalFeeNQT": "300000000", "previousBlock": "3529290645772305320", "payloadHash": "ad128723a81200a50d3d5736f2737091dd1d48d4c8efb430dace5f4eda253b9b", "generatorRS": "NXT-LMJD-BHGU-ZQGQ-E4972", "baseTarget": "621825866", "generator": "13840936370285661707", "nextBlock": "16621644196725697360", "transactions": ["2046255172920636314", "6083800436144052373", "7659435567116824677"], "timestamp": 17653153, "version": 3, "previousBlockHash": "a8035eb2248ffa303d29b29bc84fb1a5d5f7a1d25d27d5f2169607e22e0ac82e", "numberOfTransactions": 3, "height": 162886}, "id": 1, "jsonrpc": "2.0"}' 
+2014-06-16 22:31:28,992 - nxtBridge rcvd req: {'method': 'getblock', 'id': 1, 'params': ['15984948765345917885']} 
+2014-06-16 22:31:29,014 - nxtBridge returning: b'{"result": {"generationSignature": "3bda0ed8910b1b033d5d9b4a9ecd019a6699c59148605331ac16035ab905a068", "totalAmountNQT": "3000000000", "payloadLength": 480, "blockSignature": "28367be2b10146085f938d855c35bf8d2935a57e1fcb97f634517802c651a70dd91f85009eb099b21865acd1d580c06221e5fd235dd04422d22f488c65b38352", "totalFeeNQT": "300000000", "previousBlock": "3529290645772305320", "payloadHash": "ad128723a81200a50d3d5736f2737091dd1d48d4c8efb430dace5f4eda253b9b", "generatorRS": "NXT-LMJD-BHGU-ZQGQ-E4972", "baseTarget": "621825866", "generator": "13840936370285661707", "nextBlock": "16621644196725697360", "transactions": ["2046255172920636314", "6083800436144052373", "7659435567116824677"], "timestamp": 17653153, "version": 3, "previousBlockHash": "a8035eb2248ffa303d29b29bc84fb1a5d5f7a1d25d27d5f2169607e22e0ac82e", "numberOfTransactions": 3, "height": 162886}, "id": 1, "jsonrpc": "2.0"}' 
+2014-06-16 22:49:31,378 - nxtBridge listening on localhost:7876
+2014-06-16 22:49:35,895 - nxtBridge rcvd req: {'params': ['15984948765345917885'], 'id': 1, 'method': 'getblock'} 
+2014-06-16 22:49:35,915 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "result": {"totalAmountNQT": "3000000000", "height": 162886, "timestamp": 17653153, "generatorRS": "NXT-LMJD-BHGU-ZQGQ-E4972", "generationSignature": "3bda0ed8910b1b033d5d9b4a9ecd019a6699c59148605331ac16035ab905a068", "version": 3, "transactions": ["2046255172920636314", "6083800436144052373", "7659435567116824677"], "generator": "13840936370285661707", "previousBlockHash": "a8035eb2248ffa303d29b29bc84fb1a5d5f7a1d25d27d5f2169607e22e0ac82e", "baseTarget": "621825866", "totalFeeNQT": "300000000", "numberOfTransactions": 3, "nextBlock": "16621644196725697360", "blockSignature": "28367be2b10146085f938d855c35bf8d2935a57e1fcb97f634517802c651a70dd91f85009eb099b21865acd1d580c06221e5fd235dd04422d22f488c65b38352", "previousBlock": "3529290645772305320", "payloadHash": "ad128723a81200a50d3d5736f2737091dd1d48d4c8efb430dace5f4eda253b9b", "payloadLength": 480}}' 

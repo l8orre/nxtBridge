@@ -419,8 +419,8 @@ class JSON_Runner(QtCore.QRunnable):
 # 58 settxfee
 # 63 validateaddress
 
-# 15 getbestblockhash
-# 16 getblock
+# 15 getbestblockhash <----
+# 16 getblock 
 # 17 getblockcount  <----
 # 18 getblockhash
 
@@ -1482,6 +1482,140 @@ class JSON_Runner(QtCore.QRunnable):
  
  
  
+
+    @dispatcher.add_method
+    def getblock( **kwargs):
+        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
+         
+        """
+
+        # 2 calls: gestate first, then getBlock!!
+        payload = { "requestType" : "getBlock" }  
+        NxtApi = {}
+        #print("kwargs- "+ str(kwargs))
+        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
+        NxtApi['block'] =  kwargs['block'] # here we translate BTC params to NXT params
+        
+        #print("NxtApi- "+ str(NxtApi))
+        
+        NxtReq.params=NxtApi # same obj, only replace params
+        preppedReq = NxtReq.prepare()
+        response = session.send(preppedReq)
+        NxtResp = response.json()
+        
+        try:
+            lastBlock = NxtResp['lastBlock']
+        except:
+            numberOfBlocks = 'errorDescription'
+                            
+        # special: double call: now getBlock
+
+
+        #print("NxtResp- "+ str(NxtResp))
+        
+        Nxt2Btc = NxtResp
+        return Nxt2Btc  
+
+
+ 
+# ##
+#         
+#        """
+#        
+#        BTC:
+#        {
+#            "hash" : "00000000000000001f3c0cd9c721317ab2f0a7ef8162cfb158149b9398bf64da",
+#        
+#        ------------> "block" : "14304538723861420013"
+#        
+#            "confirmations" : 2,
+#        
+#        --------------->    "confirmations" : 0,
+#        
+#            "size" : 302305,
+#        ----------->    "payloadLength": 2274,
+#        
+#        
+#            "height" : 305979,
+#        --------------->    "height": 162698,
+#        
+#            "version" : 2,
+#        --------------> "version": 3,
+#        
+#        
+#            "merkleroot" : "7893df29baf299f7609f9ff31b79b7323170d0407913b02f048b748c7ac44a8c",
+#        
+#        --------------->     "blockSignature": "67b65726cea9d4a53c6e8abd82cd2a5754a90378e628437b8cd61d1c3681b409c9176584bb00fb913aac943f63fc76f564c22db24c39f88f3a2d87167a4e7977",
+#        
+#        
+#            "tx" : [
+#                "7e13e8266318bd59135d3bf9cea39c3979ce0d3cb3232fec4a1269d513be0384",
+#                "a677663ab81eddec6d31c0407fa13c28377afe02b6d7d158d405486e9b32c8f0",
+#                ...
+#        
+#                "e2e1b4ec2895c17f2a692d611fe7458653704340b1e7eaf2c40eb162a966791c",
+#                "e8990b3e93ad421309132cfb9ce982eb7d7fdeb81ce04df640fb9a36a3bdccbf",
+#                "030c7d02648605ba7180a1254ce8b6f66720318ab942fe2b132383a453f64450"
+#            ],
+#        -------------------->
+#         "transactions": [
+#                "11568770023200126019",
+#                "13322613755702627301",
+#                "15471684706907193079",
+#                "16610794723067327557",
+#                "17362613536957457748",
+#                "291141771247804605",
+#                "621369471317772773",
+#                "1058161118590452637",
+#                "1146493094279480391",
+#                "1784993009604545995",
+#                "2783379104551709239",
+#                "5640908185231189441",
+#                "6031713049113227445"
+#            ],
+#        
+#        
+#            "time" : 1402855612,
+#        ------------>"timestamp": 17632785,
+#            "nonce" : 611446181,
+#        ---------------> "generationSignature": "be4ddd8ae505fc3580d153c35cadf21281ea8e8db0905d19a364bba669962b92",
+#        
+#            "bits" : "185d859a",
+#        ----------------->"generator": "14241151062656421686"
+#        
+#            "difficulty" : 11756551916.90395164,
+#        
+#        ---------------->    "baseTarget": "500699072",
+#        
+#            "chainwork" : "0000000000000000000000000000000000000000000091657c1edbdc1ee3b9e4",
+#        ---------------->   "payloadHash": "a2a6ed8433726a2e03d7885798e1f8caae8b67b8fb69fba98213c2f021b4da5f",
+#        
+#        
+#            "previousblockhash" : "0000000000000000018ea7ab5779b1d78f3db127df7c1efdd7fa149c8cb7e759",
+#        --------------->     "previousBlock": "5853850405063967054",
+#        
+#            "nextblockhash" : "0000000000000000368812e64c137d0f812541879d3cc8fdcd2f250f67d2a902"
+#        ------------------>    "nextBlock": "6712585551241398631",
+#        
+#        }
+#        
+#        
+#        
+#        
+#        NXT: 
+#        {
+#           
+#            
+#            
+#            "previousBlockHash": "4e411daaed0d3d517740dec2533fa62c310e83cc7db3c3fc965c97dc31b9bb91",
+#            
+#        
+#        
+#        }
+#        """
+
+##
+ 
  
  
  
@@ -1563,6 +1697,13 @@ This is needs to be corrected here.
             parmsDi = {} 
             return parmsDi
 
+        def parse_getblock(jsonParms):
+            parmsDi = {} 
+            block = str(jsonParms[0])
+            parmsDi = {'block':block} 
+            
+            
+            return parmsDi
 
 
 
@@ -1725,6 +1866,8 @@ This is needs to be corrected here.
             elif bitcoind_method == 'getbestblockhash':
                 parmsDi = parse_getbestblockhash(jsonParms)
  
+            elif bitcoind_method == 'getblock':
+                parmsDi = parse_getblock(jsonParms)
 
 
              
@@ -1901,6 +2044,17 @@ This is needs to be corrected here.
             self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
 
+
+
+
+      
+        elif bitcoind_method == 'getblock':
+            
+            self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
+            
+            # return a dict directly as dict, no need to make a fake list from it
+            #self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
+            return response
 
 
 

@@ -419,12 +419,27 @@ class JSON_Runner(QtCore.QRunnable):
 # 58 settxfee
 # 63 validateaddress
 
-# 15 getbestblockhash <----
-# 16 getblock 
-# 17 getblockcount  <----
-# 18 getblockhash
+# 15 getbestblockhash <---- ok
+# 16 getblock         <----- ok
+# 17 getblockcount  <---- ok
+# 18 getblockhash ::: difficult, but not asked for yet
 
 
+# https://nxtforum.org/index.php?topic=1589.msg40038#msg40038
+# missing
+#getnewaddress
+#sendtoaddress
+#listunspent
+#listsinceblock
+#getblockhash
+## ok
+#getreceivedbyaccount
+#getbalance
+#getblock
+#gettransaction
+#getinfo
+#
+#
 
              
 
@@ -483,10 +498,8 @@ class JSON_Runner(QtCore.QRunnable):
 
 
         """
-        #print("\n\n####### getbalance\n" + str(kwargs))
         # only gets 'params' - but jsonHandler needs full json
         ACCOUNT = kwargs["account"] #kwargs['account']
-        
         
         # can replace the specific account no. with generic 'account' key
         
@@ -1232,26 +1245,26 @@ class JSON_Runner(QtCore.QRunnable):
     def settxfee( **kwargs):
         """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
          
-         
-         
-
-1   settxfee	
-
-2   <amount>	<amount> 
-
-3   is a real and is rounded to the nearest 0.00000001	
-
-4   N	
-
-5   Y	
-
-6   returns true	
-
-7   no api	
-
-8   n/a	
-
-9   use to set the default tx fee in nxtcoind
+                 
+                 
+        
+        1   settxfee	
+        
+        2   <amount>	<amount> 
+        
+        3   is a real and is rounded to the nearest 0.00000001	
+        
+        4   N	
+        
+        5   Y	
+        
+        6   returns true	
+        
+        7   no api	
+        
+        8   n/a	
+        
+        9   use to set the default tx fee in nxtcoind
 
 
         EXAMPLES:
@@ -1414,6 +1427,10 @@ class JSON_Runner(QtCore.QRunnable):
     def getblockcount( **kwargs):
         """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
          
+         ./bitcoind -rpcport=7879 getblockcount
+         163467
+
+
         """
         payload = { "requestType" : "getState" }  
         NxtApi = {}
@@ -1440,6 +1457,10 @@ class JSON_Runner(QtCore.QRunnable):
     def getbestblockhash( **kwargs):
         """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
          
+         ./bitcoind -rpcport=7879 getbestblockhash
+         1639453107654839557
+
+
         """
 
         # 2 calls: gestate first, then getBlock!!
@@ -1486,15 +1507,46 @@ class JSON_Runner(QtCore.QRunnable):
     @dispatcher.add_method
     def getblock( **kwargs):
         """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
-         
+            ./bitcoind -rpcport=7879 getblock 8461367503743142254
+            {
+                "confirmations" : 1,
+                "tx" : [
+                    "9427743273145010700",
+                    "9468719975072532448",
+                    "9560907929335947693",
+                    "10507706072875875119",
+                    "11864667946939877596",
+                    "12386165826869904583",
+                    "199053848968879261",
+                    "1294424573372804181",
+                    "1823350660510498915",
+                    "2651053493336681749"
+                ],
+                "chainwork" : "52a6360cc4529b5e07ef1d4b89eee37325a58544f4b9915c934b01fe7d067318",
+                "hash" : "8461367503743142254",
+                "difficulty" : "791103364",
+                "version" : 3,
+                "time" : 17715368,
+                "bits" : "6785084810899231190",
+                "merkleroot" : "91cdadd1f271da60268b11c72cb21fe69806cbbdb22f4f3e6a2021517d04160b1258f45122a15003fbe68eb8f0875fc08770286cc59c3226cb57fe451e73bfd0",
+                "nonce" : "4495bad149d538014216d6ed4e05ecb7631036c1ddd80b090542d7ddbefee387",
+                "nextblockhash" : "18019781220699116575",
+                "height" : 163456,
+                "size" : 1857,
+                "previousblockhash" : "12614315688190262655"
+            }
+
+
+
         """
 
         # 2 calls: gestate first, then getBlock!!
         payload = { "requestType" : "getBlock" }  
         NxtApi = {}
         #print("kwargs- "+ str(kwargs))
+        block = kwargs['block']    
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
-        NxtApi['block'] =  kwargs['block'] # here we translate BTC params to NXT params
+        NxtApi['block'] = block  # here we translate BTC params to NXT params
         
         #print("NxtApi- "+ str(NxtApi))
         
@@ -1509,113 +1561,57 @@ class JSON_Runner(QtCore.QRunnable):
             numberOfBlocks = 'errorDescription'
                             
         # special: double call: now getBlock
-
-
-        #print("NxtResp- "+ str(NxtResp))
         
-        Nxt2Btc = NxtResp
+        #print("NxtResp- "+ str(NxtResp))
+           
+   
+        #        
+        #        Nxt2Btc_Mapping = {
+        #                    "hash" : "block",
+        #                    "confirmations" : 1,
+        #                    "size" : "payloadLength",
+        #                    "height" : "height",
+        #                    "version" : "version",
+        #                    "merkleroot" : "blockSignature",
+        #                    "tx" : "transactions",
+        #                    "time" : "timestamp",
+        #                    "nonce" : "generationSignature",
+        #                    "bits" : "generator",
+        #                    "difficulty" : "baseTarget",
+        #                    "chainwork" : "payloadHash",
+        #                    "previousblockhash" : "previousBlock",
+        #                    "nextblockhash" : "nextBlock",
+        #                    "__unavailableInBitcoin1":  "previousBlockHash",
+        #                    "__unavailableInBitcoin2":  "generatorRS" 
+        #                    "__unavailableInBitcoin3":  "totalAmountNQT" 
+        #                    "__unavailableInBitcoin4":  "numberOfTransactions" 
+        #                    "__unavailableInBitcoin5":  "totalFeeNQT" 
+        #                    }
+         
+         
+        Nxt2Btc = {
+                    "hash" : block,
+                    "confirmations" : 1,
+                    "size" : NxtResp['payloadLength'],
+                    "height" : NxtResp['height'],
+                    "version" : NxtResp['version'],
+                    "merkleroot" : NxtResp['blockSignature'],
+                    "tx" : NxtResp['transactions'],
+                    "time" : NxtResp['timestamp'],
+                    "nonce" : NxtResp['generationSignature'],
+                    "bits" : NxtResp['generator'],
+                    "difficulty" : NxtResp['baseTarget'],
+                    "chainwork" : NxtResp['payloadHash'],
+                    "previousblockhash" : NxtResp['previousBlock'],
+                    "nextblockhash" : NxtResp['nextBlock'],
+                      
+        
+        }
+        
+
+
         return Nxt2Btc  
 
-
- 
-# ##
-#         
-#        """
-#        
-#        BTC:
-#        {
-#            "hash" : "00000000000000001f3c0cd9c721317ab2f0a7ef8162cfb158149b9398bf64da",
-#        
-#        ------------> "block" : "14304538723861420013"
-#        
-#            "confirmations" : 2,
-#        
-#        --------------->    "confirmations" : 0,
-#        
-#            "size" : 302305,
-#        ----------->    "payloadLength": 2274,
-#        
-#        
-#            "height" : 305979,
-#        --------------->    "height": 162698,
-#        
-#            "version" : 2,
-#        --------------> "version": 3,
-#        
-#        
-#            "merkleroot" : "7893df29baf299f7609f9ff31b79b7323170d0407913b02f048b748c7ac44a8c",
-#        
-#        --------------->     "blockSignature": "67b65726cea9d4a53c6e8abd82cd2a5754a90378e628437b8cd61d1c3681b409c9176584bb00fb913aac943f63fc76f564c22db24c39f88f3a2d87167a4e7977",
-#        
-#        
-#            "tx" : [
-#                "7e13e8266318bd59135d3bf9cea39c3979ce0d3cb3232fec4a1269d513be0384",
-#                "a677663ab81eddec6d31c0407fa13c28377afe02b6d7d158d405486e9b32c8f0",
-#                ...
-#        
-#                "e2e1b4ec2895c17f2a692d611fe7458653704340b1e7eaf2c40eb162a966791c",
-#                "e8990b3e93ad421309132cfb9ce982eb7d7fdeb81ce04df640fb9a36a3bdccbf",
-#                "030c7d02648605ba7180a1254ce8b6f66720318ab942fe2b132383a453f64450"
-#            ],
-#        -------------------->
-#         "transactions": [
-#                "11568770023200126019",
-#                "13322613755702627301",
-#                "15471684706907193079",
-#                "16610794723067327557",
-#                "17362613536957457748",
-#                "291141771247804605",
-#                "621369471317772773",
-#                "1058161118590452637",
-#                "1146493094279480391",
-#                "1784993009604545995",
-#                "2783379104551709239",
-#                "5640908185231189441",
-#                "6031713049113227445"
-#            ],
-#        
-#        
-#            "time" : 1402855612,
-#        ------------>"timestamp": 17632785,
-#            "nonce" : 611446181,
-#        ---------------> "generationSignature": "be4ddd8ae505fc3580d153c35cadf21281ea8e8db0905d19a364bba669962b92",
-#        
-#            "bits" : "185d859a",
-#        ----------------->"generator": "14241151062656421686"
-#        
-#            "difficulty" : 11756551916.90395164,
-#        
-#        ---------------->    "baseTarget": "500699072",
-#        
-#            "chainwork" : "0000000000000000000000000000000000000000000091657c1edbdc1ee3b9e4",
-#        ---------------->   "payloadHash": "a2a6ed8433726a2e03d7885798e1f8caae8b67b8fb69fba98213c2f021b4da5f",
-#        
-#        
-#            "previousblockhash" : "0000000000000000018ea7ab5779b1d78f3db127df7c1efdd7fa149c8cb7e759",
-#        --------------->     "previousBlock": "5853850405063967054",
-#        
-#            "nextblockhash" : "0000000000000000368812e64c137d0f812541879d3cc8fdcd2f250f67d2a902"
-#        ------------------>    "nextBlock": "6712585551241398631",
-#        
-#        }
-#        
-#        
-#        
-#        
-#        NXT: 
-#        {
-#           
-#            
-#            
-#            "previousBlockHash": "4e411daaed0d3d517740dec2533fa62c310e83cc7db3c3fc965c97dc31b9bb91",
-#            
-#        
-#        
-#        }
-#        """
-
-##
- 
  
  
  
@@ -1662,15 +1658,13 @@ This is needs to be corrected here.
             """
 
         ############################################################
-        # argument extraction from list here in these local functions.
         #
         # bitcoind seems to send NOT well formed jsonrpc calls!       
         #
         #        
-
-
-        # FOUR steps:
-                #
+        #
+        # FOUR steps to implement new BTC2NXT mapping:
+        #
         # 1
         #
         # def parse_BTCcall(jsonParms):
@@ -1688,7 +1682,7 @@ This is needs to be corrected here.
         # extract and re-constitute BTC reply object
         #
 
-
+        # argument extraction from list here in these local functions.
         def parse_getblockcount(jsonParms):
             parmsDi = {} 
             return parmsDi

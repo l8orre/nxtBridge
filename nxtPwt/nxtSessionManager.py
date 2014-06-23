@@ -62,6 +62,7 @@ connection management.
         
         self.nxtApi = nxtApi(self) # make the apiSigs instance here!
         self.activeNRS = nxtMods.NRSconn(self)
+        
         self.nxtApi.initSignals() # leapFrog init: account and NRSconn must be made before connecting their Sigs on nxtApi
 
     
@@ -87,16 +88,6 @@ connection management.
             
         self.uc_bridge = nxtUC_Bridge.UC_Bridge1(self, host, port )
        
-#        
-#if __name__ == "__main__":
-#    import sys
-#    sys.path += [os.path.dirname(os.path.dirname(os.path.realpath(__file__))) ]
-#    argv = sys.argv
-#    app = QtGui.QApplication(sys.argv) # creation of the app object
-#    standAloneTest = "needs to be defined here"
-#    done = app.exec_()
-#    sys.exit(done)
-# 
  
  
   

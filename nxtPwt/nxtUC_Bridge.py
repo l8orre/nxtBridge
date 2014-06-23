@@ -33,9 +33,11 @@ from nxtPwt.nxtApiPrototypes import nxtQs
 
 import time
 
+import sqlite3 as sq
 
 import logging as lg
 
+import operator as op
 
 # jsonrpc stuff
 from requests import Request as Req
@@ -50,6 +52,10 @@ from werkzeug.serving import run_simple
 from jsonrpc import JSONRPCResponseManager, dispatcher
 
 import sys
+
+
+import sqlite3 as sq
+
 
 
 
@@ -74,80 +80,7 @@ class nxtUseCaseMeta(QObject):
 
 class UC_Bridge1(nxtUseCaseMeta):
     """
-        output of ./bitcoin-cli help:
-        
-            addmultisigaddress nrequired ["key",...] ( "account" )
-            addnode "node" "add|remove|onetry"
-            backupwallet "destination"
-            createmultisig nrequired ["key",...]
-            createrawtransaction [{"txid":"id","vout":n},...] {"address":amount,...}
-            decoderawtransaction "hexstring"
-            decodescript "hex"
-            dumpprivkey "bitcoinaddress"
-            dumpwallet "filename"
-            getaccount "bitcoinaddress"
-            getaccountaddress "account"
-            getaddednodeinfo dns ( "node" )
-            getaddressesbyaccount "account"
-            getbalance ( "account" minconf )
-            getbestblockhash
-            getblock "hash" ( verbose )
-            getblockcount
-            getblockhash index
-            getblocktemplate ( "jsonrequestobject" )
-            getconnectioncount
-            getdifficulty
-            getgenerate
-            gethashespersec
-            getinfo
-            getmininginfo
-            getnettotals
-            getnetworkhashps ( blocks height )
-            getnewaddress ( "account" )
-            getpeerinfo
-            getrawchangeaddress
-            getrawmempool ( verbose )
-            getrawtransaction "txid" ( verbose )
-            getreceivedbyaccount "account" ( minconf )
-            getreceivedbyaddress "bitcoinaddress" ( minconf )
-            gettransaction "txid"
-            gettxout "txid" n ( includemempool )
-            gettxoutsetinfo
-            getunconfirmedbalance
-            getwork ( "data" )
-            help ( "command" )
-            importprivkey "bitcoinprivkey" ( "label" rescan )
-            importwallet "filename"
-            keypoolrefill ( newsize )
-            listaccounts ( minconf )
-            listaddressgroupings
-            listlockunspent
-            listreceivedbyaccount ( minconf includeempty )
-            listreceivedbyaddress ( minconf includeempty )
-            listsinceblock ( "blockhash" target-confirmations )
-            listtransactions ( "account" count from )
-            listunspent ( minconf maxconf  ["address",...] )
-            lockunspent unlock [{"txid":"txid","vout":n},...]
-            move "fromaccount" "toaccount" amount ( minconf "comment" )
-            ping
-            sendfrom "fromaccount" "tobitcoinaddress" amount ( minconf "comment" "comment-to" )
-            sendmany "fromaccount" {"address":amount,...} ( minconf "comment" )
-            sendrawtransaction "hexstring" ( allowhighfees )
-            sendtoaddress "bitcoinaddress" amount ( "comment" "comment-to" )
-            setaccount "bitcoinaddress" "account"
-            setgenerate generate ( genproclimit )
-            settxfee amount
-            signmessage "bitcoinaddress" "message"
-            signrawtransaction "hexstring" ( [{"txid":"id","vout":n,"scriptPubKey":"hex","redeemScript":"hex"},...] ["privatekey1",...] sighashtype )
-            stop
-            submitblock "hexdata" ( "jsonparametersobject" )
-            validateaddress "bitcoinaddress"
-            verifychain ( checklevel numblocks )
-            verifymessage "bitcoinaddress" "signature" "message"
-            walletlock
-            walletpassphrase "passphrase" timeout
-            walletpassphrasechange "oldpassphrase" "newpassphrase"
-            
+       
             
             
             
@@ -155,55 +88,6 @@ tested examples for the BTC-NXT mappings implemented below,
 using two different curl syntax methods.
 
 
-
-NXT:
-curl param encoding 1
------------------------
- 
-curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getinfo", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}' http://localhost:7879/jsonrpc
-
-curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getbalance", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}' http://localhost:7879/jsonrpc
-
-curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getconnectioncount", "params": {}, "id": 12}' http://localhost:7879/jsonrpc
-
-curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getreceivedbyaccount", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}' http://localhost:7879/jsonrpc
-
-curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getreceivedbyaddress", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}' http://localhost:7879/jsonrpc
-
-curl -i -X POST -d '{"jsonrpc": "2.0", "method": "gettransaction", "params": {"txid":"1448848043607985937"}, "id": 12}' http://localhost:7879/jsonrpc
-
-curl -i -X POST -d '{"jsonrpc": "2.0", "method": "sendfrom", "params": {"amount":0.00001, "fromaccount":"PASSPHRASE",  "tobitcoinaddress":"2865886802744497404",  "minconf":1,  "comment":"" , "comment-to":"" }, "id": 12}' http://localhost:7879/jsonrpc
-
-curl -i -X POST -d '{"jsonrpc": "2.0", "method": "settxfee", "params": {}, "id": 12}' http://localhost:7879/jsonrpc
-
-curl -i -X POST -d '{"jsonrpc": "2.0", "method": "validateaddress", "params": {"PASSPHRASE":"PASSPHRASE"}, "id": 12}' http://localhost:7879/jsonrpc
-
- 
-
-
-NXT:
-curl param encoding 2
------------------------
-
-curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"getinfo","params": {} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
-
-curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"getbalance","params": {"account":"16159101027034403504"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
-
-curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"getconnectioncount","params": {} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
- 
-curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"getreceivedbyaccount","params":  {"account":"16159101027034403504"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
-
-curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"getreceivedbyaddress","params":  {"account":"16159101027034403504"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
- 
-curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"gettransaction","params":  {"txid":"1448848043607985937"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
-  
-curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"sendfrom","params":  {"amount":0.00003, "fromaccount":"PASSPHRASE",  "tobitcoinaddress":"2865886802744497404",  "minconf":1,  "comment":"" , "comment-to":"" } }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
-
-curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"settxfee","params":  {} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
- 
-curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"validateaddress","params": {"PASSPHRASE":"PASSPHRASE"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
- 
- 
  
 using bitcoind as jsonrpc relay:
 ----------------------------------
@@ -308,6 +192,10 @@ TESTNET:
             """
   
 
+
+
+
+
     def __init__(self, sessMan, host = 'localhost', port = '6876'  ):
         super(UC_Bridge1   , self   ).__init__(sessMan)
         self.sessMan = sessMan
@@ -320,21 +208,51 @@ TESTNET:
         
         self.mm = BridgeThread( host  , port   )
          
+         
+         
+ 
  
 class BridgeThread(QObject):
-    
+    """ 2680262203532249785 nxt genesis block """
     # housekeeping of the threads may have to be taken care of
+    
+    
     def __init__(self, host, port):
         # print(3*"****************")
+
+
+        # check : is this the same as calling super(BridgeThread, etc) ???????
         super(QObject, self).__init__( parent = None)
+        
+        
+        self.getBlock= {
+                                        "requestType" : "getBlock" , \
+                                        "block" : "BLOCKADDRESS"
+                                        }
+        self.getState= {
+                                        "requestType" : "getState"
+                                        }
+
+        self.blockHeightDB = "nxtBlockDB.db"
+
+        self.blockDBConn = sq.connect(self.blockHeightDB)
+        
+        self.blockDBCur = self.blockDBConn.cursor()
+
+        try:
+            self.blockDBCur.execute("CREATE TABLE nxtBlockH_to_Addr(height INT, blockAddr TEXT)")
+            self.blockDBCur.execute("INSERT INTO nxtBlockH_to_Addr(height, blockAddr) VALUES(?,?)",(  0 , "2680262203532249785")) # genesis block
+            self.blockDBConn.commit()            
+            # genesis Block at height 0
+        except:
+            print("block DB table already exists")
+             
+        
         self.qPool=QtCore.QThreadPool.globalInstance()
         self.qPool.setMaxThreadCount(2500) # robustness
         self.host = host
         self.port = port
-        
-        #%(name)s - %(levelname)s 
-        #formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
+         
 
         self.bridgeLogger = lg.getLogger('bridgeLogger')
         self.bridgeLogger.setLevel(lg.INFO)        
@@ -352,12 +270,112 @@ class BridgeThread(QObject):
         ch.setFormatter(fh)
         self.consLogger.addHandler(ch)
         
+        self.init_BlockDB( host, port)
+    
+# even the db connection can be local in this function !!!!!!!!!!!!!!!!!!!!!    
+    
+    def init_BlockDB(self, host, port):
+
+        self.blockDBCur.execute("SELECT MAX(height)  from  nxtBlockH_to_Addr ")
+        
+        # maybe use this only once here and destroy again!!
+        session1 = Session()
+        headers = {'content-type': 'application/json'}
+        sessUrl = 'http://' + host + ':' + port + '/nxt?' 
+        #global NxtReq
+        NxtReq = Req( method='POST', url = sessUrl, params = {}, headers = headers        )
+        
+        NxtReq.params = self.getState 
+        preppedReq = NxtReq.prepare()
+        response = session1.send(preppedReq)
+        NxtResp = response.json()
+        
+        highBlockAddrBC = NxtResp['lastBlock']
+        highBlockBC = NxtResp['numberOfBlocks'] - 1 # GENESIS H=0 
+
+        self.blockDBCur.execute("select * from nxtBlockH_to_Addr;")
+        #print("fectchall:" + str(self.blockDBCur.fetchall()))
+
+        self.blockDBCur.execute("SELECT MAX(height)  from  nxtBlockH_to_Addr ")
+        fetchHighestBlInDB = self.blockDBCur.fetchone()[0]  #all()  
+
+        self.consLogger.info('init blockHeightDB. DBhigh, BChigh : %s, %s ', str(fetchHighestBlInDB) , str(highBlockBC) )
+        
+        #print(str(type(fetchHighestBlInDB)))        
+        #print(  str(fetchHighestBlInDB))        
+        
+        highBlockDB = int(fetchHighestBlInDB)
+        
+        self.blockDBCur.execute("SELECT blockAddr from   nxtBlockH_to_Addr WHERE height = ?   ", (highBlockDB,))
+        highestBlockAddrDB = self.blockDBCur.fetchone() #all()  
+
+        highBlockAddrDB = str(highestBlockAddrDB[0]) # ok
+#        print(str(highBlockDB >= highBlockBC))
+        
+        if highBlockDB >= highBlockBC :
+            return 0
+        
+        
+        self.getBlock['block'] = highBlockAddrDB
+        print("highBlockAddrDB- " + str(highBlockAddrDB))
+        # this is the highest block            
+        NxtReq.params = self.getBlock
+        preppedReq = NxtReq.prepare()
+        response = session1.send(preppedReq)
+        NxtResp = response.json()
+        
+        print( str(type(NxtResp['nextBlock'])))  
+        
+        nextBlock = str(NxtResp['nextBlock'])
+         
+        logIncr = 1000
+  # numberOfBlocks = height+1 genesis height =0
+        print("nextBlock - " + str(nextBlock) + str(type(nextBlock)) + str(highBlockDB))        
+        
+        while highBlockDB < highBlockBC:
+
+            self.getBlock['block'] = nextBlock
+            
+            NxtReq.params = self.getBlock
+            preppedReq = NxtReq.prepare()
+            response = session1.send(preppedReq)
+            NxtResp = response.json()
+            
+            
+            highBlockDB = int(NxtResp['height'])
+            
+            blockAddrIntoDB=str(nextBlock) 
+            
+            self.blockDBCur.execute("INSERT INTO nxtBlockH_to_Addr(height, blockAddr) VALUES(?,?)",( highBlockDB, blockAddrIntoDB))
+            #self.blockDBConn.commit()
+
+            if op.mod( highBlockDB , logIncr) == 0:
+                
+                self.consLogger.info('init blockHeightDB. DBhigh, BChigh : %s, %s ', str(highBlockDB) , blockAddrIntoDB )
+            
+            if 'nextBlock' in NxtResp.keys():
+                nextBlock = str(NxtResp['nextBlock'])
+            else:
+                break
+                    
+        self.blockDBConn.commit()
+        print("DONE")
+    
+
+                            
+ 
+       
+
+    
     
     @pyqtSlot() # 61
     def jsonServ_Slot(self, ):
+        
         self.json_Runner = JSON_Runner( self.host, self.port, self.bridgeLogger, self.consLogger ) # json_Emitter, self to THIS !!!!!!
         self.qPool.start(self.json_Runner)
-         
+    
+
+     
         
 class JSON_Runner(QtCore.QRunnable):
     """- This is what needs to be put into the QThreadpool """
@@ -374,6 +392,7 @@ class JSON_Runner(QtCore.QRunnable):
         self.bridgeLogger = fileLogger
         self.consLogger = consLogger
         
+  
   
 ############################
  # 2 generic Nxt APIs
@@ -410,8 +429,53 @@ class JSON_Runner(QtCore.QRunnable):
 # Numbers as per appeearance in listing of bitcoind help 
   
 # 14 getbalance
+  
 # 21 getconnectioncount
 # 25 getinfo 
+
+# 33 getreceivedbyaccount
+  
+# 34 getreceivedbyaddress
+
+# 35 gettransaction
+
+# 52 sendfrom
+
+# 58 settxfee
+
+# 63 validateaddress
+
+# 15 getbestblockhash 
+# 16 getblock          
+# 17 getblockcount   
+
+
+# 18 getblockhash ::: difficult, but not asked for yet
+
+
+# https://nxtforum.org/index.php?topic=1589.msg40038#msg40038
+# missing
+
+#getnewaddress
+
+#sendtoaddress
+
+#listunspent
+
+#listsinceblock
+
+## ok
+#
+#
+
+
+
+
+# Here I can see implemented functions:
+
+# 14 getbalance
+# 21 getconnectioncount
+# 25 getinfo
 # 33 getreceivedbyaccount
 # 34 getreceivedbyaddress
 # 35 gettransaction
@@ -419,27 +483,9 @@ class JSON_Runner(QtCore.QRunnable):
 # 58 settxfee
 # 63 validateaddress
 
-# 15 getbestblockhash <---- ok
-# 16 getblock         <----- ok
-# 17 getblockcount  <---- ok
-# 18 getblockhash ::: difficult, but not asked for yet
+# In order to implement NXT to our exchange we need 2 more functions:
 
-
-# https://nxtforum.org/index.php?topic=1589.msg40038#msg40038
-# missing
-#getnewaddress
-#sendtoaddress
-#listunspent
-#listsinceblock
-#getblockhash
-## ok
-#getreceivedbyaccount
-#getbalance
-#getblock
-#gettransaction
-#getinfo
-#
-#
+#  "listtransactions" and "sendtoaddress"
 
              
 
@@ -1614,6 +1660,12 @@ class JSON_Runner(QtCore.QRunnable):
 
  
  
+
+ 
+
+    def test(self):
+        pass #print("okokkook")
+        return "ok3"
  
  
  
@@ -1657,6 +1709,17 @@ This is needs to be corrected here.
 
             """
 
+
+
+        #print(str(self))
+        #ok = self.test() # 
+        #print(ok)
+        
+        #<nxtPwt.nxtUC_Bridge.JSON_Runner object at 0x7fcb351e8048>
+
+
+        # print threadcountz>!!! keep track of threadpool objects! just to make sure!
+        
         ############################################################
         #
         # bitcoind seems to send NOT well formed jsonrpc calls!       
@@ -1683,6 +1746,7 @@ This is needs to be corrected here.
         #
 
         # argument extraction from list here in these local functions.
+
         def parse_getblockcount(jsonParms):
             parmsDi = {} 
             return parmsDi
@@ -2078,3 +2142,235 @@ This is needs to be corrected here.
     def run(self,):
         run_simple('localhost', 7879, self.application,  )
  
+ 
+ 
+# 
+# getState:
+#
+#{
+#    "lastBlock": "3246422815430149567",
+#    "numberOfAliases": 120534,
+#    "lastBlockchainFeeder": "89.250.240.60",
+#    "numberOfPeers": 1367,
+#    "numberOfBlocks": 167392,
+#    "totalMemory": 788529152,
+#    "isScanning": false,
+#    "numberOfUnlockedAccounts": 2,
+#    "freeMemory": 257800136,
+#    "maxMemory": 954728448,
+#    "totalEffectiveBalanceNXT": 973315632,
+#    "numberOfTransactions": 270018,
+#    "version": "1.1.5",
+#    "numberOfOrders": 1150,
+#    "numberOfVotes": 0,
+#    "numberOfTrades": 6530,
+#    "lastBlockchainFeederHeight": 167391,
+#    "time": 18149679,
+#    "availableProcessors": 4,
+#    "numberOfAssets": 142,
+#    "numberOfPolls": 0,
+#    "cumulativeDifficulty": "5720033783595943",
+#    "numberOfAccounts": 39098
+#}
+
+
+#getBlock:
+#block:	
+#
+#{
+#    "transactions": [
+#        "11347064822191789233",
+#        "13022278691169947279",
+#        "15344830822878861528",
+#        "17027158668263548018",
+#        "3928058537964610592",
+#        "8126855791819446295"
+#    ],
+#    "generatorRS": "NXT-HV5P-5WN7-6GHZ-DDY4P",
+#    "totalAmountNQT": "996100000000",
+#    "blockSignature": "a323bce7e7e6ce4fe9e4922b13db46399d05ab9a9e979f8c42a10fb23f7d5209f5543b1367f3776d73a302e8850b23ac5047a88dd63b594c985b9bf628bad1c1",
+#    "payloadLength": 1050,
+#    "numberOfTransactions": 6,
+#    "version": 3,
+#    "timestamp": 18149668,
+#    "previousBlock": "12525420578394947162",
+#    "payloadHash": "3ce0d462b8860af45331b9ee4fe7d1f8dc6db15de0904217cb55b6e01ad6f954",
+#    "height": 167391,
+#    "totalFeeNQT": "1500000000",
+#    "baseTarget": "1312193556",
+#    "generationSignature": "3009d64559091806409276d8c8fe23d61f240c3764433ed792b8c2836a936192",
+#    "previousBlockHash": "5a3e994da73bd3ad0cada18e61170bab8292ea0623bba4abc50560654488ea72",
+#    "generator": "13442060847498652789"
+#}
+
+#getBlock:     2680262203532249785 GENESIS H=0
+#block:	
+#
+#{
+#    "transactions": [
+#        "9481240856006507060",
+#        "9576628037409549212",
+#        "9688144090768869873",
+#        "10338255408421629051",
+#        "10359184595777550676",
+#        "10373020874569525903",
+#        "10424413339700861551",
+#        "10939570664221574474",
+#        "11532826066610215721",
+#        "11917726250940952607",
+#        "12690717722987085019",
+#        "13151368363366204667",
+#        "13476758759361147188",
+#        "13575052702215035602",
+#        "13626344631074071778",
+#        "14331042609715043892",
+#        "14498707461565876109",
+#        "14629784120638206588",
+#        "14716488342582202795",
+#        "15242843992519721753",
+#        "15826148981206304696",
+#        "16587894357465415251",
+#        "16639008774229780426",
+#        "16764040714237275941",
+#        "16949060395852349444",
+#        "16986109699411704811",
+#        "17142016800722573984",
+#        "17300693002259513727",
+#        "17699122205798959185",
+#        "17859290671513293607",
+#        "18351895661104968170",
+#        "27224926019950626",
+#        "101904195883249963",
+#        "485061810832586354",
+#        "702474956264391606",
+#        "831348919724948185",
+#        "893623329775498220",
+#        "923387251222352504",
+#        "986617413179446839",
+#        "1041170497304299708",
+#        "1215257021695176331",
+#        "2119615107677390707",
+#        "2143544796861192475",
+#        "2826512495749791477",
+#        "3070200381067595603",
+#        "3355990436647260555",
+#        "3422714679394139593",
+#        "3481901580729826638",
+#        "3702379820133927389",
+#        "3999357454991991845",
+#        "4309379368213070693",
+#        "4829930967078067357",
+#        "4928977321490506392",
+#        "5060621930710257178",
+#        "5133122725444701367",
+#        "5751137657789027036",
+#        "6158243764217538132",
+#        "6389936935682895523",
+#        "6432612557545231178",
+#        "6873386888637796296",
+#        "7064280522252159011",
+#        "7289660295923749234",
+#        "7505990847309084616",
+#        "7514985232870320323",
+#        "7856149410146725103",
+#        "7998830538505701870",
+#        "8274741729641261667",
+#        "8386402818367925856",
+#        "8505964026109172291",
+#        "8507548832413139519",
+#        "8648346545164905097",
+#        "8692850727507507537",
+#        "8841312677014468592"
+#    ],
+#    "generatorRS": "NXT-MRCC-2YLS-8M54-3CMAJ",
+#    "nextBlock": "6556228577102711328",
+#    "totalAmountNQT": "100000000000000000",
+#    "blockSignature": "69d426c498b70ac6d1678180356527c1fee030ad732fbf7672c2266d166a4c08cf8fdeb4524fd1b496bbcaab03fa6e67760f6da452251402249015486c487211",
+#    "payloadLength": 9344,
+#    "numberOfTransactions": 73,
+#    "version": -1,
+#    "timestamp": 0,
+#    "payloadHash": "72c8a92efffbd8695a866eabb13ca460a2f7cdf3283b82efb163360d6eec9469",
+#    "height": 0,
+#    "totalFeeNQT": "0",
+#    "baseTarget": "153722867",
+#    "generationSignature": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+#    "generator": "1739068987193023818"
+#}
+
+#
+# output of ./bitcoin-cli help:
+#        
+#            addmultisigaddress nrequired ["key",...] ( "account" )
+#            addnode "node" "add|remove|onetry"
+#            backupwallet "destination"
+#            createmultisig nrequired ["key",...]
+#            createrawtransaction [{"txid":"id","vout":n},...] {"address":amount,...}
+#            decoderawtransaction "hexstring"
+#            decodescript "hex"
+#            dumpprivkey "bitcoinaddress"
+#            dumpwallet "filename"
+#            getaccount "bitcoinaddress"
+#            getaccountaddress "account"
+#            getaddednodeinfo dns ( "node" )
+#            getaddressesbyaccount "account"
+#            getbalance ( "account" minconf )
+#            getbestblockhash
+#            getblock "hash" ( verbose )
+#            getblockcount
+#            getblockhash index
+#            getblocktemplate ( "jsonrequestobject" )
+#            getconnectioncount
+#            getdifficulty
+#            getgenerate
+#            gethashespersec
+#            getinfo
+#            getmininginfo
+#            getnettotals
+#            getnetworkhashps ( blocks height )
+#            getnewaddress ( "account" )
+#            getpeerinfo
+#            getrawchangeaddress
+#            getrawmempool ( verbose )
+#            getrawtransaction "txid" ( verbose )
+#            getreceivedbyaccount "account" ( minconf )
+#            getreceivedbyaddress "bitcoinaddress" ( minconf )
+#            gettransaction "txid"
+#            gettxout "txid" n ( includemempool )
+#            gettxoutsetinfo
+#            getunconfirmedbalance
+#            getwork ( "data" )
+#            help ( "command" )
+#            importprivkey "bitcoinprivkey" ( "label" rescan )
+#            importwallet "filename"
+#            keypoolrefill ( newsize )
+#            listaccounts ( minconf )
+#            listaddressgroupings
+#            listlockunspent
+#            listreceivedbyaccount ( minconf includeempty )
+#            listreceivedbyaddress ( minconf includeempty )
+#            listsinceblock ( "blockhash" target-confirmations )
+#            listtransactions ( "account" count from )
+#            listunspent ( minconf maxconf  ["address",...] )
+#            lockunspent unlock [{"txid":"txid","vout":n},...]
+#            move "fromaccount" "toaccount" amount ( minconf "comment" )
+#            ping
+#            sendfrom "fromaccount" "tobitcoinaddress" amount ( minconf "comment" "comment-to" )
+#            sendmany "fromaccount" {"address":amount,...} ( minconf "comment" )
+#            sendrawtransaction "hexstring" ( allowhighfees )
+#            sendtoaddress "bitcoinaddress" amount ( "comment" "comment-to" )
+#            setaccount "bitcoinaddress" "account"
+#            setgenerate generate ( genproclimit )
+#            settxfee amount
+#            signmessage "bitcoinaddress" "message"
+#            signrawtransaction "hexstring" ( [{"txid":"id","vout":n,"scriptPubKey":"hex","redeemScript":"hex"},...] ["privatekey1",...] sighashtype )
+#            stop
+#            submitblock "hexdata" ( "jsonparametersobject" )
+#            validateaddress "bitcoinaddress"
+#            verifychain ( checklevel numblocks )
+#            verifymessage "bitcoinaddress" "signature" "message"
+#            walletlock
+#            walletpassphrase "passphrase" timeout
+#            walletpassphrasechange "oldpassphrase" "newpassphrase"
+#            
+#            

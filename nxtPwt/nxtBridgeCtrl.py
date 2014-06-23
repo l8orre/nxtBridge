@@ -44,19 +44,17 @@ class Bridge1Ctrl(QObject):
     """ Bridge Control - container and controller for useCase logic
         """
     
-    UC29changeConn_Sig = pyqtSignal(  object)
-    UCTEST_activate = pyqtSignal( object)
-
+    
     def __init__(self, app ):
         super(QObject, self, ).__init__()
         
         self.app = app
-        self.app.nxtBridge1 = self # make this   WinControl1  known  in the app namespace.  When this Win throws sigs, they can be recvd anywhere where this isknown.
-        self.timer1 = Qt.QTimer()
-        self.time1 = 10000
-#        self.nxtApi = app.sessMan.nxtApi  # there is only ONE apiSigs instance, and that is in the sessMan.
-#        self.apiCalls = nxtQs()
-#            
+        self.app.nxtBridge1 = self 
+        #make this   WinControl1  known  in the app namespace.  When this Win throws sigs, they can be recvd anywhere where this isknown.
+        #self.timer1 = Qt.QTimer()
+        #self.time1 = 10000
+
+
     def init(self):  
         """ Here all signals must be connected """  
         pass

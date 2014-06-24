@@ -27,16 +27,16 @@ from PyQt4 import  Qt ,  QtCore # QtGui,
 from PyQt4.QtCore import  SIGNAL , QObject, pyqtSignal, pyqtSlot
 
 # timer:
-import os
-import time
+#import os
+#import time
    
-from werkzeug.wrappers import Request, Response
-from werkzeug.serving import run_simple
+#from werkzeug.wrappers import Request, Response
+#from werkzeug.serving import run_simple
 
-from jsonrpc import JSONRPCResponseManager, dispatcher
+#from jsonrpc import JSONRPCResponseManager, dispatcher
 
 
-from nxtPwt.nxtApiPrototypes import nxtQs 
+#from nxtPwt.nxtApiPrototypes import nxtQs 
  
 
  

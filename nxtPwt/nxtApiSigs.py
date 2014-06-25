@@ -1247,7 +1247,7 @@ class ReplyEmitter(QObject):
         self.preppedReq = preppedReq 
         self.session = session
         metaThread = copy(meta)
-        # NOTE: This MUST be done, otherwise the 'meta' object will only be ONE meta object (from the last query)
+        # NOTE: This MUST!!! be done, otherwise the 'meta' object will only be ONE meta object (from the last query)
         # that is referenced for EVERY query and the metaData of the earlier queries will be destroyed!!!!!!!!        
         del meta
         self.metaThread = metaThread

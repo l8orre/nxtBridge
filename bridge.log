@@ -445,3 +445,164 @@
 2014-06-24 13:37:37,908 - nxtBridge returning: {"jsonrpc": "2.0", "result": 1423, "id": 1} 
 2014-06-24 13:37:42,179 - nxtBridge rcvd req: {'params': [1], 'method': 'getblockhash', 'id': 1} 
 2014-06-24 13:37:42,236 - nxtBridge returning: {"jsonrpc": "2.0", "result": "6556228577102711328", "id": 1} 
+2014-06-25 09:15:56,562 - nxtBridge listening on localhost:7876
+2014-06-25 09:17:03,243 - nxtBridge rcvd req: {'method': 'getblockhash', 'params': [12345], 'id': 1} 
+2014-06-25 09:17:03,292 - nxtBridge returning: {"jsonrpc": "2.0", "result": "17894094941664662307", "id": 1} 
+2014-06-25 09:17:08,374 - nxtBridge rcvd req: {'method': 'getblockhash', 'params': [12345], 'id': 1} 
+2014-06-25 09:17:08,427 - nxtBridge returning: {"jsonrpc": "2.0", "result": "17894094941664662307", "id": 1} 
+2014-06-25 09:17:17,267 - nxtBridge rcvd req: {'method': 'getblockhash', 'params': [0], 'id': 1} 
+2014-06-25 09:17:17,312 - nxtBridge returning: {"jsonrpc": "2.0", "result": "2680262203532249785", "id": 1} 
+2014-06-25 09:17:30,540 - nxtBridge rcvd req: {'method': 'getblockhash', 'params': [0], 'id': 1} 
+2014-06-25 09:17:30,589 - nxtBridge returning: {"jsonrpc": "2.0", "result": "2680262203532249785", "id": 1} 
+2014-06-25 09:21:35,440 - nxtBridge listening on localhost:7876
+2014-06-25 09:22:35,378 - nxtBridge rcvd req: {'method': 'getblockhash', 'params': [0], 'id': 1} 
+2014-06-25 09:22:35,429 - nxtBridge returning: {"jsonrpc": "2.0", "result": "2680262203532249785", "id": 1} 
+2014-06-25 09:22:43,675 - nxtBridge rcvd req: {'method': 'getblockcount', 'params': [], 'id': 1} 
+2014-06-25 09:22:43,698 - nxtBridge returning: {"jsonrpc": "2.0", "result": 169638, "id": 1} 
+2014-06-25 09:22:52,440 - nxtBridge rcvd req: {'method': 'getblockhash', 'params': [169638], 'id': 1} 
+2014-06-25 09:24:03,312 - nxtBridge listening on localhost:7876
+2014-06-25 09:24:12,098 - nxtBridge rcvd req: {'params': [], 'method': 'getblockcount', 'id': 1} 
+2014-06-25 09:24:12,117 - nxtBridge returning: {"jsonrpc": "2.0", "result": 169641, "id": 1} 
+2014-06-25 09:24:39,246 - nxtBridge rcvd req: {'params': [169640], 'method': 'getblockhash', 'id': 1} 
+2014-06-25 09:24:42,962 - nxtBridge rcvd req: {'params': [169641], 'method': 'getblockhash', 'id': 1} 
+2014-06-25 09:24:46,260 - nxtBridge rcvd req: {'params': [169639], 'method': 'getblockhash', 'id': 1} 
+2014-06-25 09:24:46,315 - nxtBridge returning: {"jsonrpc": "2.0", "result": "9483443433321324798", "id": 1} 
+2014-06-25 09:24:53,180 - nxtBridge rcvd req: {'params': [], 'method': 'getblockcount', 'id': 1} 
+2014-06-25 09:24:53,201 - nxtBridge returning: {"jsonrpc": "2.0", "result": 169642, "id": 1} 
+2014-06-25 09:26:35,992 - nxtBridge listening on localhost:7876
+2014-06-25 09:26:39,840 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockcount', 'params': []} 
+2014-06-25 09:26:39,873 - nxtBridge returning: {"id": 1, "result": 169642, "jsonrpc": "2.0"} 
+2014-06-25 09:27:17,997 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [169641]} 
+2014-06-25 09:27:18,051 - nxtBridge returning: {"id": 1, "result": "10206134453628354585", "jsonrpc": "2.0"} 
+2014-06-25 09:27:19,827 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [169642]} 
+2014-06-25 09:27:19,878 - nxtBridge returning: {"id": 1, "result": "3193970328543098866", "jsonrpc": "2.0"} 
+2014-06-25 09:27:25,646 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockcount', 'params': []} 
+2014-06-25 09:27:25,674 - nxtBridge returning: {"id": 1, "result": 169642, "jsonrpc": "2.0"} 
+2014-06-25 09:33:31,538 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockcount', 'params': []} 
+2014-06-25 09:33:31,570 - nxtBridge returning: {"id": 1, "result": 169647, "jsonrpc": "2.0"} 
+2014-06-25 09:33:48,311 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [0]} 
+2014-06-25 09:33:48,362 - nxtBridge returning: {"id": 1, "result": "2680262203532249785", "jsonrpc": "2.0"} 
+2014-06-25 09:38:17,451 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [0]} 
+2014-06-25 09:38:17,494 - nxtBridge returning: {"id": 1, "result": "2680262203532249785", "jsonrpc": "2.0"} 
+2014-06-25 09:38:24,804 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [2680262203532249785]} 
+2014-06-25 09:38:45,792 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockcount', 'params': []} 
+2014-06-25 09:38:45,819 - nxtBridge returning: {"id": 1, "result": 169652, "jsonrpc": "2.0"} 
+2014-06-25 09:38:53,699 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockcount', 'params': []} 
+2014-06-25 09:38:53,722 - nxtBridge returning: {"id": 1, "result": 169652, "jsonrpc": "2.0"} 
+2014-06-25 09:39:06,782 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [169652]} 
+2014-06-25 09:39:24,072 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [2680262203532249785]} 
+2014-06-25 09:39:33,202 - nxtBridge rcvd req: {'id': 1, 'method': 'getblock', 'params': ['2680262203532249785']} 
+2014-06-25 09:39:33,214 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "error": {"code": -32000, "message": "Server error", "data": {"message": "\'previousBlock\'", "args": ["previousBlock"], "type": "KeyError"}}}' 
+2014-06-25 09:39:45,682 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [169652]} 
+2014-06-25 09:39:48,673 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [169651]} 
+2014-06-25 09:39:58,776 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [16965]} 
+2014-06-25 09:39:58,829 - nxtBridge returning: {"id": 1, "result": "16045503223813183710", "jsonrpc": "2.0"} 
+2014-06-25 09:40:02,358 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [16965]} 
+2014-06-25 09:40:02,406 - nxtBridge returning: {"id": 1, "result": "16045503223813183710", "jsonrpc": "2.0"} 
+2014-06-25 09:40:06,531 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [169650]} 
+2014-06-25 09:40:15,383 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [169649]} 
+2014-06-25 09:40:18,135 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [169648]} 
+2014-06-25 09:40:20,293 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [169647]} 
+2014-06-25 09:40:27,120 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [169640]} 
+2014-06-25 09:40:27,173 - nxtBridge returning: {"id": 1, "result": "4712646605492108403", "jsonrpc": "2.0"} 
+2014-06-25 09:40:29,317 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [169641]} 
+2014-06-25 09:40:29,366 - nxtBridge returning: {"id": 1, "result": "10206134453628354585", "jsonrpc": "2.0"} 
+2014-06-25 09:40:30,539 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [169642]} 
+2014-06-25 09:40:30,586 - nxtBridge returning: {"id": 1, "result": "3193970328543098866", "jsonrpc": "2.0"} 
+2014-06-25 09:40:31,765 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [169643]} 
+2014-06-25 09:41:08,688 - nxtBridge rcvd req: {'id': 1, 'method': 'getblock', 'params': ['2680262203532249785']} 
+2014-06-25 09:41:08,695 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "error": {"code": -32000, "message": "Server error", "data": {"message": "\'previousBlock\'", "args": ["previousBlock"], "type": "KeyError"}}}' 
+2014-06-25 09:46:33,595 - nxtBridge listening on localhost:7876
+2014-06-25 09:46:45,540 - nxtBridge rcvd req: {'id': 1, 'params': [], 'method': 'getblockcount'} 
+2014-06-25 09:46:45,569 - nxtBridge returning: {"id": 1, "result": 169658, "jsonrpc": "2.0"} 
+2014-06-25 09:46:54,340 - nxtBridge rcvd req: {'id': 1, 'params': [169658], 'method': 'getblockhash'} 
+2014-06-25 09:46:57,383 - nxtBridge rcvd req: {'id': 1, 'params': [169657], 'method': 'getblockhash'} 
+2014-06-25 09:46:57,429 - nxtBridge returning: {"id": 1, "result": "17021825992041477608", "jsonrpc": "2.0"} 
+2014-06-25 09:49:11,655 - nxtBridge listening on localhost:7876
+2014-06-25 11:10:32,357 - nxtBridge listening on localhost:7876
+2014-06-25 11:14:26,971 - nxtBridge listening on localhost:7876
+2014-06-25 11:15:22,670 - nxtBridge listening on localhost:7876
+2014-06-25 11:16:41,275 - nxtBridge listening on localhost:7876
+2014-06-25 11:20:33,977 - nxtBridge listening on localhost:7876
+2014-06-25 11:20:48,862 - nxtBridge listening on localhost:7876
+2014-06-25 11:21:01,014 - nxtBridge listening on localhost:7876
+2014-06-25 11:21:14,949 - nxtBridge listening on localhost:7876
+2014-06-25 11:22:09,422 - nxtBridge listening on localhost:7876
+2014-06-25 11:22:27,755 - nxtBridge listening on localhost:7876
+2014-06-25 11:25:48,992 - nxtBridge listening on localhost:7876
+2014-06-25 11:48:35,553 - nxtBridge listening on localhost:7876
+2014-06-25 11:48:42,726 - nxtBridge rcvd req: {'id': 1, 'params': [169658], 'method': 'getblockhash'} 
+2014-06-25 11:48:42,790 - nxtBridge returning: {"id": 1, "jsonrpc": "2.0", "result": "16718002954051001400"} 
+2014-06-25 11:48:47,734 - nxtBridge rcvd req: {'id': 1, 'params': [0], 'method': 'getblockhash'} 
+2014-06-25 11:48:47,785 - nxtBridge returning: {"id": 1, "jsonrpc": "2.0", "result": "2680262203532249785"} 
+2014-06-25 11:48:57,565 - nxtBridge rcvd req: {'id': 1, 'params': [], 'method': 'getinfo'} 
+2014-06-25 11:48:57,587 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "result": {"difficulty": "5812460572429498", "keypoololdest": 849870848, "connections": 1447, "version": "1.1.5", "protocolversion": "1.1.5", "blocks": 169730, "testnet": false, "timeoffset": 0, "balance": 0.0, "walletversion": "1.1.5", "paytxfee": 0.0, "errors": "", "proxy": "", "keypoolsize": 244497032}}' 
+2014-06-25 11:49:20,530 - nxtBridge rcvd req: {'id': 1, 'params': [], 'method': 'getblockcount'} 
+2014-06-25 11:49:20,549 - nxtBridge returning: {"id": 1, "jsonrpc": "2.0", "result": 169731} 
+2014-06-25 12:38:29,111 - nxtBridge listening on localhost:7876
+2014-06-25 12:39:27,009 - nxtBridge listening on localhost:7876
+2014-06-25 12:39:44,174 - nxtBridge listening on localhost:7876
+2014-06-25 12:41:00,616 - nxtBridge listening on localhost:7876
+2014-06-25 12:41:42,600 - nxtBridge listening on localhost:7876
+2014-06-25 12:44:12,829 - nxtBridge listening on localhost:7876
+2014-06-25 12:44:25,217 - nxtBridge rcvd req: {'params': [], 'id': 1, 'method': 'getblockcount'} 
+2014-06-25 12:44:25,238 - nxtBridge returning: {"result": 169752, "jsonrpc": "2.0", "id": 1} 
+2014-06-25 12:44:28,980 - nxtBridge rcvd req: {'params': [], 'id': 1, 'method': 'getblockcount'} 
+2014-06-25 12:44:29,002 - nxtBridge returning: {"result": 169752, "jsonrpc": "2.0", "id": 1} 
+2014-06-25 12:44:31,888 - nxtBridge rcvd req: {'params': [], 'id': 1, 'method': 'getinfo'} 
+2014-06-25 12:44:31,914 - nxtBridge returning: b'{"result": {"balance": 0.0, "connections": 1448, "errors": "", "proxy": "", "walletversion": "1.1.5", "paytxfee": 0.0, "keypoololdest": 824180736, "blocks": 169752, "version": "1.1.5", "testnet": false, "difficulty": "5813262225470035", "timeoffset": 0, "protocolversion": "1.1.5", "keypoolsize": 185290816}, "jsonrpc": "2.0", "id": 1}' 
+2014-06-25 12:44:34,189 - nxtBridge rcvd req: {'params': [], 'id': 1, 'method': 'getblockcount'} 
+2014-06-25 12:44:34,211 - nxtBridge returning: {"result": 169752, "jsonrpc": "2.0", "id": 1} 
+2014-06-25 12:44:37,343 - nxtBridge rcvd req: {'params': [0], 'id': 1, 'method': 'getblockhash'} 
+2014-06-25 12:44:37,390 - nxtBridge returning: {"result": "2680262203532249785", "jsonrpc": "2.0", "id": 1} 
+2014-06-25 12:44:45,852 - nxtBridge rcvd req: {'params': [169752], 'id': 1, 'method': 'getblockhash'} 
+2014-06-25 12:44:48,279 - nxtBridge rcvd req: {'params': [169751], 'id': 1, 'method': 'getblockhash'} 
+2014-06-25 12:44:48,338 - nxtBridge returning: {"result": "14297121651705217242", "jsonrpc": "2.0", "id": 1} 
+2014-06-25 13:07:54,355 - nxtBridge listening on localhost:7876
+2014-06-25 13:08:32,588 - nxtBridge listening on localhost:7876
+2014-06-25 13:11:10,631 - nxtBridge listening on localhost:7876
+2014-06-25 13:21:25,743 - nxtBridge listening on localhost:7876
+2014-06-25 13:27:06,681 - nxtBridge listening on localhost:7876
+2014-06-25 13:27:37,057 - nxtBridge listening on localhost:7876
+2014-06-25 13:29:02,679 - nxtBridge listening on localhost:7876
+2014-06-25 13:29:41,172 - nxtBridge listening on localhost:7876
+2014-06-25 13:30:43,202 - nxtBridge listening on localhost:7876
+2014-06-25 13:31:05,689 - nxtBridge listening on localhost:7876
+2014-06-25 13:32:13,152 - nxtBridge listening on localhost:7876
+2014-06-25 13:32:32,179 - nxtBridge listening on localhost:7876
+2014-06-25 13:32:49,137 - nxtBridge rcvd req: {'params': [169751], 'id': 1, 'method': 'getblockhash'} 
+2014-06-25 13:32:49,196 - nxtBridge returning: {"result": "14297121651705217242", "id": 1, "jsonrpc": "2.0"} 
+2014-06-25 13:54:40,741 - nxtBridge listening on localhost:7876
+2014-06-25 13:55:17,103 - nxtBridge listening on localhost:7876
+2014-06-25 13:55:25,766 - nxtBridge listening on localhost:7876
+2014-06-25 13:55:54,923 - nxtBridge listening on localhost:7876
+2014-06-25 13:56:13,514 - nxtBridge listening on localhost:7876
+2014-06-25 13:58:48,683 - nxtBridge listening on localhost:7876
+2014-06-25 14:00:03,153 - nxtBridge listening on localhost:7876
+2014-06-25 14:05:13,559 - nxtBridge rcvd req: {'method': 'getblockhash', 'id': 1, 'params': [169751]} 
+2014-06-25 14:05:13,635 - nxtBridge returning: {"result": "14297121651705217242", "jsonrpc": "2.0", "id": 1} 
+2014-06-25 14:05:17,040 - nxtBridge rcvd req: {'method': 'getblockhash', 'id': 1, 'params': [0]} 
+2014-06-25 14:05:17,082 - nxtBridge returning: {"result": "2680262203532249785", "jsonrpc": "2.0", "id": 1} 
+2014-06-25 14:05:26,328 - nxtBridge rcvd req: {'method': 'getbestblockhash', 'id': 1, 'params': []} 
+2014-06-25 14:05:26,356 - nxtBridge returning: {"result": "14364313358626752031", "jsonrpc": "2.0", "id": 1} 
+2014-06-25 14:05:40,209 - nxtBridge rcvd req: {'method': 'getblockhash', 'id': 1, 'params': [169803]} 
+2014-06-25 14:05:40,258 - nxtBridge returning: {"result": "14364313358626752031", "jsonrpc": "2.0", "id": 1} 
+2014-06-25 14:06:39,243 - nxtBridge rcvd req: {'method': 'getblockhash', 'id': 1, 'params': [169805]} 
+2014-06-25 14:06:39,292 - nxtBridge returning: {"result": "6765438102411892414", "jsonrpc": "2.0", "id": 1} 
+2014-06-25 14:07:03,994 - nxtBridge rcvd req: {'method': 'getinfo', 'id': 1, 'params': []} 
+2014-06-25 14:07:04,036 - nxtBridge returning: b'{"result": {"testnet": false, "keypoolsize": 247715560, "blocks": 169806, "proxy": "", "connections": 1449, "version": "1.1.5", "difficulty": "5814736571521935", "paytxfee": 0.0, "keypoololdest": 805306368, "walletversion": "1.1.5", "protocolversion": "1.1.5", "errors": "", "timeoffset": 0, "balance": 0.0}, "jsonrpc": "2.0", "id": 1}' 
+2014-06-25 14:07:08,641 - nxtBridge rcvd req: {'method': 'getblockhash', 'id': 1, 'params': [169805]} 
+2014-06-25 14:07:08,695 - nxtBridge returning: {"result": "6765438102411892414", "jsonrpc": "2.0", "id": 1} 
+2014-06-25 14:07:14,855 - nxtBridge rcvd req: {'method': 'getbestblockhash', 'id': 1, 'params': []} 
+2014-06-25 14:07:14,876 - nxtBridge returning: {"result": "6765438102411892414", "jsonrpc": "2.0", "id": 1} 
+2014-06-25 14:07:17,495 - nxtBridge rcvd req: {'method': 'getblockhash', 'id': 1, 'params': [169805]} 
+2014-06-25 14:07:17,546 - nxtBridge returning: {"result": "6765438102411892414", "jsonrpc": "2.0", "id": 1} 
+2014-06-25 14:08:04,971 - nxtBridge rcvd req: {'method': 'getblockhash', 'id': 1, 'params': [169805]} 
+2014-06-25 14:08:05,020 - nxtBridge returning: {"result": "6765438102411892414", "jsonrpc": "2.0", "id": 1} 
+2014-06-25 14:08:09,590 - nxtBridge rcvd req: {'method': 'getblockhash', 'id': 1, 'params': [169805]} 
+2014-06-25 14:08:09,635 - nxtBridge returning: {"result": "6765438102411892414", "jsonrpc": "2.0", "id": 1} 
+2014-06-25 14:09:35,197 - nxtBridge rcvd req: {'method': 'getblockhash', 'id': 1, 'params': [169805]} 
+2014-06-25 14:09:35,247 - nxtBridge returning: {"result": "6765438102411892414", "jsonrpc": "2.0", "id": 1} 
+2014-06-25 14:43:58,947 - nxtBridge rcvd req: {'method': 'getblockhash', 'id': 1, 'params': [169823]} 
+2014-06-25 14:43:58,997 - nxtBridge returning: {"result": "1956799928884199257", "jsonrpc": "2.0", "id": 1} 
+2014-06-25 15:42:49,447 - nxtBridge listening on localhost:7876

@@ -203,9 +203,10 @@ TESTNET:
 
    #     self.uc_bridge = nxtUC_Bridge.UC_Bridge1(self, self.qPool, host, port, self.bridgeLogger, self.consLogger, DB  )
        
-    def __init__(self, sessMan,qPool=None, host = 'localhost', port = '6876',bridgeLogger=None , consLogger=None, DB=None  ):
+    def __init__(self, sessMan, host = 'localhost', port = '6876',bridgeLogger=None , consLogger=None, DB=None  ):
         super(UC_Bridge1   , self   ).__init__(sessMan)
         self.sessMan = sessMan
+        self.qPool = sessMan.qPool
         self.meta = {'caller':'Bridge1'}
         defPass17 = '0'                     #### THIS GOES TO SESSMAN- WALLET!
         acctSecKey = defPass17                      #### THIS GOES TO SESSMAN- WALLET!
@@ -214,7 +215,7 @@ TESTNET:
         
         #        lg.info('nxtBridge listening on host %s : port %s', host, port)
         
-        self.mm = BridgeThread(qPool, host  , port ,  bridgeLogger,  consLogger ,DB )
+        self.mm = BridgeThread( self.qPool, host  , port ,  bridgeLogger,  consLogger ,DB )
          
          
          
@@ -229,21 +230,19 @@ class BridgeThread(QObject):
         # check : is this the same as calling super(BridgeThread, etc) ???????
         super(QObject, self).__init__( parent = None)
         
-#        self.qPool=QtCore.QThreadPool.globalInstance()
-#        self.qPool.setMaxThreadCount(2500) # robustness
+        #        self.qPool=QtCore.QThreadPool.globalInstance()
+        #        self.qPool.setMaxThreadCount(2500) # robustness
         self.DB=DB
         self.qPool = qPool
         self.host = host
         self.port = port
         self.bridgeLogger = bridgeLogger
         self.consLogger = consLogger
-  
-
+         
     
     
     @pyqtSlot() # 61
     def jsonServ_Slot(self, ):
-        
         
         self.json_Runner = JSON_Runner( self.host, self.port, self.bridgeLogger, self.consLogger , self.qPool, self.DB) # json_Emitter, self to THIS !!!!!!
         # DB(,)        
@@ -616,7 +615,6 @@ class JSON_Runner(QtCore.QRunnable):
         curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getinfo", "params": { "": "","":""}, "id": 7}' http://localhost:7879/jsonrpc
 
         """
-        #print("~~~~~~~~>" + str( self.qPool.activeThreadCount() ))    # this line is  for timing the delay in the # QThread to wait for the proper delay time
         # no self. all we know here MUST be supplied in kwargs.
 
         payload = { "requestType" : "getState" } #getTime"   }
@@ -626,7 +624,6 @@ class JSON_Runner(QtCore.QRunnable):
         preppedReq = NxtReq.prepare()
         response = session.send(preppedReq)
         NxtResp = response.json()
-        #print(str(type(NxtResp))) # dct of cpurse
         VERSION = NxtResp['version']
         HEIGHT = NxtResp['numberOfBlocks']
         NUMPEERS = NxtResp['numberOfPeers']
@@ -1306,8 +1303,7 @@ class JSON_Runner(QtCore.QRunnable):
             isForging = False
         elif "remaining" in NxtResp2.keys():
             isForging = True
-  
-
+   
 
         payload = { "requestType" : "getAccountPublicKey" } #getTime"   }
         NxtApi = {}
@@ -1370,8 +1366,15 @@ class JSON_Runner(QtCore.QRunnable):
         preppedReq = NxtReq.prepare()
         response = session.send(preppedReq)
         NxtResp = response.json()
+        
+        # NB: since block height and block count differ by one, the number of blocks is always larger by ONE than the height of the highest block.
+        # However, bitcoind returns a correct blockhash to 'getblockhash' when given the blockcount, NOT the height of the highest block.
+        # I *SUSPECT* that bitcoind amends this internally. In this version, I do not do it in this way.
+        # So when having the numberOfBlocks of NXT, the blockAddress of the highest block is still numberOfBlocks MINUS ONE!
+        # This is more consistent with the database and less source of confusion.         
+        
         try:
-            numberOfBlocks = NxtResp['numberOfBlocks']
+            numberOfBlocks = int(NxtResp['numberOfBlocks']) # CHECK THIS OUT!!! - 1
         except:
             numberOfBlocks = 'errorDescription'
         Nxt2Btc = {}
@@ -1382,6 +1385,7 @@ class JSON_Runner(QtCore.QRunnable):
 
         #"numberOfBlocks": 127310,
 
+# NB: bitcoin: genesis: Hight
 
     @dispatcher.add_method
     def getbestblockhash( **kwargs):
@@ -1407,19 +1411,13 @@ class JSON_Runner(QtCore.QRunnable):
             lastBlock = NxtResp['lastBlock']
         except:
             numberOfBlocks = 'errorDescription'
-
-                            
-                            
+            
         # special: double call: now getBlock
         payload = { "requestType" : "getBlock" }  
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
         NxtApi['block'] =  lastBlock # here we translate BTC params to NXT params
-
-
-        print(lastBlock)  # + " ----------_" +str(NxtResp))
-                             
-
+        #print(lastBlock)  # + " ----------_" +str(NxtResp))
         Nxt2Btc = {}
         Nxt2Btc =  {
                 "lastBlock" : lastBlock,
@@ -1433,7 +1431,7 @@ class JSON_Runner(QtCore.QRunnable):
     @dispatcher.add_method
     def getblockhash( **kwargs):
         blockAddress = kwargs['blockAddress'] 
-        print("getblockhash ----------" + str(kwargs))
+        #print("getblockhash ----------" + str(kwargs))
         Nxt2Btc =  {
                     "blockAddress" : blockAddress,
                     }
@@ -1529,7 +1527,17 @@ class JSON_Runner(QtCore.QRunnable):
         #                    "__unavailableInBitcoin5":  "totalFeeNQT" 
         #                    }
          
-         
+        if 'previousBlock' in NxtResp.keys(): # the genesis block does not have a previousBlock!
+            prevBlock = NxtResp['previousBlock']
+        else:
+            prevBlock = '0'
+        if 'nextBlock' in NxtResp.keys(): # the latest block does not have a nextBlock!
+            nextBlock = NxtResp['nextBlock']
+        else:
+            nextBlock = '0'
+            
+            
+            
         Nxt2Btc = {
                     "hash" : block,
                     "confirmations" : 1,
@@ -1543,8 +1551,8 @@ class JSON_Runner(QtCore.QRunnable):
                     "bits" : NxtResp['generator'],
                     "difficulty" : NxtResp['baseTarget'],
                     "chainwork" : NxtResp['payloadHash'],
-                    "previousblockhash" : NxtResp['previousBlock'],
-                    "nextblockhash" : NxtResp['nextBlock'],
+                    "previousblockhash" : prevBlock,
+                    "nextblockhash" : nextBlock,
                       
         
         }
@@ -1654,42 +1662,22 @@ This is needs to be corrected here.
         def parse_getblock(jsonParms):
             parmsDi = {} 
             block = str(jsonParms[0])
-            print(str(block)  +" - " + str(type(block)))
             parmsDi = {'block':block} 
-            
-            
             return parmsDi
             
         def parse_getblockhash(jsonParms):
-            #print(str(jsonParms)+ "2" )
-            
             parmsDi = {} 
             blockHeight = str(jsonParms[0])
-            
-            # call INTO dbhere, then call into APISIGS
-
-            #self.blockDBConn, 
-            print( str(blockHeight) +" - " + str(type(blockHeight)  )     )
-
-
-            # test only.
             self.blockHeightDB = "nxtBlockDB.db"
             self.blockDBConn = sq.connect(self.blockHeightDB)
             self.blockDBCur = self.blockDBConn.cursor()
             self.blockDBCur = self.blockDBConn.cursor()
             self.blockDBCur.execute("SELECT blockAddr from   nxtBlockH_to_Addr WHERE height = ?   ", ( blockHeight, )  )            
-            bh=self.blockDBCur.fetchone()
-            print(str(bh) + " - " + str(type(bh)))
-            blockAddress = bh[0]
+            blockAddress_from_blockHeight = self.blockDBCur.fetchone()
+            blockAddress = blockAddress_from_blockHeight[0]
             parmsDi = {'blockAddress':blockAddress} 
-             
-            
             return parmsDi
 
-
-
-
-            
 
         def parse_getbalance(jsonParms):
             account = str(jsonParms[0])
@@ -1943,15 +1931,10 @@ This is needs to be corrected here.
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
-            
             self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
 
-        
         elif bitcoind_method == 'getconnectioncount':
-            print(str(response))
-            print(str(response.response))
-            
             parseResponse = eval(response.response[0])
             # parseResponse --> {'result': {'ACCOUNT': 2547600000000.0}, 'id': 1, 'jsonrpc': '2.0'}
             resultJson = parseResponse['result']
@@ -1960,7 +1943,6 @@ This is needs to be corrected here.
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
-
             self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
 
@@ -2012,11 +1994,7 @@ This is needs to be corrected here.
             self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             return response            
             
-            
-            
-            
-
-
+             
 
       
         elif bitcoind_method == 'getblockcount':
@@ -2027,7 +2005,6 @@ This is needs to be corrected here.
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
-
             self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
 
@@ -2042,18 +2019,13 @@ This is needs to be corrected here.
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
-
             self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
-
-
-
 
       
         elif bitcoind_method == 'getblock':
             # this format is used when we pass through a nice dict as json reply            
             self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
-            
             # return a dict directly as dict, no need to make a fake list from it
             #self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
@@ -2062,12 +2034,8 @@ This is needs to be corrected here.
 
         elif bitcoind_method == 'getblockhash':
             # this is the ugly stuff where we butcher the dict, and re-configure a synthetic json response object
-            print(str(response))
-            print(str(response.response))
             
             parseResponse = eval(response.response[0])
-            
-            print(str(parseResponse))
             resultJson = parseResponse['result']
             blockAddress  = resultJson['blockAddress']
             parseResponse['result'] = blockAddress
@@ -2078,34 +2046,23 @@ This is needs to be corrected here.
             self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
             
-            
-
-
+             
+             # BITCOIN SLOP: GETBLOCKCOUNT IS ONE TOO SMALL, COZ IT IS THE HEIGHT OF THE LATEST BLOCK THAT IS RETURNED,
+             # AND THAT IS ONE LESS THAN THE BLOCKCOUNT, BEAUSE GENESIS IS HEIGHT = ZERO!
 
         
         else:
             parmsDi = {'throwException':'here'}
         
-         
-
-
-
-
-
-
+          
 
         return   0 # shoulnd't get here
              
-
  
- 
- 
- 
-
 
 
     def run(self,):
-        run_simple('localhost', 7879, self.application,  )
+        run_simple('localhost', 7879, self.application,  ) # WERKZEUG !!!!
  
  
  
@@ -2168,7 +2125,7 @@ This is needs to be corrected here.
 #    "generator": "13442060847498652789"
 #}
 
-#getBlock:     2680262203532249785 GENESIS H=0
+#getBlock:     2680262203532249785 NXT GENESIS H=0
 #block:	
 #
 #{
@@ -2349,148 +2306,4 @@ This is needs to be corrected here.
 
 
 
-
-
-
-
-
-
-
-
-      # OBSOL
-#
-#        self.bridgeLogger = lg.getLogger('bridgeLogger')
-#        self.bridgeLogger.setLevel(lg.INFO)        
-#        fh=lg.FileHandler('bridge.log')
-#        fh.setLevel(lg.INFO)
-#        fter = lg.Formatter('%(asctime)s - %(message)s')
-#        fh.setFormatter(fter)
-#        self.bridgeLogger.addHandler(fh)
-#        self.bridgeLogger.info('nxtBridge listening on %s:%s', host, port)
-#        #        
-#        self.consLogger = lg.getLogger('consoleDebugger')
-#        self.consLogger.setLevel(lg.INFO)        
-#        ch = lg.StreamHandler()
-#        ch.setLevel(lg.DEBUG)
-#        ch.setFormatter(fh)
-#        self.consLogger.addHandler(ch)
-##        
-#        self.init_BlockDB( host, port)
-#
-#    
-#    # even the db connection can be local in this function !!!!!!!!!!!!!!!!!!!!!    
-#    
-#    def init_BlockDB(self, host, port):
-#        
-#        self.getBlock= {
-#                                        "requestType" : "getBlock" , \
-#                                        "block" : "BLOCKADDRESS"
-#                                        }
-#        self.getState= {
-#                                        "requestType" : "getState"
-#                                        }
-#
-#        self.blockHeightDB = "nxtBlockDB.db"
-#
-#        self.blockDBConn = sq.connect(self.blockHeightDB)
-#        
-#        self.blockDBCur = self.blockDBConn.cursor()
-#
-#        try:
-#            self.blockDBCur.execute("CREATE TABLE nxtBlockH_to_Addr(height INT, blockAddr TEXT)")
-#            self.blockDBCur.execute("INSERT INTO nxtBlockH_to_Addr(height, blockAddr) VALUES(?,?)",(  0 , "2680262203532249785")) # genesis block
-#            self.blockDBConn.commit()            
-#            # genesis Block at height 0
-#        except:
-#            print("block DB table already exists")
-#
-#        self.blockDBCur.execute("SELECT MAX(height)  from  nxtBlockH_to_Addr ")
-#        
-#        # maybe use this only once here and destroy again!!
-#        session1 = Session()
-#        headers = {'content-type': 'application/json'}
-#        sessUrl = 'http://' + host + ':' + port + '/nxt?' 
-#        #global NxtReq
-#        NxtReq = Req( method='POST', url = sessUrl, params = {}, headers = headers        )
-#        
-#        #########################################################
-#        NxtReq.params = self.getState         # 1 - getState 
-#        preppedReq = NxtReq.prepare()
-#        response = session1.send(preppedReq)
-#        NxtResp = response.json()
-#        #########################################################
-#        highBlockAddrBC = NxtResp['lastBlock']
-#        highBlockBC = NxtResp['numberOfBlocks'] - 1 # GENESIS H=0 
-#
-#        self.blockDBCur.execute("select * from nxtBlockH_to_Addr;")
-#        
-#        self.blockDBCur.execute("SELECT MAX(height)  from  nxtBlockH_to_Addr ")
-#        fetchHighestBlInDB = self.blockDBCur.fetchone()[0]  #all()  
-#
-#        self.consLogger.info('init blockHeightDB. DBhigh, BChigh : %s, %s ', str(fetchHighestBlInDB) , str(highBlockBC) )
-#        
-#        highBlockDB = fetchHighestBlInDB  # SHOULD BE INT ALREADY!highBlockDB = int(fetchHighestBlInDB)
-#        
-#        self.blockDBCur.execute("SELECT blockAddr from   nxtBlockH_to_Addr WHERE height = ?   ", (highBlockDB,))
-#        highestBlockAddrDB = self.blockDBCur.fetchone() #all()  
-#
-#        highBlockAddrDB = str(highestBlockAddrDB[0]) # ok
-#        
-#        if highBlockDB >= highBlockBC :
-#            
-#            self.consLogger.info('blockHeightDB is complete!')
-#            
-#            return 0
-#        
-#        
-#        self.getBlock['block'] = highBlockAddrDB
-#        # this is the highest block currently in blockDB            
-#        #########################################################
-#        NxtReq.params = self.getBlock               # 2 - getBlock
-#        preppedReq = NxtReq.prepare()
-#        response = session1.send(preppedReq)
-#        NxtResp = response.json()
-#        #########################################################        
-#        
-#        nextBlock = str(NxtResp['nextBlock'])
-#        self.consLogger.info('fetching new blocks, starting with: %s ', str(nextBlock)   )
-#        #print( str(type(NxtResp['nextBlock'])))  
-#         
-#        logIncr = 1000
-#        # numberOfBlocks = height+1 genesis height =0
-#        
-#        while highBlockDB < highBlockBC:
-#
-#            self.getBlock['block'] = nextBlock
-#            #########################################################
-#            NxtReq.params = self.getBlock                  # 2 - getBlock
-#            preppedReq = NxtReq.prepare()
-#            response = session1.send(preppedReq)
-#            NxtResp = response.json()
-#            #########################################################
-#            
-#            highBlockDB = int(NxtResp['height'])
-#            
-#            blockAddrIntoDB=str(nextBlock) 
-#            
-#            self.blockDBCur.execute("INSERT INTO nxtBlockH_to_Addr(height, blockAddr) VALUES(?,?)",( highBlockDB, blockAddrIntoDB))
-#            #self.blockDBConn.commit() #probably better onl ONCE after the loop!
-#
-#            if opmod( highBlockDB , logIncr) == 0:
-#                
-#                self.consLogger.info('fetching new blocks: DBhigh, BChigh : %s, %s ', str(highBlockDB) , blockAddrIntoDB )
-#            
-#            if 'nextBlock' in NxtResp.keys():
-#                nextBlock = str(NxtResp['nextBlock'])
-#            else:
-#                break
-#                    
-#        self.blockDBConn.commit()
-#        
-#        self.consLogger.info('blockHeightDB is complete!')
-#            
-#
-#                            
- 
-       
        

@@ -28,10 +28,7 @@ class nxtUseCaseMeta(QObject):
     The useCaseClass is tho ONLY one that talks to the api.    
 
      """
-    
     apiCalls = nxtQs() # static! dict of prototypes to be filled with vals for apiReq
-     
-    
     def __init__(self,  sessMan  ): # 
         super(nxtUseCaseMeta, self).__init__()
         self.nxtApi = sessMan.nxtApi  # there is only ONE apiSigs instance, and that is in the sessMan.
@@ -42,7 +39,6 @@ class BlockDB_Handler(nxtUseCaseMeta): # need to talk to NRS, hence UC derived
     """ 2680262203532249785 nxt genesis block
     This is a container and manager object for the QThrerasd that checks the blockchain for new blocks."""
    
-    
     def __init__(self, sessMan,  host, port,    consLogger,   ):
         # check : is this the same as calling super(BridgeThread, etc) ???????
         super(nxtUseCaseMeta, self).__init__( parent = None)
@@ -50,40 +46,16 @@ class BlockDB_Handler(nxtUseCaseMeta): # need to talk to NRS, hence UC derived
         self.qPool = sessMan.qPool # qPool is already in sessMan!
         #self.DBLogger = DBLogger
         self.consLogger = consLogger
-
-
         self.sessionBlockDB = Session()
         headers = {'content-type': 'application/json'}
         sessUrl = 'http://' + host + ':' + port + '/nxt?' 
-
-        #    expiryTimeout ()     const
-
         self.init_BlockDB(host, port,) # the init of the sqlite DB is not supposed to be threaded!
-        
-        
         DB = ( self.blockDBConn, self.blockDBCur)
         # the QTHread dual bundle: Emitter+Runner
         self.blockDB_Emitter = BlockDB_Emitter(   self.consLogger )
-        
         self.blockDBb_Runner = BlockDB_Runner( self.blockDB_Emitter, self.sessionBlockDB, self.sessMan, DB, self.NxtReq, self.consLogger ,  ) #self.DBLogger, ) 
         self.blockDBb_Runner.setAutoDelete(False) 
-        
-        # NB: this can be done WITHOUT QTHREADPOOL ALSO!!!
-
-        # self.blockDBb_Runner.run()
-
-#    expiryTimeout () const
-
         self.qPool.start(self.blockDBb_Runner)
-        
-        
-        
-        #  # housekeeping of the threads may have to be taken care of
-    
-        # SET QTHREAD PARMS HERE ! autodeleta false etc
-        #self.qPool.start(self.db_Runner)
-
-
 
     def init_BlockDB(self, host, port):
         
@@ -103,7 +75,6 @@ class BlockDB_Handler(nxtUseCaseMeta): # need to talk to NRS, hence UC derived
         headers = {'content-type': 'application/json'}
         sessUrl = 'http://' + host + ':' + port + '/nxt?' 
         self.NxtReq = Req( method='POST', url = sessUrl, params = {}, headers = headers        )
-        
         #########################################################
         self.NxtReq.params = self.getState         # 1 - getState 
         preppedReq = self.NxtReq.prepare()
@@ -114,9 +85,7 @@ class BlockDB_Handler(nxtUseCaseMeta): # need to talk to NRS, hence UC derived
         highBlockBC = NxtResp['numberOfBlocks'] - 1 # GENESIS H=0 
         self.blockDBCur.execute("SELECT MAX(height)  from  nxtBlockH_to_Addr ")
         highBlockDB = self.blockDBCur.fetchone()[0]  #all()  
-
         self.consLogger.info('init blockHeightDB. DBhigh, BChigh : %s, %s ', str(highBlockDB) , str(highBlockBC) )
- 
         if highBlockDB >= highBlockBC :
             self.consLogger.info('blockHeightDB is complete!')
             return 0
@@ -125,7 +94,6 @@ class BlockDB_Handler(nxtUseCaseMeta): # need to talk to NRS, hence UC derived
         highestBlockAddrDB = self.blockDBCur.fetchone() #all()  
         highBlockAddrDB = str(highestBlockAddrDB[0]) # ok
         self.getBlock['block'] = highBlockAddrDB
-        
         # this is the highest block currently in blockDB            
         #########################################################
         self.NxtReq.params = self.getBlock               # 2 - getBlock
@@ -133,10 +101,8 @@ class BlockDB_Handler(nxtUseCaseMeta): # need to talk to NRS, hence UC derived
         response = self.sessionBlockDB.send(preppedReq)
         NxtResp = response.json()
         #########################################################        
-        
         nextBlock = str(NxtResp['nextBlock'])
         self.consLogger.info('fetching new blocks, starting with: %s ', str(nextBlock)   )
-         
         logIncr = 1000
         # numberOfBlocks = height+1 genesis height =0
         while highBlockDB < highBlockBC:
@@ -166,10 +132,7 @@ class BlockDB_Emitter(QObject):
     
     def __init__(self,     consLogger = None  ,  ): #emitter, 
         super(BlockDB_Emitter, self).__init__()
-        
         self.conLogger = consLogger
-         
-         
          
         
 class BlockDB_Runner(QtCore.QRunnable):
@@ -182,7 +145,6 @@ class BlockDB_Runner(QtCore.QRunnable):
         self.consLogger = consLogger
         self.getBlock= {"requestType" : "getBlock" , "block" : "BLOCKADDRESS" }
         self.getState= {"requestType" : "getState"}
-        
         self.sessionBlockDB = session
         self.blockDBConn = DB[0]
         self.blockDBCur = DB[1]
@@ -190,10 +152,6 @@ class BlockDB_Runner(QtCore.QRunnable):
         self.blockDB_pollTime = 25000
         self.blockDBTimer = QTimer()
         QObject.connect(self.blockDBTimer, SIGNAL("timeout()"),  self.blockDBTimer_CB)
-        #
-        # also prep the two requests here: getState and getBlock
-        #
-
         
     def run(self,):
         self.blockDBTimer.start(self.blockDB_pollTime)
@@ -201,8 +159,6 @@ class BlockDB_Runner(QtCore.QRunnable):
     def blockDBTimer_CB(self,):
         
         self.consLogger.info('fetching new blocks: DBhigh, BChigh')# : %s, %s ', str(highBlockDB) , blockAddrIntoDB )
-        
-        
         #########################################################
         self.NxtReq.params = self.getState         # 1 - getState 
         preppedReq = self.NxtReq.prepare()
@@ -213,13 +169,10 @@ class BlockDB_Runner(QtCore.QRunnable):
         highBlockBC = NxtResp['numberOfBlocks'] - 1 # GENESIS H=0 
         self.blockDBCur.execute("SELECT MAX(height)  from  nxtBlockH_to_Addr ")
         highBlockDB = self.blockDBCur.fetchone()[0]  #all()  
-
         self.consLogger.info('init blockHeightDB. DBhigh, BChigh : %s, %s ', str(highBlockDB) , str(highBlockBC) )
- 
         if highBlockDB >= highBlockBC :
             self.consLogger.info('blockHeightDB is complete!')
             return 0
-
         self.consLogger.info('getState : %s  ', str(NxtResp) ,   )
             
         # the highest block is already in the DB, and we fecth it from NRS again to get 'nextBlock'!
@@ -227,7 +180,6 @@ class BlockDB_Runner(QtCore.QRunnable):
         highestBlockAddrDB = self.blockDBCur.fetchone() #all()  
         highBlockAddrDB = str(highestBlockAddrDB[0]) # ok
         self.getBlock['block'] = highBlockAddrDB
-        
         # this is the highest block currently in blockDB            
         #########################################################
         self.NxtReq.params = self.getBlock               # 2 - getBlock
@@ -235,10 +187,8 @@ class BlockDB_Runner(QtCore.QRunnable):
         response = self.sessionBlockDB.send(preppedReq)
         NxtResp = response.json()
         #########################################################        
-        
         nextBlock = str(NxtResp['nextBlock'])
         self.consLogger.info('fetching new blocks, starting with: %s ', str(nextBlock)   )
-         
         logIncr = 10
         # numberOfBlocks = height+1 genesis height =0
         while highBlockDB < highBlockBC:
@@ -258,7 +208,6 @@ class BlockDB_Runner(QtCore.QRunnable):
                 nextBlock = str(NxtResp['nextBlock'])
             else:
                 break
-            
         self.blockDBConn.commit()
         self.consLogger.info('blockHeightDB is complete!')
            

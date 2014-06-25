@@ -229,9 +229,6 @@ class BridgeThread(QObject):
     def __init__(self, qPool, host, port, bridgeLogger, consLogger, DB ):
         # check : is this the same as calling super(BridgeThread, etc) ???????
         super(QObject, self).__init__( parent = None)
-        
-        #        self.qPool=QtCore.QThreadPool.globalInstance()
-        #        self.qPool.setMaxThreadCount(2500) # robustness
         self.DB=DB
         self.qPool = qPool
         self.host = host
@@ -245,7 +242,7 @@ class BridgeThread(QObject):
     def jsonServ_Slot(self, ):
         
         self.json_Runner = JSON_Runner( self.host, self.port, self.bridgeLogger, self.consLogger , self.qPool, self.DB) # json_Emitter, self to THIS !!!!!!
-        # DB(,)        
+        self.json_Runner.setAutoDelete(False) 
         self.qPool.start(self.json_Runner)
     
 
@@ -307,68 +304,37 @@ class JSON_Runner(QtCore.QRunnable):
 #
 # Function Calls implemented below
 # Numbers as per appeearance in listing of bitcoind help 
-  
-# 14 getbalance
-  
+   
+
+# 14 getbalance               <.-.-.-. access wallet: account - addrress mapping
 # 21 getconnectioncount
 # 25 getinfo 
 
-# 33 getreceivedbyaccount
-  
-# 34 getreceivedbyaddress
+# 33 getreceivedbyaccount    <.-.-.-. access wallet: iterate over ALL TXs in NXT acct(s) and sum the INCOMING NXT TXs
+# 34 getreceivedbyaddress    <.-.-.-. access wallet: iterate over ALL TXs in NXT acct and sum the INCOMING NXT TXs
 
 # 35 gettransaction
-
-# 52 sendfrom
-
+# 52 sendfrom                    <.-.-.-. access wallet: simply map acct->addr. ultimatley sendfrom sends from address
 # 58 settxfee
-
 # 63 validateaddress
 
 # 15 getbestblockhash 
 # 16 getblock          
 # 17 getblockcount   
+# 18 getblockhash      <------- db: height-blockaddress OK!   
 
 
-# 18 getblockhash ::: difficult, but not asked for yet
-
-
-# https://nxtforum.org/index.php?topic=1589.msg40038#msg40038
 # missing
 
-#getnewaddress
+# getnewaddress              <.-.-.-. access wallet
 
-#sendtoaddress
+# sendtoaddress                  <.-.-.-. access wallet
 
-#listunspent
+# listunspent             <.-.-.-. access wallet
 
-#listsinceblock
+# listsinceblock
 
-## ok
-#
-#
-
-
-
-
-# Here I can see implemented functions:
-
-# 14 getbalance
-# 21 getconnectioncount
-# 25 getinfo
-# 33 getreceivedbyaccount
-# 34 getreceivedbyaddress
-# 35 gettransaction
-# 52 sendfrom
-# 58 settxfee
-# 63 validateaddress
-
-# In order to implement NXT to our exchange we need 2 more functions:
-
-#  "listtransactions" and "sendtoaddress"
-
-             
-
+ 
   
 #######################
 #######################
@@ -814,9 +780,7 @@ class JSON_Runner(QtCore.QRunnable):
                     }
      
         return Nxt2Btc  
-        
          
-        
         
       
 
@@ -1369,8 +1333,8 @@ class JSON_Runner(QtCore.QRunnable):
         
         # NB: since block height and block count differ by one, the number of blocks is always larger by ONE than the height of the highest block.
         # However, bitcoind returns a correct blockhash to 'getblockhash' when given the blockcount, NOT the height of the highest block.
-        # I *SUSPECT* that bitcoind amends this internally. In this version, I do not do it in this way.
-        # So when having the numberOfBlocks of NXT, the blockAddress of the highest block is still numberOfBlocks MINUS ONE!
+        # I *SUSPECT* that bitcoind amends this internally. 
+        # So when having the numberOfBlocks of NXT, the blockHeight of the highest block is still numberOfBlocks MINUS ONE!
         # This is more consistent with the database and less source of confusion.         
         
         try:
@@ -1417,7 +1381,6 @@ class JSON_Runner(QtCore.QRunnable):
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
         NxtApi['block'] =  lastBlock # here we translate BTC params to NXT params
-        #print(lastBlock)  # + " ----------_" +str(NxtResp))
         Nxt2Btc = {}
         Nxt2Btc =  {
                 "lastBlock" : lastBlock,
@@ -1553,28 +1516,18 @@ class JSON_Runner(QtCore.QRunnable):
                     "chainwork" : NxtResp['payloadHash'],
                     "previousblockhash" : prevBlock,
                     "nextblockhash" : nextBlock,
-                      
-        
-        }
-        
-
-
+                    }
+         
         return Nxt2Btc  
 
- 
- 
-
- 
+  
  
      # this is a method that is NOT routed through dispatcher and it can beused also!!!
     def test(self):
         pass #print("okokkook")
         return "ok3"
  
- 
- 
- 
- 
+  
  
 
     @Request.application
@@ -1592,38 +1545,9 @@ class JSON_Runner(QtCore.QRunnable):
              7 NXT API	
              8 NXT format	
              9 Implementation Rules How to map a NXT API return to a XXXCOIND API return
-
-
-Note: using bitcoind as a relay to send jsonrpc to another server with a whitespace separated list apparently produces not quite well formed json requests.
-./bitcoind -rpcport=7879 getbalance 2865886802744497404 1
-
-This is needs to be corrected here.
-
-
-# 14 getbalance
-# 21 getconnectioncount
-# 25 getinfo 
-# 33 getreceivedbyaccount
-# 34 getreceivedbyaddress
-# 35 gettransaction
-# 52 sendfrom
-# 58 settxfee
-# 63 validateaddress
-
-
+ 
             """
-
-
-
-        #print(str(self))
-        #ok = self.test() # 
-        #print(ok)
-        
-        #<nxtPwt.nxtUC_Bridge.JSON_Runner object at 0x7fcb351e8048>
-
-
-        # print threadcountz>!!! keep track of threadpool objects! just to make sure!
-        
+ 
         ############################################################
         #
         # bitcoind seems to send NOT well formed jsonrpc calls!       
@@ -1651,6 +1575,16 @@ This is needs to be corrected here.
 
         # argument extraction from list here in these local functions.
 
+
+        #print(str(self))
+        #ok = self.test() # 
+        #print(ok)
+        
+        #<nxtPwt.nxtUC_Bridge.JSON_Runner object at 0x7fcb351e8048>
+
+
+        # print threadcountz>!!! keep track of threadpool objects! just to make sure!
+        
         def parse_getblockcount(jsonParms):
             parmsDi = {} 
             return parmsDi
@@ -1677,8 +1611,7 @@ This is needs to be corrected here.
             blockAddress = blockAddress_from_blockHeight[0]
             parmsDi = {'blockAddress':blockAddress} 
             return parmsDi
-
-
+ 
         def parse_getbalance(jsonParms):
             account = str(jsonParms[0])
             minconf = str(jsonParms[1])
@@ -1693,9 +1626,7 @@ This is needs to be corrected here.
         def parse_getinfo(jsonParms):
             parmsDi = {} 
             return parmsDi
-            
-        
-        
+              
         def parse_getreceivedbyaccount(jsonParms):
             parmsDi = {} 
             account = str(jsonParms[0])
@@ -1756,11 +1687,9 @@ This is needs to be corrected here.
             
             return parmsDi
             
-            
-            
-        
-        
-        
+             
+        ##################################################
+        #
         # 1 extract details from the incoming request        
         
         
@@ -1823,8 +1752,7 @@ This is needs to be corrected here.
             # we need this to determine the params extraction method for params in a list.
 
             bitcoind_method = jsonEval['method']
-            
-
+             
             if bitcoind_method == 'getbalance':
                 parmsDi = parse_getbalance(jsonParms)
 
@@ -1840,14 +1768,7 @@ This is needs to be corrected here.
                 
             elif bitcoind_method == 'getblockhash':
                 parmsDi = parse_getblockhash(jsonParms)
-                
-                #print(str(parmsdi))
-                
-
-
-             
-             
-             
+                 ############################
              
              
             elif bitcoind_method == 'getconnectioncount':
@@ -1873,17 +1794,12 @@ This is needs to be corrected here.
     
             elif bitcoind_method == 'validateaddress':
                 parmsDi = parse_validateaddress(jsonParms)
-
  
-
             else:
                 parmsDi = {'throwException':'here'}
-    
-    
-    
-    
-    
-    
+      
+        ##################################################
+        #
         # 3 here we forcible re-insert our custom made request into the request object
                    
             jsonEval['params'] = parmsDi
@@ -1901,11 +1817,10 @@ This is needs to be corrected here.
             jsonEval['params'] = jsonParms
             jsonStr = jsonRaw
             
+             
             
-            
-            
-            
-            
+        ##################################################
+        #
         # 4 send request to the NRS      
             
         responseFromNxt = JSONRPCResponseManager.handle(jsonStr, dispatcher)
@@ -1993,10 +1908,7 @@ This is needs to be corrected here.
 
             self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             return response            
-            
-             
-
-      
+           
         elif bitcoind_method == 'getblockcount':
             parseResponse = eval(response.response[0])
             resultJson = parseResponse['result']
@@ -2007,9 +1919,7 @@ This is needs to be corrected here.
             response.response[0] = parseResponse
             self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
-
-
-
+ 
         elif bitcoind_method == 'getbestblockhash':
             # this is the ugly stuff where we butcher the dict, and re-configure a synthetic json response object
             parseResponse = eval(response.response[0])
@@ -2021,20 +1931,16 @@ This is needs to be corrected here.
             response.response[0] = parseResponse
             self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
-
-      
+ 
         elif bitcoind_method == 'getblock':
             # this format is used when we pass through a nice dict as json reply            
             self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             # return a dict directly as dict, no need to make a fake list from it
             #self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
-
-
-
+ 
         elif bitcoind_method == 'getblockhash':
             # this is the ugly stuff where we butcher the dict, and re-configure a synthetic json response object
-            
             parseResponse = eval(response.response[0])
             resultJson = parseResponse['result']
             blockAddress  = resultJson['blockAddress']
@@ -2042,29 +1948,21 @@ This is needs to be corrected here.
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
-
             self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
-            
-             
              # BITCOIN SLOP: GETBLOCKCOUNT IS ONE TOO SMALL, COZ IT IS THE HEIGHT OF THE LATEST BLOCK THAT IS RETURNED,
              # AND THAT IS ONE LESS THAN THE BLOCKCOUNT, BEAUSE GENESIS IS HEIGHT = ZERO!
 
-        
         else:
             parmsDi = {'throwException':'here'}
         
           
 
         return   0 # shoulnd't get here
-             
- 
-
-
+              
     def run(self,):
         run_simple('localhost', 7879, self.application,  ) # WERKZEUG !!!!
- 
- 
+  
  
 # 
 # getState:
@@ -2131,77 +2029,7 @@ This is needs to be corrected here.
 #{
 #    "transactions": [
 #        "9481240856006507060",
-#        "9576628037409549212",
-#        "9688144090768869873",
-#        "10338255408421629051",
-#        "10359184595777550676",
-#        "10373020874569525903",
-#        "10424413339700861551",
-#        "10939570664221574474",
-#        "11532826066610215721",
-#        "11917726250940952607",
-#        "12690717722987085019",
-#        "13151368363366204667",
-#        "13476758759361147188",
-#        "13575052702215035602",
-#        "13626344631074071778",
-#        "14331042609715043892",
-#        "14498707461565876109",
-#        "14629784120638206588",
-#        "14716488342582202795",
-#        "15242843992519721753",
-#        "15826148981206304696",
-#        "16587894357465415251",
-#        "16639008774229780426",
-#        "16764040714237275941",
-#        "16949060395852349444",
-#        "16986109699411704811",
-#        "17142016800722573984",
-#        "17300693002259513727",
-#        "17699122205798959185",
-#        "17859290671513293607",
-#        "18351895661104968170",
-#        "27224926019950626",
-#        "101904195883249963",
-#        "485061810832586354",
-#        "702474956264391606",
-#        "831348919724948185",
-#        "893623329775498220",
-#        "923387251222352504",
-#        "986617413179446839",
-#        "1041170497304299708",
-#        "1215257021695176331",
-#        "2119615107677390707",
-#        "2143544796861192475",
-#        "2826512495749791477",
-#        "3070200381067595603",
-#        "3355990436647260555",
-#        "3422714679394139593",
-#        "3481901580729826638",
-#        "3702379820133927389",
-#        "3999357454991991845",
-#        "4309379368213070693",
-#        "4829930967078067357",
-#        "4928977321490506392",
-#        "5060621930710257178",
-#        "5133122725444701367",
-#        "5751137657789027036",
-#        "6158243764217538132",
-#        "6389936935682895523",
-#        "6432612557545231178",
-#        "6873386888637796296",
-#        "7064280522252159011",
-#        "7289660295923749234",
-#        "7505990847309084616",
-#        "7514985232870320323",
-#        "7856149410146725103",
-#        "7998830538505701870",
-#        "8274741729641261667",
-#        "8386402818367925856",
-#        "8505964026109172291",
-#        "8507548832413139519",
-#        "8648346545164905097",
-#        "8692850727507507537",
+#           ... 73 in total
 #        "8841312677014468592"
 #    ],
 #    "generatorRS": "NXT-MRCC-2YLS-8M54-3CMAJ",

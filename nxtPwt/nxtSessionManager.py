@@ -74,13 +74,10 @@ connection management.
         
         self.nxtApi = nxtApi(self) # make the apiSigs instance here!
         self.activeNRS = nxtMods.NRSconn(self)
-        
         self.nxtApi.initSignals() # leapFrog init: account and NRSconn must be made before connecting their Sigs on nxtApi
-
         self.qPool=QtCore.QThreadPool.globalInstance()
         self.qPool.setMaxThreadCount(2500) # robustness
 
-    
         if len(argv) < 2:
             argv.append('testNet')
     
@@ -89,7 +86,6 @@ connection management.
         args={}
         args['runAs'] = runAs
         
-
         if runAs == 'testNet':
             host = 'localhost'
             port = '6876'
@@ -99,7 +95,6 @@ connection management.
 
         args['host'] = host
         args['port'] = port
-            
         
         # build the loggers:        
         self.bridgeLogger = lg.getLogger('bridgeLogger')
@@ -117,43 +112,13 @@ connection management.
         ch.setLevel(lg.DEBUG)
         ch.setFormatter(fh)
         self.consLogger.addHandler(ch)
-        
          
         self.blockDB = nxtDB.BlockDB_Handler(self, host, port, self.consLogger )
         
-
-        #self.init_BlockDB( host, port) # this inits the blockDB W/O QThread in main Thread!
-
-        DB= (0,0)
-        
-        
-        #self.blockDBCur.close() # 
-
-
-
-
-
-
-
+        DB_blockHeights = (0,0)
                                                 # self is sessMan!!
-        self.uc_bridge = nxtUC_Bridge.UC_Bridge1(self,  host, port, self.bridgeLogger, self.consLogger, DB  )
+        self.uc_bridge = nxtUC_Bridge.UC_Bridge1(self,  host, port, self.bridgeLogger, self.consLogger, DB_blockHeights  )
        
-       
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

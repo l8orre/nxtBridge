@@ -56,7 +56,7 @@ class Bridge1Ctrl(QObject):
 
 
     def init(self):  
-        """ Here all signals must be connected """  
+        """ Here QT signals must be connected """  
         pass
         #QObject.connect(self.timer1, SIGNAL("timeout()"),  self.timer1_CB)
         

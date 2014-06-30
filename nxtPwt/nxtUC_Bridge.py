@@ -243,8 +243,14 @@ class BridgeThread(QObject):
         
         self.json_Runner = JSON_Runner( self.host, self.port, self.bridgeLogger, self.consLogger , self.qPool, self.DB) # json_Emitter, self to THIS !!!!!!
         self.json_Runner.setAutoDelete(False) 
+        #self.json_Runner.run() #start()
+        
+        #self.consLogger.info('jsonStr= %s ', jsonStr )
+        self.consLogger.info('  self.qPool.activeThreadCount() = %s ', str(   self.qPool.activeThreadCount()) )
+        
         self.qPool.start(self.json_Runner)
-    
+        self.consLogger.info('  self.qPool.activeThreadCount() = %s ', str(   self.qPool.activeThreadCount()) )
+            
 
      
         
@@ -428,6 +434,255 @@ class JSON_Runner(QtCore.QRunnable):
         return Nxt2Btc  
  
  
+ 
+ 
+    @dispatcher.add_method
+    def getbestblockhash( **kwargs):
+        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
+         
+         ./bitcoind -rpcport=7879 getbestblockhash
+         1639453107654839557
+
+
+        """
+
+        # 2 calls: gestate first, then getBlock!!
+        payload = { "requestType" : "getState" }  
+        NxtApi = {}
+        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
+        
+        NxtReq.params=NxtApi # same obj, only replace params
+        preppedReq = NxtReq.prepare()
+        response = session.send(preppedReq)
+        NxtResp = response.json()
+        
+        try:
+            lastBlock = NxtResp['lastBlock']
+        except:
+            numberOfBlocks = 'errorDescription'
+            
+        # special: double call: now getBlock
+        payload = { "requestType" : "getBlock" }  
+        NxtApi = {}
+        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
+        NxtApi['block'] =  lastBlock # here we translate BTC params to NXT params
+        Nxt2Btc = {}
+        Nxt2Btc =  {
+                "lastBlock" : lastBlock,
+                            }
+                            
+        return Nxt2Btc  
+
+
+
+    @dispatcher.add_method
+    def getblock( **kwargs):
+        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
+            ./bitcoind -rpcport=7879 getblock 8461367503743142254
+            {
+                "confirmations" : 1,
+                "tx" : [
+                    "9427743273145010700",
+                    "9468719975072532448",
+                    "9560907929335947693",
+                    "10507706072875875119",
+                    "11864667946939877596",
+                    "12386165826869904583",
+                    "199053848968879261",
+                    "1294424573372804181",
+                    "1823350660510498915",
+                    "2651053493336681749"
+                ],
+                "chainwork" : "52a6360cc4529b5e07ef1d4b89eee37325a58544f4b9915c934b01fe7d067318",
+                "hash" : "8461367503743142254",
+                "difficulty" : "791103364",
+                "version" : 3,
+                "time" : 17715368,
+                "bits" : "6785084810899231190",
+                "merkleroot" : "91cdadd1f271da60268b11c72cb21fe69806cbbdb22f4f3e6a2021517d04160b1258f45122a15003fbe68eb8f0875fc08770286cc59c3226cb57fe451e73bfd0",
+                "nonce" : "4495bad149d538014216d6ed4e05ecb7631036c1ddd80b090542d7ddbefee387",
+                "nextblockhash" : "18019781220699116575",
+                "height" : 163456,
+                "size" : 1857,
+                "previousblockhash" : "12614315688190262655"
+            }
+
+
+
+        """
+
+        # 2 calls: gestate first, then getBlock!!
+        payload = { "requestType" : "getBlock" }  
+        NxtApi = {}
+        #print("kwargs- "+ str(kwargs))
+        block = kwargs['block']    
+        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
+        NxtApi['block'] = block  # here we translate BTC params to NXT params
+        
+        #print("NxtApi- "+ str(NxtApi))
+        
+        NxtReq.params=NxtApi # same obj, only replace params
+        preppedReq = NxtReq.prepare()
+        response = session.send(preppedReq)
+        NxtResp = response.json()
+        
+        try:
+            lastBlock = NxtResp['lastBlock']
+        except:
+            numberOfBlocks = 'errorDescription'
+                            
+        # special: double call: now getBlock
+        
+        #print("NxtResp- "+ str(NxtResp))
+           
+   
+        #        
+        #        Nxt2Btc_Mapping = {
+        #                    "hash" : "block",
+        #                    "confirmations" : 1,
+        #                    "size" : "payloadLength",
+        #                    "height" : "height",
+        #                    "version" : "version",
+        #                    "merkleroot" : "blockSignature",
+        #                    "tx" : "transactions",
+        #                    "time" : "timestamp",
+        #                    "nonce" : "generationSignature",
+        #                    "bits" : "generator",
+        #                    "difficulty" : "baseTarget",
+        #                    "chainwork" : "payloadHash",
+        #                    "previousblockhash" : "previousBlock",
+        #                    "nextblockhash" : "nextBlock",
+        #                    "__unavailableInBitcoin1":  "previousBlockHash",
+        #                    "__unavailableInBitcoin2":  "generatorRS" 
+        #                    "__unavailableInBitcoin3":  "totalAmountNQT" 
+        #                    "__unavailableInBitcoin4":  "numberOfTransactions" 
+        #                    "__unavailableInBitcoin5":  "totalFeeNQT" 
+        #                    }
+         
+        if 'previousBlock' in NxtResp.keys(): # the genesis block does not have a previousBlock!
+            prevBlock = NxtResp['previousBlock']
+        else:
+            prevBlock = '0'
+        if 'nextBlock' in NxtResp.keys(): # the latest block does not have a nextBlock!
+            nextBlock = NxtResp['nextBlock']
+        else:
+            nextBlock = '0'
+            
+            
+            
+        Nxt2Btc = {
+                    "hash" : block,
+                    "confirmations" : 1,
+                    "size" : NxtResp['payloadLength'],
+                    "height" : NxtResp['height'],
+                    "version" : NxtResp['version'],
+                    "merkleroot" : NxtResp['blockSignature'],
+                    "tx" : NxtResp['transactions'],
+                    "time" : NxtResp['timestamp'],
+                    "nonce" : NxtResp['generationSignature'],
+                    "bits" : NxtResp['generator'],
+                    "difficulty" : NxtResp['baseTarget'],
+                    "chainwork" : NxtResp['payloadHash'],
+                    "previousblockhash" : prevBlock,
+                    "nextblockhash" : nextBlock,
+                    }
+         
+        return Nxt2Btc  
+
+  
+ 
+
+
+# 15 getblockcount
+ 
+    @dispatcher.add_method
+    def getblockcount( **kwargs):
+        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
+         
+         ./bitcoind -rpcport=7879 getblockcount
+         163467
+
+
+        """
+        payload = { "requestType" : "getState" }  
+        NxtApi = {}
+        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
+        
+        NxtReq.params=NxtApi # same obj, only replace params
+        preppedReq = NxtReq.prepare()
+        response = session.send(preppedReq)
+        NxtResp = response.json()
+        
+        # NB: since block height and block count differ by one, the number of blocks is always larger by ONE than the height of the highest block.
+        # However, bitcoind returns a correct blockhash to 'getblockhash' when given the blockcount, NOT the height of the highest block.
+        # I *SUSPECT* that bitcoind amends this internally. 
+        # So when having the numberOfBlocks of NXT, the blockHeight of the highest block is still numberOfBlocks MINUS ONE!
+        # This is more consistent with the database and less source of confusion.         
+        
+        try: # BTC-IDIOM !!!
+            numberOfBlocks = int(NxtResp['numberOfBlocks']) - 1  # CHECK THIS OUT!!! # BTC-IDIOM !!!
+        except:
+            numberOfBlocks = 'errorDescription'
+        Nxt2Btc = {}
+        Nxt2Btc =  {
+                "numberOfBlocks" : numberOfBlocks,
+                            }
+        return Nxt2Btc  
+
+        #"numberOfBlocks": 127310,
+
+# NB: bitcoin: genesis: Hight
+
+
+
+ 
+    @dispatcher.add_method
+    def getblockhash( **kwargs):
+        blockAddress = kwargs['blockAddress'] 
+        #print("getblockhash ----------" + str(kwargs))
+        Nxt2Btc =  {
+                    "blockAddress" : blockAddress,
+                    }
+        
+        return Nxt2Btc  
+
+
+ 
+     # NOTE: **kawrags is how we can also pass the 'self' nxtUC_Bridge namespace to the callbacks if we want to!
+
+        #Usage of **kwargs
+        #**kwargs allows you to pass keyworded variable length of arguments to a function. You should use **kwargs if you want to handle named arguments in a function. Here is an example to get you going with it:
+        #
+        #def greet_me(**kwargs):
+        #    if kwargs is not None:
+        #        for key, value in kwargs.iteritems():
+        #            print "%s == %s" %(key,value)
+        # 
+        #>>> greet_me(name="yasoob")
+        #name == yasoob
+        #
+        #
+        #
+        # Usage of *args
+        #*args and **kwargs are mostly used in function definitions. *args and **kwargs allow you to pass a variable number of arguments to a function. What does variable mean here is that you do not know before hand that how many arguments can be passed to your function by the user so in this case you use these two keywords. *args is used to send a non-keyworded variable length argument list to the function. Here’s an example to help you get a clear idea:
+        #
+        #def test_var_args(f_arg, *argv):
+        #    print "first normal arg:", f_arg
+        #    for arg in argv:
+        #        print "another arg through *argv :", arg
+        #
+        #test_var_args('yasoob','python','eggs','test')
+        #
+        #This produces the following result:
+        #
+        #first normal arg: yasoob
+        #another arg through *argv : python
+        #another arg through *argv : eggs
+        #another arg through *argv : test
+        #
+
+
+ 
 #########################
 # 21 getconnectioncount
    
@@ -581,9 +836,12 @@ class JSON_Runner(QtCore.QRunnable):
         curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getinfo", "params": { "": "","":""}, "id": 7}' http://localhost:7879/jsonrpc
 
         """
-        # no self. all we know here MUST be supplied in kwargs.
-
+        # it is possible to iclude the parent object namespace (runner) in the kwargs to have access!
+        #self = kwargs['Runner']
+        
+        # self.consLogger.info('kwargs = %s ', kwargs )
         payload = { "requestType" : "getState" } #getTime"   }
+        
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
         NxtReq.params=NxtApi # same obj, only replace params
@@ -617,6 +875,59 @@ class JSON_Runner(QtCore.QRunnable):
         #print("~~~~~~~~>" + str( self.qPool.activeThreadCount() ))    # this line is  for timing the delay in the # QThread to wait for the proper delay time
 
         return Nxt2Btc  
+
+
+
+
+    @dispatcher.add_method
+    def listsinceblock( **kwargs):
+#        ACCOUNT = kwargs["account"] #kwargs['account']
+#        payload = { "requestType" : "getBalance" } #getTime"   }
+#        NxtApi = {}
+#        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
+#        NxtApi['account'] = ACCOUNT 
+#        NxtReq.params=NxtApi # same obj, only replace params
+#        preppedReq = NxtReq.prepare()
+#        response = session.send(preppedReq)
+#        NxtResp = response.json()
+#        Nxt2Btc = {}
+
+
+        Nxt2Btc =  {
+                    'A' : "B"
+                    }
+     
+          
+        
+        return Nxt2Btc  
+        
+        
+
+
+
+    @dispatcher.add_method
+    def listunspent( **kwargs):
+#        ACCOUNT = kwargs["account"] #kwargs['account']
+#        payload = { "requestType" : "getBalance" } #getTime"   }
+#        NxtApi = {}
+#        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
+#        NxtApi['account'] = ACCOUNT 
+#        NxtReq.params=NxtApi # same obj, only replace params
+#        preppedReq = NxtReq.prepare()
+#        response = session.send(preppedReq)
+#        NxtResp = response.json()
+#        Nxt2Btc = {}
+
+
+        Nxt2Btc =  {
+                    'A' : "B"
+                    }
+     
+          
+        
+        return Nxt2Btc  
+        
+
 
 
  
@@ -1128,6 +1439,19 @@ class JSON_Runner(QtCore.QRunnable):
  
 
  
+    @dispatcher.add_method
+    def sendtoaddress( **kwargs):
+         
+        Nxt2Btc = {}
+        Nxt2Btc =  {
+                
+                "txid" : TX_ID,
+                
+                            }
+                    
+        return Nxt2Btc  
+ 
+
   
 
 # 58 settxfee
@@ -1262,7 +1586,7 @@ class JSON_Runner(QtCore.QRunnable):
         preppedReq = NxtReq.prepare()
         response = session.send(preppedReq)
         NxtResp2 = response.json()
- 
+
         if "errorCode" in NxtResp2.keys():
             isForging = False
         elif "remaining" in NxtResp2.keys():
@@ -1308,220 +1632,6 @@ class JSON_Runner(QtCore.QRunnable):
 
 
 
-
-
-
-# 15 getblockcount
- 
-    @dispatcher.add_method
-    def getblockcount( **kwargs):
-        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
-         
-         ./bitcoind -rpcport=7879 getblockcount
-         163467
-
-
-        """
-        payload = { "requestType" : "getState" }  
-        NxtApi = {}
-        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
-        
-        NxtReq.params=NxtApi # same obj, only replace params
-        preppedReq = NxtReq.prepare()
-        response = session.send(preppedReq)
-        NxtResp = response.json()
-        
-        # NB: since block height and block count differ by one, the number of blocks is always larger by ONE than the height of the highest block.
-        # However, bitcoind returns a correct blockhash to 'getblockhash' when given the blockcount, NOT the height of the highest block.
-        # I *SUSPECT* that bitcoind amends this internally. 
-        # So when having the numberOfBlocks of NXT, the blockHeight of the highest block is still numberOfBlocks MINUS ONE!
-        # This is more consistent with the database and less source of confusion.         
-        
-        try:
-            numberOfBlocks = int(NxtResp['numberOfBlocks']) # CHECK THIS OUT!!! - 1
-        except:
-            numberOfBlocks = 'errorDescription'
-        Nxt2Btc = {}
-        Nxt2Btc =  {
-                "numberOfBlocks" : numberOfBlocks,
-                            }
-        return Nxt2Btc  
-
-        #"numberOfBlocks": 127310,
-
-# NB: bitcoin: genesis: Hight
-
-    @dispatcher.add_method
-    def getbestblockhash( **kwargs):
-        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
-         
-         ./bitcoind -rpcport=7879 getbestblockhash
-         1639453107654839557
-
-
-        """
-
-        # 2 calls: gestate first, then getBlock!!
-        payload = { "requestType" : "getState" }  
-        NxtApi = {}
-        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
-        
-        NxtReq.params=NxtApi # same obj, only replace params
-        preppedReq = NxtReq.prepare()
-        response = session.send(preppedReq)
-        NxtResp = response.json()
-        
-        try:
-            lastBlock = NxtResp['lastBlock']
-        except:
-            numberOfBlocks = 'errorDescription'
-            
-        # special: double call: now getBlock
-        payload = { "requestType" : "getBlock" }  
-        NxtApi = {}
-        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
-        NxtApi['block'] =  lastBlock # here we translate BTC params to NXT params
-        Nxt2Btc = {}
-        Nxt2Btc =  {
-                "lastBlock" : lastBlock,
-                            }
-                            
-        return Nxt2Btc  
-
-
-
- 
-    @dispatcher.add_method
-    def getblockhash( **kwargs):
-        blockAddress = kwargs['blockAddress'] 
-        #print("getblockhash ----------" + str(kwargs))
-        Nxt2Btc =  {
-                    "blockAddress" : blockAddress,
-                    }
-        
-        return Nxt2Btc  
-
-
- 
-
-
-
-    @dispatcher.add_method
-    def getblock( **kwargs):
-        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
-            ./bitcoind -rpcport=7879 getblock 8461367503743142254
-            {
-                "confirmations" : 1,
-                "tx" : [
-                    "9427743273145010700",
-                    "9468719975072532448",
-                    "9560907929335947693",
-                    "10507706072875875119",
-                    "11864667946939877596",
-                    "12386165826869904583",
-                    "199053848968879261",
-                    "1294424573372804181",
-                    "1823350660510498915",
-                    "2651053493336681749"
-                ],
-                "chainwork" : "52a6360cc4529b5e07ef1d4b89eee37325a58544f4b9915c934b01fe7d067318",
-                "hash" : "8461367503743142254",
-                "difficulty" : "791103364",
-                "version" : 3,
-                "time" : 17715368,
-                "bits" : "6785084810899231190",
-                "merkleroot" : "91cdadd1f271da60268b11c72cb21fe69806cbbdb22f4f3e6a2021517d04160b1258f45122a15003fbe68eb8f0875fc08770286cc59c3226cb57fe451e73bfd0",
-                "nonce" : "4495bad149d538014216d6ed4e05ecb7631036c1ddd80b090542d7ddbefee387",
-                "nextblockhash" : "18019781220699116575",
-                "height" : 163456,
-                "size" : 1857,
-                "previousblockhash" : "12614315688190262655"
-            }
-
-
-
-        """
-
-        # 2 calls: gestate first, then getBlock!!
-        payload = { "requestType" : "getBlock" }  
-        NxtApi = {}
-        #print("kwargs- "+ str(kwargs))
-        block = kwargs['block']    
-        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
-        NxtApi['block'] = block  # here we translate BTC params to NXT params
-        
-        #print("NxtApi- "+ str(NxtApi))
-        
-        NxtReq.params=NxtApi # same obj, only replace params
-        preppedReq = NxtReq.prepare()
-        response = session.send(preppedReq)
-        NxtResp = response.json()
-        
-        try:
-            lastBlock = NxtResp['lastBlock']
-        except:
-            numberOfBlocks = 'errorDescription'
-                            
-        # special: double call: now getBlock
-        
-        #print("NxtResp- "+ str(NxtResp))
-           
-   
-        #        
-        #        Nxt2Btc_Mapping = {
-        #                    "hash" : "block",
-        #                    "confirmations" : 1,
-        #                    "size" : "payloadLength",
-        #                    "height" : "height",
-        #                    "version" : "version",
-        #                    "merkleroot" : "blockSignature",
-        #                    "tx" : "transactions",
-        #                    "time" : "timestamp",
-        #                    "nonce" : "generationSignature",
-        #                    "bits" : "generator",
-        #                    "difficulty" : "baseTarget",
-        #                    "chainwork" : "payloadHash",
-        #                    "previousblockhash" : "previousBlock",
-        #                    "nextblockhash" : "nextBlock",
-        #                    "__unavailableInBitcoin1":  "previousBlockHash",
-        #                    "__unavailableInBitcoin2":  "generatorRS" 
-        #                    "__unavailableInBitcoin3":  "totalAmountNQT" 
-        #                    "__unavailableInBitcoin4":  "numberOfTransactions" 
-        #                    "__unavailableInBitcoin5":  "totalFeeNQT" 
-        #                    }
-         
-        if 'previousBlock' in NxtResp.keys(): # the genesis block does not have a previousBlock!
-            prevBlock = NxtResp['previousBlock']
-        else:
-            prevBlock = '0'
-        if 'nextBlock' in NxtResp.keys(): # the latest block does not have a nextBlock!
-            nextBlock = NxtResp['nextBlock']
-        else:
-            nextBlock = '0'
-            
-            
-            
-        Nxt2Btc = {
-                    "hash" : block,
-                    "confirmations" : 1,
-                    "size" : NxtResp['payloadLength'],
-                    "height" : NxtResp['height'],
-                    "version" : NxtResp['version'],
-                    "merkleroot" : NxtResp['blockSignature'],
-                    "tx" : NxtResp['transactions'],
-                    "time" : NxtResp['timestamp'],
-                    "nonce" : NxtResp['generationSignature'],
-                    "bits" : NxtResp['generator'],
-                    "difficulty" : NxtResp['baseTarget'],
-                    "chainwork" : NxtResp['payloadHash'],
-                    "previousblockhash" : prevBlock,
-                    "nextblockhash" : nextBlock,
-                    }
-         
-        return Nxt2Btc  
-
-  
- 
      # this is a method that is NOT routed through dispatcher and it can beused also!!!
     def test(self):
         pass #print("okokkook")
@@ -1584,11 +1694,14 @@ class JSON_Runner(QtCore.QRunnable):
 
 
         # print threadcountz>!!! keep track of threadpool objects! just to make sure!
-        
-        def parse_getblockcount(jsonParms):
-            parmsDi = {} 
+ 
+        def parse_getbalance(jsonParms):
+            account = str(jsonParms[0])
+            minconf = str(jsonParms[1])
+            #print("account" + str(account))
+            parmsDi = {'account':account, 'minconf': minconf}             
             return parmsDi
-
+ 
         def parse_getbestblockhash(jsonParms):
             parmsDi = {} 
             return parmsDi
@@ -1597,6 +1710,10 @@ class JSON_Runner(QtCore.QRunnable):
             parmsDi = {} 
             block = str(jsonParms[0])
             parmsDi = {'block':block} 
+            return parmsDi
+               
+        def parse_getblockcount(jsonParms):
+            parmsDi = {} 
             return parmsDi
             
         def parse_getblockhash(jsonParms):
@@ -1612,13 +1729,6 @@ class JSON_Runner(QtCore.QRunnable):
             parmsDi = {'blockAddress':blockAddress} 
             return parmsDi
  
-        def parse_getbalance(jsonParms):
-            account = str(jsonParms[0])
-            minconf = str(jsonParms[1])
-            #print("account" + str(account))
-            parmsDi = {'account':account, 'minconf': minconf}             
-            return parmsDi
-         
         def parse_getconnectioncount(jsonParms):
             parmsDi = {} 
             return parmsDi
@@ -1626,7 +1736,12 @@ class JSON_Runner(QtCore.QRunnable):
         def parse_getinfo(jsonParms):
             parmsDi = {} 
             return parmsDi
-              
+            
+        def parse_getnewaddress(jsonParms):
+            account = str(jsonParms[0])
+            parmsDi = {'account':account}             
+            return parmsDi
+          
         def parse_getreceivedbyaccount(jsonParms):
             parmsDi = {} 
             account = str(jsonParms[0])
@@ -1644,6 +1759,25 @@ class JSON_Runner(QtCore.QRunnable):
             txid = str(jsonParms[0])
             parmsDi = {'txid':txid}             
             return parmsDi
+        
+        def parse_listsinceblock(jsonParms):
+            parmsDi = {} 
+            blockAddress = str(jsonParms[0])
+            parmsDi = {'blockAddress':blockAddress}             
+            minimumConfs = str(jsonParms[0])
+            parmsDi = {'minimumConfs':minimumConfs}             
+            return parmsDi
+        
+        def parse_listunspent(jsonParms):
+            parmsDi = {} 
+            minimumConfs = str(jsonParms[0])
+            parmsDi = {'minimumConfs':minimumConfs}             
+            maximumConfs = str(jsonParms[0])
+            parmsDi = {'maximumConfs':maximumConfs}             
+            addresses = str(jsonParms[0])
+            parmsDi = {'addresses':addresses}             
+            return parmsDi
+        
         
         def parse_sendfrom(jsonParms):
         
@@ -1676,9 +1810,26 @@ class JSON_Runner(QtCore.QRunnable):
             
             return parmsDi
         
+        
+        def parse_sendtoaddress(jsonParms):
+            """ - """
+            parmsDi = {} 
+            tobitcoinaddress = str(jsonParms[0])
+            parmsDi['tobitcoinaddress']  = tobitcoinaddress
+            amount = str(jsonParms[1])
+            parmsDi['amount']  = amount
+            comment = str(jsonParms[2])
+            parmsDi['comment']  = comment
+            commentTo = str(jsonParms[3])
+            parmsDi['commentTo']  = commentTo
+            return parmsDi
+        
+        
         def parse_settxfee(jsonParms):
             parmsDi = {} 
             return parmsDi
+            
+            
         
         def parse_validateaddress(jsonParms):
             parmsDi = {} 
@@ -1686,7 +1837,17 @@ class JSON_Runner(QtCore.QRunnable):
             parmsDi = {'PASSPHRASE':PASSPHRASE}             
             
             return parmsDi
-            
+        
+        
+        
+        def parse_test(jsonParms):
+            print(str(jsonParms))
+            parmsDi = {} 
+            return parmsDi
+            #./bitcoind -rpcport=7879 test "" --------------  ['']
+            #./bitcoind -rpcport=7879 test "*" ---------      ['*']
+
+
              
         ##################################################
         #
@@ -1695,7 +1856,9 @@ class JSON_Runner(QtCore.QRunnable):
         
         jsonRaw = request.get_data()
 
-
+        #
+        # we have to do a lot of things here that are not lege artis. thanks to bitcoin slop.   
+        #
         #self.bridgeLogger.debug('nxtBridge rcvd raw: %s ', jsonRaw )
         
         #
@@ -1756,37 +1919,46 @@ class JSON_Runner(QtCore.QRunnable):
             if bitcoind_method == 'getbalance':
                 parmsDi = parse_getbalance(jsonParms)
 
-            ##### new calls 061514
+            elif bitcoind_method == 'getbestblockhash':
+                parmsDi = parse_getbestblockhash(jsonParms)
+
+            elif bitcoind_method == 'getblock':
+                parmsDi = parse_getblock(jsonParms)
+
             elif bitcoind_method == 'getblockcount':
                 parmsDi = parse_getblockcount(jsonParms)
 
-            elif bitcoind_method == 'getbestblockhash':
-                parmsDi = parse_getbestblockhash(jsonParms)
- 
-            elif bitcoind_method == 'getblock':
-                parmsDi = parse_getblock(jsonParms)
-                
             elif bitcoind_method == 'getblockhash':
                 parmsDi = parse_getblockhash(jsonParms)
-                 ############################
-             
-             
+                 
             elif bitcoind_method == 'getconnectioncount':
                 parmsDi = parse_getconnectioncount(jsonParms)
                 
             elif bitcoind_method == 'getinfo':
                 parmsDi = parse_getinfo(jsonParms)
-                
+
+            elif bitcoind_method == 'getnewaddress':
+                parmsDi = parse_getinfo(jsonParms)
+
             elif bitcoind_method == 'getreceivedbyaccount':
                 parmsDi = parse_getreceivedbyaccount(jsonParms)
                 
             elif bitcoind_method == 'getreceivedbyaddress':
                 parmsDi = parse_getreceivedbyaddress(jsonParms)
+
+            elif bitcoind_method == 'listsinceblock':
+                parmsDi = parse_getreceivedbyaccount(jsonParms)
                 
+            elif bitcoind_method == 'listunspent':
+                parmsDi = parse_getreceivedbyaddress(jsonParms)
+
             elif bitcoind_method == 'gettransaction':
                 parmsDi = parse_gettransaction(jsonParms)
                 
             elif bitcoind_method == 'sendfrom':
+                parmsDi = parse_sendfrom(jsonParms)
+
+            elif bitcoind_method == 'sendtoaddress':
                 parmsDi = parse_sendfrom(jsonParms)
                 
             elif bitcoind_method == 'settxfee':
@@ -1795,37 +1967,43 @@ class JSON_Runner(QtCore.QRunnable):
             elif bitcoind_method == 'validateaddress':
                 parmsDi = parse_validateaddress(jsonParms)
  
+            elif bitcoind_method == 'test':
+                print("test")
+                parmsDi = parse_test(jsonParms)
+                
             else:
                 parmsDi = {'throwException':'here'}
       
         ##################################################
         #
         # 3 here we forcible re-insert our custom made request into the request object
-                   
+
+            #parmsDi['Runner'] = self # this is to include the 'self  namespace in the CB functions!
+            
             jsonEval['params'] = parmsDi
             jsonEval['jsonrpc'] = '2.0'
             jsonStr = str(jsonEval)
             jsonStr = jsonStr.replace("'", '"') # this seems to be an irregularity either in python3 str or in JSONRPCResponseManager
-
-
+            #self.consLogger.info('jsonStr= %s ', jsonStr )
+         
             
         elif isinstance(jsonParms, dict):
-            #
+            self.consLogger.debug('jsonParms= %s ', str( jsonParms ) )
             # THESE ARE CURRENTLY NOT OPERABLE, BUT THE OPTION SHALL BE MAINTAINED
             # is the json request is well formed, we do not need to do anyting at all,
             # just hand it as a str to the Handler
             jsonEval['params'] = jsonParms
             jsonStr = jsonRaw
             
-             
-            
+              
         ##################################################
         #
         # 4 send request to the NRS      
             
         responseFromNxt = JSONRPCResponseManager.handle(jsonStr, dispatcher)
         response = Response( responseFromNxt.json, mimetype='application/json') #, mimetype='text/plain') 
-        self.consLogger.debug('self.qPool.activeThreadCount()  = %s ', str( self.qPool.activeThreadCount() ) )
+        
+        self.consLogger.info('self.qPool.activeThreadCount()  = %s ', str( self.qPool.activeThreadCount() ) )
         
         # *SOME* of the replies do not seem to be correct JSON format in {key:value} format.
         
@@ -1848,7 +2026,51 @@ class JSON_Runner(QtCore.QRunnable):
             response.response[0] = parseResponse
             self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
-
+ 
+        elif bitcoind_method == 'getbestblockhash':
+            # this is the ugly stuff where we butcher the dict, and re-configure a synthetic json response object
+            parseResponse = eval(response.response[0])
+            resultJson = parseResponse['result']
+            blockcount  = resultJson['lastBlock']
+            parseResponse['result'] = blockcount
+            parseResponse = str(parseResponse)
+            parseResponse = parseResponse.replace( "'",'"') 
+            response.response[0] = parseResponse
+            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
+            return response
+ 
+        elif bitcoind_method == 'getblock':
+            # this format is used when we pass through a nice dict as json reply            
+            self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
+            # return a dict directly as dict, no need to make a fake list from it
+            #self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
+            return response
+       
+        elif bitcoind_method == 'getblockcount':
+            parseResponse = eval(response.response[0])
+            resultJson = parseResponse['result']
+            blockcount  = resultJson['numberOfBlocks']
+            parseResponse['result'] = blockcount
+            parseResponse = str(parseResponse)
+            parseResponse = parseResponse.replace( "'",'"') 
+            response.response[0] = parseResponse
+            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
+            return response
+ 
+        elif bitcoind_method == 'getblockhash':
+            # this is the ugly stuff where we butcher the dict, and re-configure a synthetic json response object
+            parseResponse = eval(response.response[0])
+            resultJson = parseResponse['result']
+            blockAddress  = resultJson['blockAddress']
+            parseResponse['result'] = blockAddress
+            parseResponse = str(parseResponse)
+            parseResponse = parseResponse.replace( "'",'"') 
+            response.response[0] = parseResponse
+            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
+            return response
+             # BITCOIN SLOP: GETBLOCKCOUNT IS ONE TOO SMALL, COZ IT IS THE HEIGHT OF THE LATEST BLOCK THAT IS RETURNED,
+             # AND THAT IS ONE LESS THAN THE BLOCKCOUNT, BEAUSE GENESIS IS HEIGHT = ZERO!
+ 
         elif bitcoind_method == 'getconnectioncount':
             parseResponse = eval(response.response[0])
             # parseResponse --> {'result': {'ACCOUNT': 2547600000000.0}, 'id': 1, 'jsonrpc': '2.0'}
@@ -1860,11 +2082,23 @@ class JSON_Runner(QtCore.QRunnable):
             response.response[0] = parseResponse
             self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
-
+ 
         elif bitcoind_method == 'getinfo':
             self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             return response
+ 
+        elif bitcoind_method == 'getnewaddress':
+            self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
+            return response
 
+        elif bitcoind_method == 'listsinceblock':
+            self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
+            return response
+
+        elif bitcoind_method == 'listunspent':
+            self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
+            return response
+ 
         elif bitcoind_method == 'getreceivedbyaccount':
             parseResponse = eval(response.response[0])
             resultJson = parseResponse['result']
@@ -1899,6 +2133,11 @@ class JSON_Runner(QtCore.QRunnable):
             self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             return response
 
+        elif bitcoind_method == 'sendtoaddress':
+
+            self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
+            return response
+
         elif bitcoind_method == 'settxfee':
             
             self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
@@ -1909,50 +2148,7 @@ class JSON_Runner(QtCore.QRunnable):
             self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             return response            
            
-        elif bitcoind_method == 'getblockcount':
-            parseResponse = eval(response.response[0])
-            resultJson = parseResponse['result']
-            blockcount  = resultJson['numberOfBlocks']
-            parseResponse['result'] = blockcount
-            parseResponse = str(parseResponse)
-            parseResponse = parseResponse.replace( "'",'"') 
-            response.response[0] = parseResponse
-            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
-            return response
- 
-        elif bitcoind_method == 'getbestblockhash':
-            # this is the ugly stuff where we butcher the dict, and re-configure a synthetic json response object
-            parseResponse = eval(response.response[0])
-            resultJson = parseResponse['result']
-            blockcount  = resultJson['lastBlock']
-            parseResponse['result'] = blockcount
-            parseResponse = str(parseResponse)
-            parseResponse = parseResponse.replace( "'",'"') 
-            response.response[0] = parseResponse
-            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
-            return response
- 
-        elif bitcoind_method == 'getblock':
-            # this format is used when we pass through a nice dict as json reply            
-            self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
-            # return a dict directly as dict, no need to make a fake list from it
-            #self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
-            return response
- 
-        elif bitcoind_method == 'getblockhash':
-            # this is the ugly stuff where we butcher the dict, and re-configure a synthetic json response object
-            parseResponse = eval(response.response[0])
-            resultJson = parseResponse['result']
-            blockAddress  = resultJson['blockAddress']
-            parseResponse['result'] = blockAddress
-            parseResponse = str(parseResponse)
-            parseResponse = parseResponse.replace( "'",'"') 
-            response.response[0] = parseResponse
-            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
-            return response
-             # BITCOIN SLOP: GETBLOCKCOUNT IS ONE TOO SMALL, COZ IT IS THE HEIGHT OF THE LATEST BLOCK THAT IS RETURNED,
-             # AND THAT IS ONE LESS THAN THE BLOCKCOUNT, BEAUSE GENESIS IS HEIGHT = ZERO!
-
+        
         else:
             parmsDi = {'throwException':'here'}
         
@@ -1963,6 +2159,9 @@ class JSON_Runner(QtCore.QRunnable):
     def run(self,):
         run_simple('localhost', 7879, self.application,  ) # WERKZEUG !!!!
   
+  
+#
+#    
  
 # 
 # getState:

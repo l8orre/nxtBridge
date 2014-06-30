@@ -220,13 +220,9 @@ class nxtApi(Qt.QObject):
     getAllAssets_Sig =  pyqtSignal(dict,dict)  #59
 
     getAssets_Sig =  pyqtSignal(dict,dict)  #60
-
-    
+ 
     catchAll_Sig =  pyqtSignal(dict, dict)  #61
-
-
-
-
+ 
 
     # this signal is for maintenace access to the raw url string     
     queryURL_Sig = pyqtSignal(object, ) # it is emtitted before starting the QThread.

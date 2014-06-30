@@ -56,11 +56,7 @@ class BlockDB_Handler(nxtUseCaseMeta): # need to talk to NRS, hence UC derived
         self.blockDB_Emitter = BlockDB_Emitter(   self.consLogger )
         self.blockDBb_Runner = BlockDB_Runner( self.blockDB_Emitter, self.sessionBlockDB, self.sessMan, DB, self.NxtReq, self.consLogger ,  ) #self.DBLogger, ) 
         self.blockDBb_Runner.setAutoDelete(False) 
-
-        self.consLogger.info('  self.qPool.activeThreadCount() = %s ', str(   self.qPool.activeThreadCount()) )
         self.qPool.start(self.blockDBb_Runner)
-        #self.blockDBb_Runner.run()
-        
         self.consLogger.info('  self.qPool.activeThreadCount() = %s ', str(   self.qPool.activeThreadCount()) )
          
          
@@ -236,10 +232,12 @@ class BlockDB_Runner(QtCore.QRunnable):
 
 
 
-# **kwargs as dict ?!?!
+# **kwargs as dict ?!?! 
+
+# MAYBE the wallet does not need to query the NRS????
  
 class WalletDB_Handler(nxtUseCaseMeta): # need to talk to NRS, hence UC derived
-    """ 2680262203532249785 nxt genesis block
+    """ 
     This is a container and manager object for the QThrerasd that checks the blockchain for new blocks."""
    
     def __init__(self, sessMan,  walletLogger,   consLogger,   ):
@@ -249,21 +247,21 @@ class WalletDB_Handler(nxtUseCaseMeta): # need to talk to NRS, hence UC derived
         self.qPool = sessMan.qPool # qPool is already in sessMan!
         #self.DBLogger = DBLogger
         self.consLogger = consLogger
-        self.sessionBlockDB = Session()
+        self.walletLogger = walletLogger
+        
+        self.sessionWalletDB = Session()
         headers = {'content-type': 'application/json'}
         sessUrl = 'http://' + host + ':' + port + '/nxt?' 
         self.init_WalletDB(host, port,) # the init of the sqlite DB is not supposed to be threaded!
 
-        DB = ( self.blockDBConn, self.blockDBCur)
+        DB = ( self.walletDBConn, self.walletDBCur)
         
         # the QTHread dual bundle: Emitter+Runner
-        self.walletDB_Emitter = WalletDB_Emitter(   self.consLogger )
-        self.walletDBb_Runner = WalletDB_Runner( self.walletDB_Emitter, self.sessionWalletDB, self.sessMan, DB, self.NxtReq, self.consLogger ,  ) #self.DBLogger, ) 
+        self.walletDB_Emitter = WalletDB_Emitter(   self.consLogger, self.walletLogger )
+        self.walletDBb_Runner = WalletDB_Runner( self.walletDB_Emitter, self.sessionWalletDB, self.sessMan, DB, self.NxtReq, self.consLogger , self.walletLogger  ) #self.DBLogger, ) 
         self.walletDBb_Runner.setAutoDelete(False) 
 
-        self.consLogger.info('  self.qPool.activeThreadCount() = %s ', str(   self.qPool.activeThreadCount()) )
         self.qPool.start(self.blockDBb_Runner)
-        #self.blockDBb_Runner.run()
         
         self.consLogger.info('  self.qPool.activeThreadCount() = %s ', str(   self.qPool.activeThreadCount()) )
          
@@ -314,7 +312,7 @@ class WalletDB_Runner(QtCore.QRunnable):
         self.walletDBConn = DB[0]
         self.walletDBCur = DB[1]
         self.emitter = emitter
-        self.walletDB_pollTime = 25000
+        self.walletDB_pollTime = 125000
         self.walletDBTimer = QTimer()
         QObject.connect(self.walletDBTimer, SIGNAL("timeout()"),  self.walletDBTimer_CB)
         
@@ -322,14 +320,12 @@ class WalletDB_Runner(QtCore.QRunnable):
         self.walletDBTimer.start(self.walletDB_pollTime)
         
     def walletDBTimer_CB(self,):
-        
-        #self.consLogger.info('  self.qPool.activeThreadCount() = %s ', str(   self.qPool.activeThreadCount()) )
-         
+        pass 
+        # this is  a heartbeat for now!
         #self.consLogger.info('fetching new blocks: DBhigh, BChigh')# : %s, %s ', str(highBlockDB) , blockAddrIntoDB )
         #########################################################
          
-        self.blockDBConn.commit()
-        self.consLogger.info('blockHeightDB is complete!')
+        # do the activities here         
            
            
      

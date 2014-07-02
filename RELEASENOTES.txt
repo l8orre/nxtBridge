@@ -1,37 +1,127 @@
 
+07/02/14
+
+on behalf of the NXT InfraStructure fund
+ 
+l8orre@yandex.com
+nxtforum.org
 
 
 
-Welcome to nxtBridge beta 0.1.1 - June 01, 2014
+The Bridge - access the NXT blockchain using legacy bitcoind jsonrpc calls
+ 
+purpose: communicate with the NXT blockchain by using bitcoind jsonrpc calls
+ 
 
-developed on Ubuntu 13.10
 
-requirements:
+operation: 
 
-python3
+ 
+
+run bitcoind with rpc enabled
+run NRS (NXT server)
+run nxtBridge.py [args]
+
+args: [ testNet/mainNet, filename for wallet.dat, ...]
+
+
+
+1:
+-------------------------------------
+bitcoind can be used as a relay to forward jsonrpc calls that are sent to it to another port:
+
+./bitcoind -rpcport=7879 getinfo 
+
+Calls bitcoind from the command line with 'getinfo', and bitcoind forwards the 'getinfo' jsonrpc call to port 7879
+
+Note: bitcoind is listening on the rpcport as designated in bitcoin.conf, default is 8332
+
+sending 'getinfo' as jsonrpc to port 8332 does the same as the cmd line in the example above.
+
+
+2:
+-------------------------------------
+nxtBridge listens on port 7879 for jsonrpc calls that are relayed to there form bitcoind
+
+nxtBridge receives a jsonrpc call from bitcoind.
+
+nxtBridge internally maps the jsonrpc call from bitcoind to associated NXT api call(s)
+
+nxtBridge queries the designated NRS instance - currently hardcoded running on the same machine as the bridge,
+but can be easily modified
+
+nxtBridge receives the replie(s) from the NRS and maps them back to a format that is congruent to bitcoind
+
+nxtBridge returns the bitcoind-'congruent' message
+   
+
+
+-------------------------------------
+ 
+Example using shell call to bitcoind:
+
+Alice@myBox:~/bitcoin-0.9.1-linux/bin/64$./bitcoind -rpcport=7879 getinfo
+{
+    "connections" : 56,
+    "errors" : "",
+    "balance" : 0.00000000,
+    "keypoololdest" : 769654784,
+    "keypoolsize" : 326764176,
+    "proxy" : "",
+    "version" : "1.2.0e",
+    "timeoffset" : 0,
+    "paytxfee" : 0.00000000,
+    "protocolversion" : "1.2.0e",
+    "blocks" : 142754,
+    "walletversion" : "1.2.0e",
+    "difficulty" : "2552571948492161",
+    "testnet" : false
+}
+
+This call contains data from the NXT blockchain, and is returned by the Bridge via bitcoind.
+The parameters returned represent the NXT blockchain.
+
+Note the differences of values to current bitcoin blockchain parameters.
+
+
+Dependencies:
+
+Python3
 PyQt4
-werkzeug
-json-rpc
 requests
+Werkzeug
+jsonrpc
+numpy
 
 
 
-The followong bitcoin commands can be accessed:
+The following bitcoind jsonrpc calls will be supported:
 
-# number is the ordinal of appearance in bitcoind help listing:
+getbalance		# under revision
+getbestblockhash	# OK
+getblock		# OK
+getblockcount		# OK
+getblockhash		# OK
+getconnectioncount	# OK
+getinfo			# OK
+getnewaddress		# under revision
+getreceivedbyaccount	# under revision
+getreceivedbyaddress	# under revision
+listsinceblock		# under revision
+listunspent		# under revision
+gettransaction		# OK
+sendfrom		# under revision
+sendtoaddress		# under revision
+settxfee		# OK (n/a)
+validateaddress		# OK
 
-# 14 getbalance
-# 21 getconnectioncount
-# 25 getinfo 
-# 33 getreceivedbyaccount
-# 34 getreceivedbyaddress
-# 35 gettransaction
-# 52 sendfrom
-# 58 settxfee
-# 63 validateaddress
 
 
+Note: 
 
+NXT does not have a 'wallet' feature, the Bridge emulates a wallet-like database.
+The Bridge internally maintains an sqlite3 database to do this.
+Recommended handling of cryptographic keys will be documented in an upcoming version. 
 
 
 
@@ -40,10 +130,9 @@ These have been tested on Ubuntu13.10
 
 
 
-using bitcoind as jsonrpc relay:
+some examples using bitcoind as jsonrpc relay:
 ----------------------------------
-note: bitcoind does not seem to deliver well formed jsonrpc! 
-
+ 
 ./bitcoind -rpcport=7879 getbalance 2865886802744497404 1
 
 ./bitcoind -rpcport=7879 getconnectioncount
@@ -64,59 +153,13 @@ note: bitcoind does not seem to deliver well formed jsonrpc!
 
 
 
-Note: curl uses proper jsonrpc, and these are currently inoperable due to focus on bitcoind operations (060514)
-
-NXT:
-curl param encoding 1
------------------------
+Note: 
+bitcoind uses malformed jsonrpc with several of its api calls. The 'curl' tool is not able to hanlde this.
+The Bridge might support this in the future also, but not at present.
  
-curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getinfo", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}' http://localhost:7879/jsonrpc
-
-curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getbalance", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}' http://localhost:7879/jsonrpc
-
-curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getconnectioncount", "params": {}, "id": 12}' http://localhost:7879/jsonrpc
-
-curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getreceivedbyaccount", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}' http://localhost:7879/jsonrpc
-
-curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getreceivedbyaddress", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}' http://localhost:7879/jsonrpc
-
-curl -i -X POST -d '{"jsonrpc": "2.0", "method": "gettransaction", "params": {"txid":"1448848043607985937"}, "id": 12}' http://localhost:7879/jsonrpc
-
-curl -i -X POST -d '{"jsonrpc": "2.0", "method": "sendfrom", "params": {"amount":0.00001, "fromaccount":"PASSPHRASE",  "tobitcoinaddress":"2865886802744497404",  "minconf":1,  "comment":"" , "comment-to":"" }, "id": 12}' http://localhost:7879/jsonrpc
-
-curl -i -X POST -d '{"jsonrpc": "2.0", "method": "settxfee", "params": {}, "id": 12}' http://localhost:7879/jsonrpc
-
-curl -i -X POST -d '{"jsonrpc": "2.0", "method": "validateaddress", "params": {"PASSPHRASE":"PASSPHRASE"}, "id": 12}' http://localhost:7879/jsonrpc
-
  
 
-
-NXT:
-curl param encoding 2
------------------------
-
-curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"getinfo","params": {} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
-
-curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"getbalance","params": {"account":"16159101027034403504"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
-
-curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"getconnectioncount","params": {} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
- 
-curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"getreceivedbyaccount","params":  {"account":"16159101027034403504"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
-
-curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"getreceivedbyaddress","params":  {"account":"16159101027034403504"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
- 
-curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"gettransaction","params":  {"txid":"1448848043607985937"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
-  
-curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"sendfrom","params":  {"amount":0.00003, "fromaccount":"PASSPHRASE",  "tobitcoinaddress":"2865886802744497404",  "minconf":1,  "comment":"" , "comment-to":"" } }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
-
-curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"settxfee","params":  {} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
- 
-curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"validateaddress","params": {"PASSPHRASE":"17oreosetc17oreosetc"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
- 
-
-
-
-Donations Welcome! NXT: 1674414626317090683
+Donations Welcome! NXT-LHVV-9ES7-RVHU-3R7HG
 
 Comments, Questions: l8orre - nxtforum.org 
 

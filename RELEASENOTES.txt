@@ -34,9 +34,17 @@ bitcoind can be used as a relay to forward jsonrpc calls that are sent to it to 
 
 Calls bitcoind from the command line with 'getinfo', and bitcoind forwards the 'getinfo' jsonrpc call to port 7879
 
-Note: bitcoind is listening on the rpcport as designated in bitcoin.conf, default is 8332
+Notes: 
 
-sending 'getinfo' as jsonrpc to port 8332 does the same as the cmd line in the example above.
+- bitcoind is listening on the rpcport as designated in bitcoin.conf, default is 8332
+
+- sending 'getinfo' as jsonrpc to port 8332 does the same as the cmd line in the example above.
+
+- nxtBridge can vbe called directly by sending bitcoind comprehensible json to port 7879 w/o running bitcoind
+
+- bitcoind uses malformed jsonrpc with several of its api calls. 
+  The 'curl' tool is not able to hanlde this. nxtBridge might support this in the future also, but not at present.
+ 
 
 
 2:
@@ -153,11 +161,8 @@ some examples using bitcoind as jsonrpc relay:
 
 
 
-Note: 
-bitcoind uses malformed jsonrpc with several of its api calls. The 'curl' tool is not able to hanlde this.
-The Bridge might support this in the future also, but not at present.
  
- 
+
 
 Donations Welcome! NXT-LHVV-9ES7-RVHU-3R7HG
 

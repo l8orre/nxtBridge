@@ -22,7 +22,10 @@ run bitcoind with rpc enabled
 run NRS (NXT server)
 run nxtBridge.py [args]
 
-args: [ testNet/mainNet, filename for wallet.dat, ...]
+args: [nxtNET, walletFile]
+
+nxtNET = testNet or mainNet           default: testNet
+walletFile = filename for nxtWallet   default: nxtWallet.dat
 
 
 
@@ -125,11 +128,71 @@ validateaddress		# OK
 
 
 
-Note: 
+Wallet emulation
+----------------
 
-NXT does not have a 'wallet' feature, the Bridge emulates a wallet-like database.
-The Bridge internally maintains an sqlite3 database to do this.
-Recommended handling of cryptographic keys will be documented in an upcoming version. 
+DISCLAIMER
+OBSERVE THE FOLLOWING SECURITY MEASURES:
+
+1: PREVENT SECURITY BREACHES OF YOUR OPERATIONAL ENVIRONMENT.
+2: PREVENT LOSS OF THE WALLET FILE.
+
+THE SQLITE3 DATABASE THAT CONTAINS THE NXT PASSWORDS FOR THE NXT ACCOUNTS ARE STORED WITHOUT ENCRYPTION IN THE SQLITE3 DATABASE FILE.
+A SECURITY BREACH OF THE OPERATIONAL ENVIRONMENT MAY LEAD TO THEFT OF FUNDS HELD IN THESE ACCOUNTS.
+PASSWORD PROTECTION OF THE SQLITE3 DATABASE CAN BE ADDED EASILY BY ANYBODY WITH MODERATE PYTHON PROFICIENCY.
+HENCE, PREVENT SECURITY BREACHES OF YOUR OPERATIONAL ENVIRONMENT.
+
+LOSS OF THE WALLET FILE LEADS TO LOSS OF ACCESS TO THE NXT FUNDS REPRESENTED BY THE NXT PASSPHRASES.
+HENCE, PREVENT LOSS OF THE WALLET FILE.
+
+
+NXT does not have a 'wallet' feature as bitcoin does.
+nxtBridge emulates this by maintaining a bitcoin-wallet-like database (sqlite3).
+
+The filename can be supplied at startup, and if THE corresponding sqlite3.db does not exist, it will be created.
+If the wallet.dat sqlite3 db already exists, it will be continued.
+
+Since extensive use of the 'accounts' feature is somewhat discouraged by the bitcoin developers,
+nxtBridge makes a slight restriction on its use.
+
+nxtBridge enforces a strict 1-1 mapping of the arbitrary account names against the NXT addresses.
+
+The first account that is created automatically upon the creation of nxtWallet will be "" the an account
+that is associated with the empty string.
+
+Subsequent calls to the 'getnewaddress' must supply an account name that does not yet exist in nxtWallet.
+If an account name is supplied with the 'getnewaddress' call that already exists, an error will be returned.
+
+
+
+
+
+getbalance
+----------
+without parameter returns the sum of the balances of all NXT addresses in the wallet
+with "" as parameter return the balance of the NXT address associated with the account named by the empty string ""
+with "accountName" as parameter return the balance of the NXT address associated with the account named "accountName"
+
+
+./bitcoind -rpcport=7879 getbalance 2865886802744497404 1
+
+listunspent
+-----------
+without parameter returns list of balances of all NXT addresses in the wallet from the NXT blockchain
+with a  parameter (=nxtAddress) returns the balance of the NXT address from the NXT blockchain.
+
+
+getreceivedbyaccount
+--------------------
+returns the sum of all payments received by this address and the associated account
+
+getreceivedbyaddress
+--------------------
+returns the sum of all payments received by this address and the associated account
+
+
+
+
 
 
 
@@ -138,10 +201,6 @@ These have been tested on Ubuntu13.10
 
 
 
-some examples using bitcoind as jsonrpc relay:
-----------------------------------
- 
-./bitcoind -rpcport=7879 getbalance 2865886802744497404 1
 
 ./bitcoind -rpcport=7879 getconnectioncount
 

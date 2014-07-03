@@ -43,22 +43,15 @@ from operator import mod as opmod
 
 # jsonrpc stuff
 from requests import Request as Req
-from requests import Response  as Resp
 from requests import Session
-import requests 
-
 
 from werkzeug.wrappers import  Response ,Request
 from werkzeug.serving import run_simple
 
 from jsonrpc import JSONRPCResponseManager, dispatcher
 
-import sys
-
-
 import sqlite3 as sq
- 
- 
+
     
 
 class nxtUseCaseMeta(QObject):
@@ -84,170 +77,48 @@ class nxtUseCaseMeta(QObject):
  
 
 class UC_Bridge1(nxtUseCaseMeta):
-    """
-       
-            
-            
-            
-tested examples for the BTC-NXT mappings implemented below, 
-using two different curl syntax methods.
-
-
- 
-using bitcoind as jsonrpc relay:
-----------------------------------
-note: bitcoind does not seem to deliver well formed jsonrpc! 
-
-
-TESTNET:
-
-./bitcoind -rpcport=7879 getbalance 2865886802744497404 1
-50068.83570152
-
-
-./bitcoind -rpcport=7879 getconnectioncount
-46
-
-
-./bitcoind -rpcport=7879 getinfo
-{
-    "timeoffset" : 0,
-    "keypoolsize" : 290386944,
-    "paytxfee" : 0.00000000,
-    "balance" : 0.00000000,
-    "blocks" : 115901,
-    "errors" : "",
-    "protocolversion" : "1.1.4",
-    "testnet" : false,
-    "difficulty" : "2504768413821209",
-    "keypoololdest" : 834666496,
-    "walletversion" : "1.1.4",
-    "connections" : 46,
-    "version" : "1.1.4",
-    "proxy" : ""
-}
-
-
-
-
-./bitcoind -rpcport=7879 getreceivedbyaccount 2865886802744497404
-50069.83570152
-
-
-./bitcoind -rpcport=7879 getreceivedbyaddress 2865886802744497404
-50069.83570152
-
-
-
-./bitcoind -rpcport=7879 gettransaction 1448848043607985937
-{
-    "timereceived" : 13323520,
-    "txid" : "1448848043607985937",
-    "time" : 13323520,
-    "details" : [
-        {
-            "account" : "16159101027034403504",
-            "address" : "2865886802744497404",
-            "amount" : 3.00000000,
-            "category" : "receive"
-        }
-    ],
-    "confirmations" : 34860,
-    "amount" : 3.00000000
-}
-
-
-
-./bitcoind -rpcport=7879 sendfrom xxxxxxxxxx 16159101027034403504 1.98765432 1 comm1 commTo 
-
-
-
-./bitcoind -rpcport=7879 gettransaction 13184500470311816723
-
-
-
- ./bitcoind -rpcport=7879 sendfrom 14oreosetc14oreosetc 16159101027034403504 1.2340 1 comm1 commTo 
-{
-    "txid" : "11564054352935906995"
-}
-
-./bitcoind -rpcport=7879 sendfrom XXXXXXXXXXXXXXXX 16159101027034403504 1.2340 1 comm1 commTo 
-{
-    "txid" : "2732068724802022093"
-}
-
-
-
-./bitcoind -rpcport=7879 settxfee
-{
-    "settxfee" : "n/a"
-}
-
-
-./bitcoind -rpcport=7879 validateaddress   xxxxxxxxxxxx
-{
-    "ismine" : true,
-    "address" : "2865886802744497404",
-    "isvalid" : true
-}
-
-
- 
-
-            """
-  
-
-
 
 
 
    #     self.uc_bridge = nxtUC_Bridge.UC_Bridge1(self, self.qPool, host, port, self.bridgeLogger, self.consLogger, DB  )
        
-    def __init__(self, sessMan, host = 'localhost', port = '6876',bridgeLogger=None , consLogger=None, DB=None  ):
+    def __init__(self, sessMan, host = 'localhost', port = '6876',bridgeLogger=None , consLogger=None, DBs=None  ):
         super(UC_Bridge1   , self   ).__init__(sessMan)
         self.sessMan = sessMan
         self.qPool = sessMan.qPool
         self.meta = {'caller':'Bridge1'}
-        defPass17 = '0'                     #### THIS GOES TO SESSMAN- WALLET!
-        acctSecKey = defPass17                      #### THIS GOES TO SESSMAN- WALLET!
         self.bridgeLogger = bridgeLogger
         self.consLogger = consLogger
-        
+
+
         #        lg.info('nxtBridge listening on host %s : port %s', host, port)
-        
-        self.mm = BridgeThread( self.qPool, host  , port ,  bridgeLogger,  consLogger ,DB )
-         
-         
-         
- 
+        self.mm = BridgeThread( self.qPool, host  , port ,  bridgeLogger,  consLogger ,DBs )
+
  
 class BridgeThread(QObject):
     """ 2680262203532249785 nxt genesis block """
     # housekeeping of the threads may have to be taken care of
     
     
-    def __init__(self, qPool, host, port, bridgeLogger, consLogger, DB ):
+    def __init__(self, qPool, host, port, bridgeLogger, consLogger, DBs ):
         # check : is this the same as calling super(BridgeThread, etc) ???????
         super(QObject, self).__init__( parent = None)
-        self.DB=DB
+        self.DBs=DBs
         self.qPool = qPool
         self.host = host
         self.port = port
         self.bridgeLogger = bridgeLogger
         self.consLogger = consLogger
-         
+        self.walletDB = DBs[0]
+        self.blockDB  = DBs[1]
+
     
     
     @pyqtSlot() # 61
     def jsonServ_Slot(self, ):
-        
-        self.json_Runner = JSON_Runner( self.host, self.port, self.bridgeLogger, self.consLogger , self.qPool, self.DB) # json_Emitter, self to THIS !!!!!!
+        """-"""
+        self.json_Runner = JSON_Runner( self.host, self.port, self.bridgeLogger, self.consLogger , self.qPool, self.DBs) # json_Emitter, self to THIS !!!!!!
         self.json_Runner.setAutoDelete(False) 
-        #self.json_Runner.run() #start()
-        
-        #self.consLogger.info('jsonStr= %s ', jsonStr )
-        self.consLogger.info('  self.qPool.activeThreadCount() = %s ', str(   self.qPool.activeThreadCount()) )
-        
         self.qPool.start(self.json_Runner)
         self.consLogger.info('  self.qPool.activeThreadCount() = %s ', str(   self.qPool.activeThreadCount()) )
             
@@ -258,13 +129,18 @@ class JSON_Runner(QtCore.QRunnable):
     """- This is what needs to be put into the QThreadpool """
     nxtApi = nxtApi
     
-    def __init__(self,   host = 'localhost', port = '6876', fileLogger = None, consLogger = None , qPool=None, DB=None ): #emitter, 
+    def __init__(self,   host = 'localhost', port = '6876', fileLogger = None, consLogger = None , qPool=None, DBs=None ): #emitter,
         super(QtCore.QRunnable, self).__init__()
         global session # this must be global to be accessible from the dispatcher methods
         session = Session()
         headers = {'content-type': 'application/json'}
         sessUrl = 'http://' + host + ':' + port + '/nxt?' 
         global NxtReq
+
+        self.walletDB = DBs[0]
+        self.blockDB  = DBs[1]
+
+
         
         # !!!! use a dedicated DBTrhead later on. Will be no problem! For now, make cursor objects as needed in the QTHreapool runnables
         # self.blockDBConn = DB[0]
@@ -274,6 +150,9 @@ class JSON_Runner(QtCore.QRunnable):
         self.bridgeLogger = fileLogger
         self.consLogger = consLogger
         self.qPool = qPool
+
+
+
         
   
   
@@ -310,35 +189,25 @@ class JSON_Runner(QtCore.QRunnable):
 #
 # Function Calls implemented below
 # Numbers as per appeearance in listing of bitcoind help 
-   
+#
+# getbalance	    	# under revision
+# getbestblockhash   	# OK
+# getblock	        	# OK
+# getblockcount	    	# OK
+# getblockhash		    # OK
+# getconnectioncount	# OK
+# getinfo		    	# OK
+# getnewaddress	    	# under revision
+# getreceivedbyaccount	# under revision
+# getreceivedbyaddress	# under revision
+# listsinceblock		# under revision
+# listunspent		   # under revision
+# gettransaction		# OK
+# sendfrom		       # under revision
+# sendtoaddress	    	# under revision
+# settxfee		        # OK (n/a)
+# validateaddress		# OK
 
-# 14 getbalance               <.-.-.-. access wallet: account - addrress mapping
-# 21 getconnectioncount
-# 25 getinfo 
-
-# 33 getreceivedbyaccount    <.-.-.-. access wallet: iterate over ALL TXs in NXT acct(s) and sum the INCOMING NXT TXs
-# 34 getreceivedbyaddress    <.-.-.-. access wallet: iterate over ALL TXs in NXT acct and sum the INCOMING NXT TXs
-
-# 35 gettransaction
-# 52 sendfrom                    <.-.-.-. access wallet: simply map acct->addr. ultimatley sendfrom sends from address
-# 58 settxfee
-# 63 validateaddress
-
-# 15 getbestblockhash 
-# 16 getblock          
-# 17 getblockcount   
-# 18 getblockhash      <------- db: height-blockaddress OK!   
-
-
-# missing
-
-# getnewaddress              <.-.-.-. access wallet
-
-# sendtoaddress                  <.-.-.-. access wallet
-
-# listunspent             <.-.-.-. access wallet
-
-# listsinceblock
 
  
   
@@ -355,47 +224,7 @@ class JSON_Runner(QtCore.QRunnable):
   
     @dispatcher.add_method
     def getbalance( **kwargs):
-        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
-        1   getbalance
-        
-        2   [account] [minconf=1]	
-        
-        3   If [account] is not specified, returns the server's total available balance.
-            If [account] is specified, returns the balance in the account.
-        
-        4   N	
-        
-        5   Y	
-        
-        6   return is a float 0.00000000
 
-        7   http://localhost:7876/nxt?requestType=getBalance&account=ACCOUNT	
-
-        8   {
-            "unconfirmedBalanceNQT": UNCONFBALANCENQT,
-            "effectiveBalanceNXT": EFFBALANCENXT,
-            "balanceNQT": BALANCENQT
-            }	
-
-        9   here we use the account to pass in an NXT account number so you can enquire any account and dont need the secret phrase
-            run this command for the specified nxt account return the BALANCENQT - <account> is required
-        
-        EXAMPLE:
-                 
-        curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getbalance", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}' http://localhost:7879/jsonrpc
-        
-        HTTP/1.0 200 OK
-        Content-Type: application/json
-        Content-Length: 81
-        Server: Werkzeug/0.9.4 Python/3.4.0
-        Date: Tue, 27 May 2014 13:10:34 GMT
-        
-        {"result": {"16159101027034403504": "4061839895698"}, "id": 12, "jsonrpc": "2.0"}azure@boxfish:~/workbench/nxtDev/BRIDGE$ 
-
-
-
-
-        """
         # only gets 'params' - but jsonHandler needs full json
         ACCOUNT = kwargs["account"] #kwargs['account']
         
@@ -438,13 +267,7 @@ class JSON_Runner(QtCore.QRunnable):
  
     @dispatcher.add_method
     def getbestblockhash( **kwargs):
-        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
-         
-         ./bitcoind -rpcport=7879 getbestblockhash
-         1639453107654839557
 
-
-        """
 
         # 2 calls: gestate first, then getBlock!!
         payload = { "requestType" : "getState" }  
@@ -477,39 +300,6 @@ class JSON_Runner(QtCore.QRunnable):
 
     @dispatcher.add_method
     def getblock( **kwargs):
-        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
-            ./bitcoind -rpcport=7879 getblock 8461367503743142254
-            {
-                "confirmations" : 1,
-                "tx" : [
-                    "9427743273145010700",
-                    "9468719975072532448",
-                    "9560907929335947693",
-                    "10507706072875875119",
-                    "11864667946939877596",
-                    "12386165826869904583",
-                    "199053848968879261",
-                    "1294424573372804181",
-                    "1823350660510498915",
-                    "2651053493336681749"
-                ],
-                "chainwork" : "52a6360cc4529b5e07ef1d4b89eee37325a58544f4b9915c934b01fe7d067318",
-                "hash" : "8461367503743142254",
-                "difficulty" : "791103364",
-                "version" : 3,
-                "time" : 17715368,
-                "bits" : "6785084810899231190",
-                "merkleroot" : "91cdadd1f271da60268b11c72cb21fe69806cbbdb22f4f3e6a2021517d04160b1258f45122a15003fbe68eb8f0875fc08770286cc59c3226cb57fe451e73bfd0",
-                "nonce" : "4495bad149d538014216d6ed4e05ecb7631036c1ddd80b090542d7ddbefee387",
-                "nextblockhash" : "18019781220699116575",
-                "height" : 163456,
-                "size" : 1857,
-                "previousblockhash" : "12614315688190262655"
-            }
-
-
-
-        """
 
         # 2 calls: gestate first, then getBlock!!
         payload = { "requestType" : "getBlock" }  
@@ -597,14 +387,7 @@ class JSON_Runner(QtCore.QRunnable):
  
     @dispatcher.add_method
     def getblockcount( **kwargs):
-        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
-         
-         ./bitcoind -rpcport=7879 getblockcount
-         163467
-
-
-        """
-        payload = { "requestType" : "getState" }  
+        payload = { "requestType" : "getState" }
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
         
@@ -688,50 +471,7 @@ class JSON_Runner(QtCore.QRunnable):
    
     @dispatcher.add_method
     def getconnectioncount( **kwargs):
-        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
-        
-        
-        1    getconnectioncount		
-        
-        2
-        
-        3    Returns the number of connections to other nodes.	
-        
-        4   N	
-        
-        5   Y	
-        
-        6       returns int of number of connections	
-        
-        7       ? requestType=getState	
-        
-        8       {
-        "numberOfPolls": NUMPOLLS,
-        "numberOfVotes": NUMVOTES,
-        "numberOfTrades": NUMTRADES,
-        "lastBlock": "LASTBLOCKID",
-        "numberOfAliases": NUMALIASES,
-        "lastBlockchainFeeder": "FEEDERPEER",
-        "numberOfBlocks": HEIGHT,
-        "numberOfPeers": NUMPEERS
-        "totalMemory": CURMEMORY,
-        "freeMemory": FREEMEMORY,
-        "maxMemory": MAXMEMORY,
-        "numberOfTransactions": NUMTRANS,
-        "numberOfUnlockedAccounts": NUMUSERS,
-        "version": "VERSION",
-        "numberOfOrders": NUMORDERS,
-        "totalEffectiveBalanceNXT": EFFECTIVEBALANCE
-        "time": TIME,
-        "availableProcessors": NUMPROCESSORS,
-        "numberOfAssets": NUMASSETS,
-        "cumulativeDifficulty": "CUMEDIFF"
-        "numberOfAccounts": NUMACCOUNTS
-        }	
-        
-        9   return numberOfPeers
-        
-        """
+
         payload = { "requestType" : "getState" }  
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
@@ -753,89 +493,7 @@ class JSON_Runner(QtCore.QRunnable):
 # 25 getinfo 
     @dispatcher.add_method
     def getinfo( **kwargs):
-        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
-        
-        1        getinfo
-        
-        2        None
-        
-        3        Returns an object containing various state info.
-        
-        4        N
-        
-        5        Y
-        
-        6        Returns JSON as follows
-        
-        {
-        "version" : 80300,
-        "protocolversion" : 70001,
-        "walletversion" : 60000,
-        "balance" : 0.00000000,
-        "blocks" : 253584,
-        "timeoffset" : -5,
-        "connections" : 13,
-        "proxy" : "",
-        "difficulty" : 50810339.04827648,
-        "testnet" : false,
-        "keypoololdest" : 1373494595,
-        "keypoolsize" : 101,
-        "paytxfee" : 0.00000000,
-        "errors" : ""
-        }	
-        
-        7        ? requestType=getState	
-        
-        8        {
-        "numberOfPolls": NUMPOLLS,
-        "numberOfVotes": NUMVOTES,
-        "numberOfTrades": NUMTRADES,
-        "lastBlock": "LASTBLOCKID",
-        "numberOfAliases": NUMALIASES,
-        "lastBlockchainFeeder": "FEEDERPEER",
-        "numberOfBlocks": HEIGHT,
-        "numberOfPeers": NUMPEERS
-        "totalMemory": CURMEMORY,
-        "freeMemory": FREEMEMORY,
-        "maxMemory": MAXMEMORY,
-        "numberOfTransactions": NUMTRANS,
-        "numberOfUnlockedAccounts": NUMUSERS,
-        "version": "VERSION",
-        "numberOfOrders": NUMORDERS,
-        "totalEffectiveBalanceNXT": EFFECTIVEBALANCE
-        "time": TIME,
-        "availableProcessors": NUMPROCESSORS,
-        "numberOfAssets": NUMASSETS,
-        "cumulativeDifficulty": "CUMEDIFF"
-        "numberOfAccounts": NUMACCOUNTS
-        }	
-        
-        9        Returns JSON as follows
-        
-        {
-        "version" : VERSION,
-        "protocolversion" : VERSION,
-        "walletversion" : VERSION,
-        "balance" : 0.00000000,
-        "blocks" : HEIGHT,
-        "timeoffset" : 0,
-        "connections" : NUMPEERS,
-        "proxy" : "",
-        "difficulty" : CUMEDIFF,
-        "testnet" : false,
-        "keypoololdest" : CURMEMORY,
-        "keypoolsize" : FREEMEMORY,
-        "paytxfee" : 0.00000000,
-        "errors" : ""
-        }
-        
-        EXAMPLES:
-        
-        curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"getinfo","params":[]}' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
-
-        curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getinfo", "params": { "": "","":""}, "id": 7}' http://localhost:7879/jsonrpc
-
-        """
+        print("\ngetinfo\n")
         # it is possible to iclude the parent object namespace (runner) in the kwargs to have access!
         #self = kwargs['Runner']
         
@@ -937,53 +595,7 @@ class JSON_Runner(QtCore.QRunnable):
          
     @dispatcher.add_method
     def getreceivedbyaccount( **kwargs):
-        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
-                 
-        1   getreceivedbyaccount	
-        
-        2   [account] [minconf=1]	
-        
-        3   Returns the total amount received by addresses with [account] in transactions with at least [minconf] confirmations. If [account] not provided return will include all transactions to all accounts. (version 0.3.24)
-        
-        4   N	
-        
-        5   Y	
-        
-        6   account=walletaccountnumber, minconf=10, returns float 0.00000000	
-        
-        7   http://localhost:7876/nxt?
-        requestType=getBalance&
-        account=ACCOUNT
-        
-        8	
-        
-        {
-        "guaranteedBalanceNQT": "GUARANTEED_BALANCE",
-        "balanceNQT": "BALANCENQT",
-        "effectiveBalanceNXT": EFFBALANCENXT,
-        "unconfirmedBalanceNQT": "UNCONFBALANCENQT",
-        "forgedBalanceNQT": "FORGEDBAL"
-        }	
-        
-        9   Pass in the nxt account number and return GUARANTEED_BALANCE as float
-
-
-        EXAMPLES:
-        
-        curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"getreceivedbyaccount","params":  {"account":"16159101027034403504"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
-
-        {"result": {"16159101027034403504": 4061839895698.0}, "id": "curltext", "jsonrpc": "2.0"}
-
-
-        
-        curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getreceivedbyaccount", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}' http://localhost:7879/jsonrpc
-        
-        {"result": {"16159101027034403504": 4061839895698.0}, "id": 12, "jsonrpc": "2.0"}
-
-
-
-        """
-        #print("getreceivedbyaccount" +str(kwargs))   
+        #print("getreceivedbyaccount" +str(kwargs))
         ACCOUNT = kwargs["account"] #kwargs['account']
         payload = { "requestType" : "getBalance" } #getTime"   }
         NxtApi = {}
@@ -1013,67 +625,7 @@ class JSON_Runner(QtCore.QRunnable):
  
     @dispatcher.add_method
     def getreceivedbyaddress( **kwargs):
-        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
-             
-             
-                     
-        
-        1   getreceivedbyaddress	
-        
-        2   <bitcoinaddress> [minconf=1]	
-        
-        3   Returns the amount received by <bitcoinaddress> in transactions with at least [minconf] confirmations. It correctly handles the case where someone has sent to the address in multiple transactions. Keep in mind that addresses are only ever used for receiving transactions. Works only for addresses in the local wallet, external addresses will always show 0.
-        
-        4   N
-        
-        5   Y	
-        
-        6   address=bitcoinaddress, minconf=10, returns float 0.00000000	
-        
-        7   http://localhost:7876/nxt?
-        requestType=getAccountId&
-        secretPhrase=PASSPHRASE
-        Followed by
-        http://localhost:7876/nxt?
-        requestType=getBalance&
-        account=ACCOUNT	
-        
-        8   Use bitcoinaddress as the secret phrase to return the NXT account ID
-        
-        {
-        "GUARANTEED_BALANCE",
-        "GUARANTEED_BALANCE",
-        "BALANCENQT",
-        "BALANCENQT",
-        EFFBALANCENXT,
-        EFFBALANCENXT,
-        "unconfirmedBalanceNQT": "UNCONFBALANCENQT",
-        "FORGEDBAL"
-        "FORGEDBAL"
-        }	
-        
-        9   In this model I have mapeed bitcoinaddress as the NXT secretphrase passed to the server return GUARANTEED_BALANCE as float
-        
-        
-        
-        EXAMPLES:
-        
-        
-        curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"getreceivedbyaddress","params":  {"account":"16159101027034403504"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
-        
-        {"jsonrpc": "2.0", "id": "curltext", "result": {"16159101027034403504": 4061839895698.0}}
-
-
-        
-        curl -i -X POST -d '{"jsonrpc": "2.0", "method": "getreceivedbyaddress", "params": {"account":"16159101027034403504","minconf":"1"}, "id": 12}' http://localhost:7879/jsonrpc
-        
-        {"jsonrpc": "2.0", "id": 12, "result": {"16159101027034403504": 4061839895698.0}}
-
-
-
-
-        """
-        #print("getreceivedbyaddress" +str(kwargs))   
+    #print("getreceivedbyaddress" +str(kwargs))
         ACCOUNT = kwargs["account"] #kwargs['account']
         payload = { "requestType" : "getBalance" } #getTime"   }
         NxtApi = {}
@@ -1101,198 +653,7 @@ class JSON_Runner(QtCore.QRunnable):
         
     @dispatcher.add_method
     def gettransaction( **kwargs):
-        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
-                 
-        1   gettransaction	
-        
-        2   <txid>	
-        
-        3   Returns an object about the given transaction containing:
-        "amount" : total amount of the transaction
-        "confirmations" : number of confirmations of the transaction
-        "txid" : the transaction ID
-        "time" : time associated with the transaction[1].
-        "details" - An array of objects containing:
-        "account"
-        "address"
-        "category"
-        "amount"
-        "fee"
-        
-        4   N
-        
-        5   Y
-        
-        6	{
-        "amount" : 0.05000000,
-        "confirmations" : 0,
-        "txid" : "9ca8f969bd3ef5ec2a8685660fdbf7a8bd365524c2e1fc66c309acbae2c14ae3",
-        "time" : 1392660908,
-        "timereceived" : 1392660908,
-        "details" : [
-        {
-        "account" : "",
-        "address" : "1hvzSofGwT8cjb8JU7nBsCSfEVQX5u9CL",
-        "category" : "receive",
-        "amount" : 0.05000000
-        }
-        ]
-        }
-        
-        7	http://localhost:7876/nxt?
-        requestType=getTransaction&
-        transaction=TRANSID<txid>	{
-        
-        8   "sender": "SENDERACCOUNT",
-        "senderRS": "SENDERACCOUNTRS",
-        "feeNQT": "FEE",
-        "amountNQT": "AMOUNT",
-        "timestamp": TIME,
-        "referencedTransaction": REFTX,
-        "confirmations": CONFIRMS,
-        "subtype": SUBTYPE,
-        "block": "BLOCKID",
-        "senderPublicKey": "PUBKEY",
-        "type": TYPE,
-        "deadline": DEADLINE,
-        "signature": "SIGNATURE",
-        "recipient": "RECIPACCOUNT",
-        "recipientRS": "RECIPACCOUNTRS",
-        "fullHash": "FULLHASH", 
-        "signatureHash": "SIGHASH", 
-        "hash": "HASH", 
-        "transaction": "TRANSID", 
-        "attachment":
-        {
-        ATTACHMENT
-        }
-        }	
-        
-        9   Pass in a NXT tx id previously obtained and get information on the confirmation status of that.
-        {
-        "amount" : float(AMOUNT),
-        "confirmations" : CONFIRMS,
-        "txid" : TRANSID
-        "time" : TIME,
-        "timereceived" : TIME,
-        "details" : [
-        {
-        "account" : “”,
-        "address" : RECIPACCOUNT 
-        "category" : "receive",
-        "amount" : AMOUNT
-        }
-        ]
-        }
-         
-        
-        ./bitcoin-cli help gettransaction
-        gettransaction "txid"
-        
-        Get detailed information about in-wallet transaction <txid>
-        
-        Arguments:
-        1. "txid"    (string, required) The transaction id
-        
-        Result:
-        {
-          "amount" : x.xxx,        (numeric) The transaction amount in btc
-          "confirmations" : n,     (numeric) The number of confirmations
-          "blockhash" : "hash",  (string) The block hash
-          "blockindex" : xx,       (numeric) The block index
-          "blocktime" : ttt,       (numeric) The time in seconds since epoch (1 Jan 1970 GMT)
-          "txid" : "transactionid",   (string) The transaction id, see also https://blockchain.info/tx/[transactionid]
-          "time" : ttt,            (numeric) The transaction time in seconds since epoch (1 Jan 1970 GMT)
-          "timereceived" : ttt,    (numeric) The time received in seconds since epoch (1 Jan 1970 GMT)
-          "details" : [
-            {
-              "account" : "accountname",  (string) The account name involved in the transaction, can be "" for the default account.
-              "address" : "bitcoinaddress",   (string) The bitcoin address involved in the transaction
-              "category" : "send|receive",    (string) The category, either 'send' or 'receive'
-              "amount" : x.xxx                  (numeric) The amount in btc
-            }
-            ,...
-          ],
-          "hex" : "data"         (string) Raw data for transaction
-        }
-          
-        
-        BITCOIN TX REPLY:
-        curl --user 'rpcNxtBitcoin:4JLstlAJ6gJyV1DHv2' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"gettransaction","params":["f0b20213346b14361795a9a387ac28078dc9a8a14fd9ced4f7b32eab9966820f"]}' -H 'content-type:text/plain;' http://127.0.0.1:8332
-        {"result":{
-        
-        "amount":-0.00010000,
-        "fee":-0.00010000,
-        "confirmations":5521,
-        "blockhash":"0000000000000000091ae589c034bc0466e2feca51dc018bb2c3303e8ab8648b",
-        "blockindex":156,
-        "blocktime":1398350348,
-        "txid":"f0b20213346b14361795a9a387ac28078dc9a8a14fd9ced4f7b32eab9966820f",
-        "walletconflicts":[],
-        "time":1398349976,
-        "timereceived":1398349976,
-        "details":[
-        		{"account":"",
-                   "address":"19SCQ8fWR4sChAPwbfNACsv1s6CNspF6Yh",
-                   "category":"send",
-                   "amount":-0.00010000,
-                   "fee":-0.00010000}
-        
-        ],
-        "hex":"0100000001033e27a990fe6f3dba62493dcd59b16405dab0bcf2bdcf9b098b613dfb614790010000006b483045022100f61632e64c9b47a70445166bb5de5bae6d8d099ba96ac0d1219842ac2fdb6c0902204be319107f76dee45e5332a10202c6152da7c0391e91397c273d036b95c4d88d01210272518a71e864d296ca61efd5bd8be6061afa70248462c958b58f52afaff6b688ffffffff0250c30000000000001976a9147fa916934255d62febf440a3fad445e1d743d95a88ac10270000000000001976a9145c84ebab10bdf995178e972e5aac94c6b1c5405688ac00000000"},
-        "error":null,
-        "id":"curltext"
-        }
 
-
-
-
-
-         Nxt testNet TX: 1448848043607985937
-              
-        
-        
-        Nxt full getTransaction reply:
-        
-        {
-            "fullHash": "110fc68c9e571b14bb05bcd7d64aea5ae342a4fa80f32deb85be4bdf285ef8d4",
-            "confirmations": 29448,
-            "signatureHash": "8169819b0f3f6e950db238ba5dab2c7080b5754c2630eb4d4b3ebdf8639e65d6",
-            "transaction": "1448848043607985937",
-            "amountNQT": "300000000",
-            "block": "9383935361491353106",
-            "recipientRS": "NXT-3P9W-VMQ3-9DRR-4EFKH",
-            "type": 0,
-            "feeNQT": "100000000",
-            "recipient": "2865886802744497404",
-            "sender": "16159101027034403504",
-            "timestamp": 13323520,
-            "height": 81053,
-            "subtype": 0,
-            "senderPublicKey": "f9cecd0a2d38afcb4a799ec7e7c718ce451053bd2a2924c15fbd5922aa915825",
-            "deadline": 180,
-            "blockTimestamp": 13323576,
-            "senderRS": "NXT-L6PJ-SMZ2-5TDB-GA7J2",
-            "signature": "b210c5b3e1fa28c9aa5c5fd05d2e6ca64869b191d3d4bc04369f06ffdcffc8044fce36f2825b155ba2be9eeef10a1644306609c965632e638598ee954684c86e"
-        }
-        
-        
-                
-        EXAMPLES:
-        
-        curl -i -X POST -d '{"jsonrpc": "2.0", "method": "gettransaction", "params": {"txid":"1448848043607985937"}, "id": 12}' http://localhost:7879/jsonrpc
-        
-        {"result": {"amount": 300000000.0, "details": [{"amount": 300000000.0, "account": "16159101027034403504", "category": "receive", "address": "2865886802744497404"}], "time": 13323520, "timereceived": 13323520, "confirmations": 29471, "txid": "1448848043607985937"}, "jsonrpc": "2.0", "id": 12} 
-        
-        
-        curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"gettransaction","params":  {"txid":"1448848043607985937"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
-        
-        {"result": {"amount": 300000000.0, "details": [{"amount": 300000000.0, "account": "16159101027034403504", "category": "receive", "address": "2865886802744497404"}], "time": 13323520, "timereceived": 13323520, "confirmations": 29473, "txid": "1448848043607985937"}, "jsonrpc": "2.0", "id": "curltext"}
- 
-
-
-        """
-        
         TXid = kwargs["txid"] #kwargs['account']
         try:
             TX_hash = kwargs['hash']
@@ -1350,57 +711,6 @@ class JSON_Runner(QtCore.QRunnable):
         
     @dispatcher.add_method
     def sendfrom( **kwargs):
-        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
- 
-            
-            1   sendfrom	
-            
-            2   <fromaccount> <tobitcoinaddress> <amount> [minconf=1] [comment] [comment-to]	
-            
-            3   <amount> is a real and is rounded to 8 decimal places. Will send the given amount to the given address, ensuring the account has a valid balance using [minconf] confirmations. Returns the transaction ID if successful (not in JSON object).	
-            
-            4   Y	
-            
-            5   N	
-            
-            6   { “txid” : “<txid>” }	
-            
-            7   http://localhost:7876/nxt?
-            requestType=sendMoney&
-            secretPhrase=<fromaccount>&
-            recipient=<tobitcoinaddress>& 
-            amountNQT=<amount>& 
-            feeNQT=(from set tx fee)& 
-            deadline=(default 1440)	
-            
-            8   { 
-            "transaction": "TRANSACTIONID" 
-            }	
-            
-            9   Would have preferred a better bitcond call here as I swap the use of accont and address but I dont see any other option
-            use the <fromaccount> to pass the secretphrase for the NXT account, <tobitcoinaddress> becomes the nxt account number, need to convert the float amount into NQT the fee should be defaulted to the minimum or set using set tx fee command, convert the json to pass back the transaction id
-            # NOTE: THE AMOUNT IS PASSED IN AS NXT.NQT AND IS CONVERTED TO NQT HERE
-            
-            EXAMPLES:
-            
-            curl -i -X POST -d '{"jsonrpc": "2.0", "method": "sendfrom", "params": {"amount":0.00001, "fromaccount":"SECRETPHRASE",  "tobitcoinaddress":"1234567890123456789",  "minconf":1,  "comment":"" , "comment-to":"" }, "id": 12}' http://localhost:7879/jsonrpc
-            
-            {"jsonrpc": "2.0", "id": 12, "result": {"txid": "948172143107956553"}
-            
-            
-            
-            
-            curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"sendfrom","params":  {"amount":0.00003, "fromaccount":"SECRETPHRASE",  "tobitcoinaddress":"1234567890123456789",  "minconf":1,  "comment":"" , "comment-to":"" } }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
-            {"jsonrpc": "2.0", "id": "curltext", "result": {"txid": "16837301710895534070"}}
-            
-            
-            CORRECT INTERNAL NXT SERVER DICT:
-            {'fullHash': 'ce2964c99d93d21688f9755a8bc0b6928f8d01306e5846c0ac9525665e24e42d', 'transaction': '1644539119841585614', 'unsignedTransactionBytes': '00004dfbf3000100f9cecd0a2d38afcb4a799ec7e7c718ce451053bd2a2924c15fbd5922aa915825fcd410ecdcacc527e80300000000000000e1f50500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000', 'signatureHash': '7e7829a740b5c2286eb698ad6dd3b90ce15d56c70b6343135cd548dbb3177aeb', 'transactionBytes': '00004dfbf3000100f9cecd0a2d38afcb4a799ec7e7c718ce451053bd2a2924c15fbd5922aa915825fcd410ecdcacc527e80300000000000000e1f505000000000000000000000000000000000000000000000000000000000000000000000000054cc9b39f8e5644a06976f92883876451b427890763c6f38746fd8fe27a85022e6bd35254e937fa321083835ed5034e7ca9fb7c3987627066408720077a434b', 'broadcasted': True}
-            
-            127.0.0.1 - - [28/May/2014 15:33:02] "POST /jsonrpc HTTP/1.1" 200 -
-
-            """
-
 
  
         payload = { "requestType" : "sendMoney" }  
@@ -1458,34 +768,6 @@ class JSON_Runner(QtCore.QRunnable):
  
     @dispatcher.add_method
     def settxfee( **kwargs):
-        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
-         
-                 
-                 
-        
-        1   settxfee	
-        
-        2   <amount>	<amount> 
-        
-        3   is a real and is rounded to the nearest 0.00000001	
-        
-        4   N	
-        
-        5   Y	
-        
-        6   returns true	
-        
-        7   no api	
-        
-        8   n/a	
-        
-        9   use to set the default tx fee in nxtcoind
-
-
-        EXAMPLES:
-        
-        """
-        #print("settxfee"+str(kwargs))   
         payload = { "requestType" : "getState" } #getTime"   }
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
@@ -1506,65 +788,7 @@ class JSON_Runner(QtCore.QRunnable):
 
     @dispatcher.add_method
     def validateaddress( **kwargs):
-        """ Mapping Commentary. See keys at [Nxt2Btc_Mapping_Comments] in docstring of def application()
-         
-                 
-        1   validateaddress	
-        
-        2   <bitcoinaddress>	
-        
-        3   Return information about <bitcoinaddress>.	
-        
-        4   N	
-        
-        5   Y	
-        
-        6   {
-            "isvalid" : true,
-            "address" : "168La15SRLLaJBz6zUrxxyDQXU6cnzoHS2",
-            "ismine" : false
-            }
-            
-        7   http://localhost:7876/nxt?
-            requestType=getAccountId& secretPhrase=PASSPHRASEhttp://local
-            
-            Follwed by 
-            
-            Host:7876/nxt?
-            requestType=getAccountPublicKey&
-            account=ACCOUNTNUM	
-        
-        8   {
-            "publicKey": "PUBKEY"
-            }	
-            
-        9   Convert as follows – isvalid=true if pubkey exists, ismine=true as secretphrase is known and address is passed back using secretphrease to be consistent
-            {
-            "isvalid" : IFPUBKEY(true),
-            "address" : "PASSPHRASE",
-            "ismine" : true
-            }
 
-          
-
-        EXAMPLES:
-        
-        
-        curl -i -X POST -d '{"jsonrpc": "2.0", "method": "validateaddress", "params": {"PASSPHRASE":"XXXXXXXXXXXXXXXX"}, "id": 12}' http://localhost:7879/jsonrpc
-        
-        {"jsonrpc": "2.0", "result": {"ismine": true, "address": "16159101027034403504", "isvalid": true}, "id": 12}azure@boxfish:~/workbench/nxtDev/BRIDGE$ ^C
-        
-        
-        
-        curl --user 'anyName:anyPW' --data-binary '{"jsonrpc":"1.0","id":"curltext","method":"validateaddress","params": {"PASSPHRASE":"XXXXXXXXXXXXXXXX"} }' -H 'content-type:text/plain;' http://127.0.0.1:7879/jsonrpc
-        
-        {"jsonrpc": "2.0", "result": {"ismine": false, "address": "16159101027034403504", "isvalid": true}, "id": "curltext"}azure@boxfish:~/workbench/nxtDev/BRIDGE$  
-
-
-
-
-        """
-       
         payload = { "requestType" : "getAccountId" } 
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
@@ -1633,11 +857,50 @@ class JSON_Runner(QtCore.QRunnable):
 
 
      # this is a method that is NOT routed through dispatcher and it can beused also!!!
-    def test(self):
-        pass #print("okokkook")
-        return "ok3"
+
+    @dispatcher.add_method
+    def testC(**kwargs):
+        print("-2-------->"  )
+        print("kwargs: " + str(kwargs))
+        # #{'nxtWalletDB': <nxtPwt.nxtDB.WalletDB_Handler object at 0x7fca49515ca8>, 'bridgeRunner': <nxtPwt.nxtUC_Bridge.JSON_Runner object at 0x7fca46d981f8>}
+        #
+        # bridgeRunner = kwargs['bridgeRunner'] # <nxtPwt.nxtUC_Bridge.JSON_Runner object
+        # nxtWalletDB = kwargs['nxtWalletDB']   #<nxtPwt.nxtDB.WalletDB_Handler object at 0x7fca49515ca8>
+        #
+        #
+        # print("-1-------->"  )
+        walletDB_fName  = "nxtWallet.dat" # NAME OF DB HERE ---------- THIS WILL BE HNADED IN AS KWARGS!!!!
+        walletDBConn = sq.connect(walletDB_fName)
+        print(str(walletDBConn))
+
+        walletDBCur = walletDBConn.cursor()
+        print(str(walletDBCur))
+
+        #walletDBCur.execute("SELECT * FROM   nxtWallet WHERE accountName = ?   ", ( "", )) # WHERE height = ?   ", ( blockHeight, )  )
+        walletDBCur.execute("SELECT * FROM   nxtWallet") # WHERE height = ?   ", ( blockHeight, )  )
+
+        WALLET = walletDBCur.fetchone()
+        #WALLET = WALLET[0]
+        print("-3-------->"  )
+        print("--str(WALLET)------->" +str(WALLET))
+
+        #
+        # self.walletLogger.info('wallet: nxtBridge  : %s ', "in json thread" )
+        # self.walletDB = "nxtWalletDB.dat" # NAME OF DB HERE
+        # self.walletDBConn = sq.connect(self.walletDB)
+        # self.walletDBCur = self.walletDBConn.cursor()
+        # self.walletDBCur.execute("SELECT * from   nxtWallet WHERE accountName = ?   ", ( "", )  )
+        #
+        # wallTemp = self.walletDBCur.fetchone()
+
+
+        return {"testC":str(WALLET)} # WALLET
  
-  
+
+    def test(self):
+        pass
+        return "ok3"
+
  
 
     @Request.application
@@ -1719,16 +982,31 @@ class JSON_Runner(QtCore.QRunnable):
         def parse_getblockhash(jsonParms):
             parmsDi = {} 
             blockHeight = str(jsonParms[0])
-            self.blockHeightDB = "nxtBlockDB.db"
+            #print("test")
+
+            # maybe later this can be done ONCE for the object instance...
+            #self.blockHeightDB = "nxtBlockDB.db"
+            #self.blockDBConn = sq.connect(self.blockHeightDB)
+
+            #self.blockDBCur = self.blockDBConn.cursor()
+
+
+
+
+
+            self.blockHeightDB = "nxtBlockDB.db" # NAME OF DB HERE
             self.blockDBConn = sq.connect(self.blockHeightDB)
             self.blockDBCur = self.blockDBConn.cursor()
-            self.blockDBCur = self.blockDBConn.cursor()
-            self.blockDBCur.execute("SELECT blockAddr from   nxtBlockH_to_Addr WHERE height = ?   ", ( blockHeight, )  )            
+
+            self.blockDBCur.execute("SELECT blockAddr from   nxtBlockH_to_Addr WHERE height = ?   ", ( blockHeight, )  )
+
             blockAddress_from_blockHeight = self.blockDBCur.fetchone()
             blockAddress = blockAddress_from_blockHeight[0]
             parmsDi = {'blockAddress':blockAddress} 
             return parmsDi
- 
+
+
+
         def parse_getconnectioncount(jsonParms):
             parmsDi = {} 
             return parmsDi
@@ -1840,15 +1118,17 @@ class JSON_Runner(QtCore.QRunnable):
         
         
         
-        def parse_test(jsonParms):
-            print(str(jsonParms))
-            parmsDi = {} 
+        def parse_testC(jsonParms):
+            #print(str(jsonParms))
+            parmsDi = {}
+            parmsDi['bridgeRunner'] = self # here we add the walletDB to the parms to hand it into the callback
+
+            parmsDi['nxtWalletDB'] = self.walletDB # here we add the walletDB to the parms to hand it into the callback
             return parmsDi
             #./bitcoind -rpcport=7879 test "" --------------  ['']
             #./bitcoind -rpcport=7879 test "*" ---------      ['*']
 
 
-             
         ##################################################
         #
         # 1 extract details from the incoming request        
@@ -1967,9 +1247,12 @@ class JSON_Runner(QtCore.QRunnable):
             elif bitcoind_method == 'validateaddress':
                 parmsDi = parse_validateaddress(jsonParms)
  
-            elif bitcoind_method == 'test':
-                print("test")
-                parmsDi = parse_test(jsonParms)
+            elif bitcoind_method == 'testC':
+
+                parmsDi = parse_testC(jsonParms)
+                parmsDi = {'testC':'testc_PARMSDI'}
+                print("\nparse json: elif bitcoind_method == 'testC': str(parmsDi) " + str(parmsDi) )
+
                 
             else:
                 parmsDi = {'throwException':'here'}
@@ -2026,7 +1309,26 @@ class JSON_Runner(QtCore.QRunnable):
             response.response[0] = parseResponse
             self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
- 
+
+
+
+        elif bitcoind_method == 'testC':
+            print("\nelif bitcoind_method == 'testC':" + str(response))
+            #print("elif bitcoind_method == 'testC':" + str(response.__dir__()))
+
+            #   parseResponse = eval(response.response[0])
+            # parseResponse --> {'result': {'ACCOUNT': 2547600000000.0}, 'id': 1, 'jsonrpc': '2.0'}
+            #resultJson = parseResponse['result']
+            #amount  = resultJson['ACCOUNT']
+            #parseResponse['result'] = amount
+            #parseResponse = str(parseResponse)
+            #parseResponse = parseResponse.replace( "'",'"')
+            #response.response[0] = parseResponse
+            #print(str(wallTemp))
+            return response
+
+
+
         elif bitcoind_method == 'getbestblockhash':
             # this is the ugly stuff where we butcher the dict, and re-configure a synthetic json response object
             parseResponse = eval(response.response[0])

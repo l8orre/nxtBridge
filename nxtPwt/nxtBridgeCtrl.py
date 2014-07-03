@@ -79,7 +79,6 @@ class Bridge1Ctrl(QObject):
         print("QUITTING - not!?!?!")
         self.app.app.flush()
         self.app.app.emit(SIGNAL("aboutToQuit()") )
-        
         self.app.app.exit(0)
         
         

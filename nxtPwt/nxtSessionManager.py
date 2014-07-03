@@ -61,7 +61,7 @@ connection management.
   """
 
 
-    def __init__(self, app, argv ):# app, self.lastSess
+    def __init__(self, app, argv ):
         """
         sessMan can do things himself.
         But most of the things are done in the UC instances which are clollected here.
@@ -78,11 +78,13 @@ connection management.
         self.qPool=QtCore.QThreadPool.globalInstance()
         self.qPool.setMaxThreadCount(2500) # robustness
 
-        if len(argv) < 2:
-            argv.append('testNet')
     
         runAs = argv[1]
-        
+
+        if len(argv) < 3:
+            argv.append("nxtWallet.dat")
+        walletDB_fName = argv[2]
+
         args={}
         args['runAs'] = runAs
         
@@ -105,19 +107,38 @@ connection management.
         fh.setFormatter(fter)
         self.bridgeLogger.addHandler(fh)
         self.bridgeLogger.info('nxtBridge listening on %s:%s', host, port)
-        #        
+
+
+        self.walletLogger = lg.getLogger('walletLogger')
+        self.walletLogger.setLevel(lg.INFO)
+        fh=lg.FileHandler('wallet.log')
+        fh.setLevel(lg.INFO)
+        fter = lg.Formatter('%(asctime)s - %(message)s')
+        fh.setFormatter(fter)
+        self.walletLogger.addHandler(fh)
+        self.walletLogger.info('nxtwallet: %s',  walletDB_fName)
+
+
+        #
         self.consLogger = lg.getLogger('consoleDebugger')
         self.consLogger.setLevel(lg.INFO)        
         ch = lg.StreamHandler()
         ch.setLevel(lg.DEBUG)
         ch.setFormatter(fh)
         self.consLogger.addHandler(ch)
-         
+
+        self.walletDB_fName = walletDB_fName # filenmae
+
         self.blockDB = nxtDB.BlockDB_Handler(self, host, port, self.consLogger )
-        
-        DB_blockHeights = (0,0)
+
+
+        self.walletDB = nxtDB.WalletDB_Handler(self, walletDB_fName,   self.walletLogger,self.consLogger )
+
+        #self.walletDB
+        DBs = (self.walletDB, self.blockDB)
+
                                                 # self is sessMan!!
-        self.uc_bridge = nxtUC_Bridge.UC_Bridge1(self,  host, port, self.bridgeLogger, self.consLogger, DB_blockHeights  )
+        self.uc_bridge = nxtUC_Bridge.UC_Bridge1(self,  host, port, self.bridgeLogger, self.consLogger, DBs  )
        
 
 

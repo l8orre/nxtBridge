@@ -48,8 +48,9 @@ class BlockDB_Handler(nxtUseCaseMeta): # need to talk to NRS, hence UC derived
         #self.DBLogger = DBLogger
         self.consLogger = consLogger
         self.sessionBlockDB = Session()
-        headers = {'content-type': 'application/json'}
-        sessUrl = 'http://' + host + ':' + port + '/nxt?' 
+        #headers = {'content-type': 'application/json'}
+        #sessUrl = 'http://' + host + ':' + port + '/nxt?'
+
         self.init_BlockDB(host, port,) # the init of the sqlite DB is not supposed to be threaded!
         DB = ( self.blockDBConn, self.blockDBCur)
         # the QTHread dual bundle: Emitter+Runner
@@ -131,7 +132,7 @@ class BlockDB_Handler(nxtUseCaseMeta): # need to talk to NRS, hence UC derived
 
 class BlockDB_Emitter(QObject):
 
-    blockDBSig =  NRSREPLY = pyqtSignal(object  ,object) 
+    blockDBSig = pyqtSignal(object  ,object)
     
     def __init__(self,     consLogger = None  ,  ): #emitter, 
         super(BlockDB_Emitter, self).__init__()
@@ -162,7 +163,7 @@ class BlockDB_Runner(QtCore.QRunnable):
     def blockDBTimer_CB(self,):
         
         #self.consLogger.info('  self.qPool.activeThreadCount() = %s ', str(   self.qPool.activeThreadCount()) )
-         
+
         #self.consLogger.info('fetching new blocks: DBhigh, BChigh')# : %s, %s ', str(highBlockDB) , blockAddrIntoDB )
         #########################################################
         self.NxtReq.params = self.getState         # 1 - getState 
@@ -179,7 +180,7 @@ class BlockDB_Runner(QtCore.QRunnable):
             self.consLogger.info('blockHeightDB is complete!')
             return 0
         self.consLogger.info('getState : %s  ', str(NxtResp) ,   )
-            
+
         # the highest block is already in the DB, and we fecth it from NRS again to get 'nextBlock'!
         self.blockDBCur.execute("SELECT blockAddr from   nxtBlockH_to_Addr WHERE height = ?   ", (highBlockDB,))
         highestBlockAddrDB = self.blockDBCur.fetchone() #all()  
@@ -205,7 +206,7 @@ class BlockDB_Runner(QtCore.QRunnable):
             NxtResp = response.json()
             #########################################################
             highBlockDB = int(NxtResp['height'])
-            blockAddrIntoDB=str(nextBlock) 
+            blockAddrIntoDB=str(nextBlock)
             self.blockDBCur.execute("INSERT INTO nxtBlockH_to_Addr(height, blockAddr) VALUES(?,?)",( highBlockDB, blockAddrIntoDB))
             if opmod( highBlockDB , logIncr) == 0:
                 self.consLogger.info('fetching new blocks: DBhigh, BChigh : %s, %s ', str(highBlockDB) , blockAddrIntoDB )
@@ -240,89 +241,84 @@ class WalletDB_Handler(nxtUseCaseMeta): # need to talk to NRS, hence UC derived
     """ 
     This is a container and manager object for the QThrerasd that checks the blockchain for new blocks."""
    
-    def __init__(self, sessMan,  walletLogger,   consLogger,   ):
-        # check : is this the same as calling super(BridgeThread, etc) ???????
-        super(WalletDB_Handler, self).__init__( parent = None)
+    def __init__(self, sessMan, walletDB_fName =  "nxtWallet.dat", walletLogger = None ,   consLogger =None,   ):
+        super(nxtUseCaseMeta, self).__init__( parent = None)
         self.sessMan = sessMan
         self.qPool = sessMan.qPool # qPool is already in sessMan!
-        #self.DBLogger = DBLogger
         self.consLogger = consLogger
         self.walletLogger = walletLogger
-        
-        self.sessionWalletDB = Session()
-        headers = {'content-type': 'application/json'}
-        sessUrl = 'http://' + host + ':' + port + '/nxt?' 
-        self.init_WalletDB(host, port,) # the init of the sqlite DB is not supposed to be threaded!
+        self.walletDB_fName = walletDB_fName
 
+        self.init_WalletDB() # the init of the sqlite DB is not supposed to be threaded!
+        self.walletPass = None
         DB = ( self.walletDBConn, self.walletDBCur)
         
         # the QTHread dual bundle: Emitter+Runner
         self.walletDB_Emitter = WalletDB_Emitter(   self.consLogger, self.walletLogger )
-        self.walletDBb_Runner = WalletDB_Runner( self.walletDB_Emitter, self.sessionWalletDB, self.sessMan, DB, self.NxtReq, self.consLogger , self.walletLogger  ) #self.DBLogger, ) 
+        self.walletDBb_Runner = WalletDB_Runner( self.walletDB_Emitter, self.sessMan, DB,  self.consLogger , self.walletLogger  ) #self.DBLogger, )
         self.walletDBb_Runner.setAutoDelete(False) 
 
-        self.qPool.start(self.blockDBb_Runner)
+        self.qPool.start(self.walletDBb_Runner)
         
-        self.consLogger.info('  self.qPool.activeThreadCount() = %s ', str(   self.qPool.activeThreadCount()) )
+        self.consLogger.info(' WalletDB_Handler -  self.qPool.activeThreadCount() = %s ', str(   self.qPool.activeThreadCount()) )
+
+
+
          
-         
-    def init_WalletDB(self, host, port):
-        
-        self.sessionBlockDB = Session()
-        self.getBlock= {"requestType" : "getBlock" , "block" : "BLOCKADDRESS" }
-        self.getState= {"requestType" : "getState"}
-        self.walletDB = "nxtWallet.dat" # DEFAULT! - PARSE ARGS FOR OTHER WALLETS!
-        self.walletDBConn = sq.connect(self.walletDB)
+    def init_WalletDB(self, ):
+        self.walletDBConn = sq.connect(self.walletDB_fName)
         self.walletDBCur = self.walletDBConn.cursor()
         try:
-            self.walletDBCur.execute("CREATE TABLE nxtXXX(height INT, blockAddr TEXT)")
-            self.walletDBCur.execute("INSERT INTO nxtXXX(height, blockAddr) VALUES(?,?)",(  0 , "2680262203532249785")) # genesis block
+            # fetch "" ACCOUNT HERE FROM NXT ALREADY??
+            self.walletDBCur.execute("CREATE TABLE nxtWallet(accountName TEXT, nxtAddressNumeric TEXT, nxtAddressRS TEXT, nxtSECRET TEXT, UNIQUE (nxtSECRET))")
+            self.walletDBCur.execute("INSERT INTO nxtWallet(accountName, nxtAddressNumeric, nxtAddressRS,nxtSECRET) VALUES(?,?,?,?)",(  "" , "26","NXT-ABC","noPW")) # genesis block
             self.walletDBCur.commit()            
-            # genesis Block at height 0
+
         except:
-            self.consLogger.info("block DB table already exists")
-        headers = {'content-type': 'application/json'}
-        sessUrl = 'http://' + host + ':' + port + '/nxt?' 
-        self.NxtReq = Req( method='POST', url = sessUrl, params = {}, headers = headers        )
+            self.consLogger.info("walletDB already exists")
         #########################################################
-        
-        self.blockDBConn.commit()
-        self.consLogger.info('blockHeightDB is complete!')
+        self.walletDBConn.commit()
+        self.consLogger.info('walletDB - some info here!')
            
 
 class WalletDB_Emitter(QObject):
 
-    walletDBSig =  NRSREPLY = pyqtSignal(object  ,object) 
+    walletDBSig = pyqtSignal(object  ,object)
     
-    def __init__(self,     consLogger = None  ,  ): #emitter, 
-        super(BlockDB_Emitter, self).__init__()
+    def __init__(self,     consLogger = None  , walletLogger = None  ): #emitter,
+        super(WalletDB_Emitter, self).__init__()
         self.conLogger = consLogger
+        self.walletLogger = walletLogger
          
         
 class WalletDB_Runner(QtCore.QRunnable):
     """- This is what needs to be put into the QThreadpool """
     #nxtApi = nxtApi
     
-    def __init__(self, emitter,session , sessMan,   DB, NxtReq ,  consLogger = None , DBLogger = None, ): #emitter, 
+    def __init__(self, emitter , sessMan,   DB,   consLogger = None , walletLogger = None, ): #emitter,
         super(QtCore.QRunnable, self).__init__()
-        self.NxtReq = NxtReq
         self.consLogger = consLogger
-        #self.getBlock= {"requestType" : "getBlock" , "block" : "BLOCKADDRESS" }
-        self.sessionBlockDB = session
+        self.walletLogger = walletLogger
+
         self.walletDBConn = DB[0]
         self.walletDBCur = DB[1]
         self.emitter = emitter
-        self.walletDB_pollTime = 125000
+
+        self.walletDB_pollTime = 25000
         self.walletDBTimer = QTimer()
         QObject.connect(self.walletDBTimer, SIGNAL("timeout()"),  self.walletDBTimer_CB)
-        
+
+
+    def run(self,):
+        self.blockDBTimer.start(self.blockDB_pollTime)
+
     def run(self,):
         self.walletDBTimer.start(self.walletDB_pollTime)
         
     def walletDBTimer_CB(self,):
-        pass 
+        pass
         # this is  a heartbeat for now!
-        #self.consLogger.info('fetching new blocks: DBhigh, BChigh')# : %s, %s ', str(highBlockDB) , blockAddrIntoDB )
+        self.consLogger.info('walletDB heartbeat')
         #########################################################
          
         # do the activities here         

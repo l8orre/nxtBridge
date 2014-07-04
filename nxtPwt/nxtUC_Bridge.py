@@ -200,13 +200,14 @@ class JSON_Runner(QtCore.QRunnable):
 # getnewaddress	    	# under revision
 # getreceivedbyaccount	# under revision
 # getreceivedbyaddress	# under revision
+# gettransaction		# OK
 # listsinceblock		# under revision
 # listunspent		   # under revision
-# gettransaction		# OK
 # sendfrom		       # under revision
 # sendtoaddress	    	# under revision
 # settxfee		        # OK (n/a)
 # validateaddress		# OK
+
 
 
  
@@ -220,8 +221,7 @@ class JSON_Runner(QtCore.QRunnable):
 
 
 #######################
-# 14 getbalance
-  
+
     @dispatcher.add_method
     def getbalance( **kwargs):
 
@@ -238,8 +238,6 @@ class JSON_Runner(QtCore.QRunnable):
         preppedReq = NxtReq.prepare()
         response = session.send(preppedReq)
         NxtResp = response.json()
-
-        #print("NxtResp" + str(NxtResp))
 
         Nxt2Btc = {}
         try:
@@ -383,7 +381,6 @@ class JSON_Runner(QtCore.QRunnable):
  
 
 
-# 15 getblockcount
  
     @dispatcher.add_method
     def getblockcount( **kwargs):
@@ -465,9 +462,7 @@ class JSON_Runner(QtCore.QRunnable):
         #
 
 
- 
-#########################
-# 21 getconnectioncount
+
    
     @dispatcher.add_method
     def getconnectioncount( **kwargs):
@@ -535,6 +530,137 @@ class JSON_Runner(QtCore.QRunnable):
         return Nxt2Btc  
 
 
+    @dispatcher.add_method
+    def getnewaddress( **kwargs):
+
+        # if accName exists in DB, return ERROR
+        # generate random pw
+        # check if exists -
+        # convert RS
+        # pad RS to bitcoinRS
+        # enter into DB
+        # : accName,
+
+
+        Nxt2Btc = {}
+        return Nxt2Btc
+
+
+
+# 1Ce1NpJJAH9uLKMR37vzAmnqTjB4Ck8L4g
+# NXT-JTA7-B2QR-8BFC-2V222
+# NXTxJTA7xB2QRx8BFCx2V222nxtnxtnxtx
+
+
+
+
+
+
+    @dispatcher.add_method
+    def getreceivedbyaccount( **kwargs):
+        #print("getreceivedbyaccount" +str(kwargs))
+        ACCOUNT = kwargs["account"] #kwargs['account']
+        payload = { "requestType" : "getBalance" } #getTime"   }
+        NxtApi = {}
+        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
+        NxtApi['account'] = ACCOUNT
+        NxtReq.params=NxtApi # same obj, only replace params
+        preppedReq = NxtReq.prepare()
+        response = session.send(preppedReq)
+        NxtResp = response.json()
+        Nxt2Btc = {}
+
+
+        Nxt2Btc =  {
+                    'ACCOUNT' : float(NxtResp['balanceNQT'] ) * 0.00000001
+                    }
+
+
+
+        return Nxt2Btc
+
+
+
+    @dispatcher.add_method
+    def getreceivedbyaddress( **kwargs):
+    #print("getreceivedbyaddress" +str(kwargs))
+        ACCOUNT = kwargs["account"] #kwargs['account']
+        payload = { "requestType" : "getBalance" } #getTime"   }
+        NxtApi = {}
+        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
+        NxtApi['account'] = ACCOUNT
+        NxtReq.params=NxtApi # same obj, only replace params
+        preppedReq = NxtReq.prepare()
+        response = session.send(preppedReq)
+        NxtResp = response.json()
+        Nxt2Btc = {}
+
+
+        Nxt2Btc =  {
+                    'ACCOUNT' : float(NxtResp['balanceNQT'] ) * 0.00000001
+                    }
+
+        return Nxt2Btc
+
+
+
+
+
+    @dispatcher.add_method
+    def gettransaction( **kwargs):
+
+        TXid = kwargs["txid"] #kwargs['account']
+        try:
+            TX_hash = kwargs['hash']
+        except:
+            TX_hash = ''
+        payload = { "requestType" : "getTransaction" }
+
+        NxtApi = {}
+        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
+        NxtApi['transaction'] = TXid
+        NxtApi['hash'] = TX_hash
+
+        NxtReq.params=NxtApi # same obj, only replace params
+        preppedReq = NxtReq.prepare()
+        response = session.send(preppedReq)
+        NxtResp = response.json()
+
+
+        try:
+            CONFIRMS = NxtResp['confirmations']
+        except:
+            CONFIRMS = 0
+            print(str(NxtResp))
+        TRANSID = NxtResp['transaction']
+        TIME = NxtResp['timestamp']
+        SENDER = NxtResp['sender']
+        RECIPIENT = NxtResp['recipient']
+
+        AMOUNT = NxtResp['amountNQT']
+        AMOUNT =  float(AMOUNT)
+        AMOUNT = AMOUNT * 0.00000001
+        #print(str(NxtResp))
+        Nxt2Btc = {}
+        Nxt2Btc =  {
+                "amount" : float(AMOUNT),
+                "confirmations" : CONFIRMS,
+                "txid" : TRANSID,
+                "time" : TIME,
+                "timereceived" : TIME,
+                "details" : [
+                            {
+                            "account" : SENDER,
+                            "address" : RECIPIENT,
+                            "category" : "receive",
+                            "amount" : float(AMOUNT)
+                            }
+                            ]
+                            }
+
+        return Nxt2Btc
+
+
 
 
     @dispatcher.add_method
@@ -588,123 +714,6 @@ class JSON_Runner(QtCore.QRunnable):
 
 
 
- 
-##################################################
- 
-# 33 getreceivedbyaccount
-         
-    @dispatcher.add_method
-    def getreceivedbyaccount( **kwargs):
-        #print("getreceivedbyaccount" +str(kwargs))
-        ACCOUNT = kwargs["account"] #kwargs['account']
-        payload = { "requestType" : "getBalance" } #getTime"   }
-        NxtApi = {}
-        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
-        NxtApi['account'] = ACCOUNT 
-        NxtReq.params=NxtApi # same obj, only replace params
-        preppedReq = NxtReq.prepare()
-        response = session.send(preppedReq)
-        NxtResp = response.json()
-        Nxt2Btc = {}
-
-
-        Nxt2Btc =  {
-                    'ACCOUNT' : float(NxtResp['balanceNQT'] ) * 0.00000001
-                    }
-     
-          
-        
-        return Nxt2Btc  
-        
-        
-        
-        
-        
-        
-# 34 getreceivedbyaddress
- 
-    @dispatcher.add_method
-    def getreceivedbyaddress( **kwargs):
-    #print("getreceivedbyaddress" +str(kwargs))
-        ACCOUNT = kwargs["account"] #kwargs['account']
-        payload = { "requestType" : "getBalance" } #getTime"   }
-        NxtApi = {}
-        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
-        NxtApi['account'] = ACCOUNT 
-        NxtReq.params=NxtApi # same obj, only replace params
-        preppedReq = NxtReq.prepare()
-        response = session.send(preppedReq)
-        NxtResp = response.json()
-        Nxt2Btc = {}
-         
-        
-        Nxt2Btc =  {
-                    'ACCOUNT' : float(NxtResp['balanceNQT'] ) * 0.00000001
-                    }
-     
-        return Nxt2Btc  
-         
-        
-      
-
-# 35 gettransaction
-  
-        
-        
-    @dispatcher.add_method
-    def gettransaction( **kwargs):
-
-        TXid = kwargs["txid"] #kwargs['account']
-        try:
-            TX_hash = kwargs['hash']
-        except:
-            TX_hash = ''
-        payload = { "requestType" : "getTransaction" }  
-        
-        NxtApi = {}
-        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
-        NxtApi['transaction'] = TXid
-        NxtApi['hash'] = TX_hash 
-        
-        NxtReq.params=NxtApi # same obj, only replace params
-        preppedReq = NxtReq.prepare()
-        response = session.send(preppedReq)
-        NxtResp = response.json()
-        
-
-        try:        
-            CONFIRMS = NxtResp['confirmations']
-        except:
-            CONFIRMS = 0
-            print(str(NxtResp))
-        TRANSID = NxtResp['transaction']
-        TIME = NxtResp['timestamp']
-        SENDER = NxtResp['sender']
-        RECIPIENT = NxtResp['recipient']
-        
-        AMOUNT = NxtResp['amountNQT']
-        AMOUNT =  float(AMOUNT)
-        AMOUNT = AMOUNT * 0.00000001
-        #print(str(NxtResp))
-        Nxt2Btc = {}
-        Nxt2Btc =  {
-                "amount" : float(AMOUNT),
-                "confirmations" : CONFIRMS,
-                "txid" : TRANSID,
-                "time" : TIME,
-                "timereceived" : TIME,
-                "details" : [
-                            {
-                            "account" : SENDER,
-                            "address" : RECIPIENT,
-                            "category" : "receive",
-                            "amount" : float(AMOUNT)
-                            }
-                            ]
-                            }
-                    
-        return Nxt2Btc  
- 
 
 
 # 52 sendfrom
@@ -927,23 +936,28 @@ class JSON_Runner(QtCore.QRunnable):
         #
         #        
         #
-        # FOUR steps to implement new BTC2NXT mapping:
+        # FIVE steps to implement new BTC2NXT mapping:
         #
         # 1
         #
-        # def parse_BTCcall(jsonParms):
+        #   extract details from the incoming request
         #
         # 2
         # 
-        # call parse_BTCcall to get parmsDi
+        # call the local functions to parse the parameters received in the call
         #
         # 3
         # 
-        # call dispatcher with parmsdi
+        # re-insert our custom made parameters dict into the 'request' object
         #
         # 4
         #
-        # extract and re-constitute BTC reply object
+        # call dispatcher with request object
+        #
+        #
+        # 5
+        #
+        # return response object using dedicated 'method' label as originally in request object
         #
 
         # argument extraction from list here in these local functions.
@@ -956,8 +970,6 @@ class JSON_Runner(QtCore.QRunnable):
         #<nxtPwt.nxtUC_Bridge.JSON_Runner object at 0x7fcb351e8048>
 
 
-        # print threadcountz>!!! keep track of threadpool objects! just to make sure!
- 
         def parse_getbalance(jsonParms):
             account = str(jsonParms[0])
             minconf = str(jsonParms[1])
@@ -1037,26 +1049,26 @@ class JSON_Runner(QtCore.QRunnable):
             txid = str(jsonParms[0])
             parmsDi = {'txid':txid}             
             return parmsDi
-        
+
+
         def parse_listsinceblock(jsonParms):
-            parmsDi = {} 
+            parmsDi = {}
             blockAddress = str(jsonParms[0])
-            parmsDi = {'blockAddress':blockAddress}             
+            parmsDi = {'blockAddress':blockAddress}
             minimumConfs = str(jsonParms[0])
-            parmsDi = {'minimumConfs':minimumConfs}             
+            parmsDi = {'minimumConfs':minimumConfs}
             return parmsDi
-        
+
         def parse_listunspent(jsonParms):
-            parmsDi = {} 
+            parmsDi = {}
             minimumConfs = str(jsonParms[0])
-            parmsDi = {'minimumConfs':minimumConfs}             
+            parmsDi = {'minimumConfs':minimumConfs}
             maximumConfs = str(jsonParms[0])
-            parmsDi = {'maximumConfs':maximumConfs}             
+            parmsDi = {'maximumConfs':maximumConfs}
             addresses = str(jsonParms[0])
-            parmsDi = {'addresses':addresses}             
+            parmsDi = {'addresses':addresses}
             return parmsDi
-        
-        
+
         def parse_sendfrom(jsonParms):
         
             parmsDi = {} 
@@ -1116,7 +1128,11 @@ class JSON_Runner(QtCore.QRunnable):
             
             return parmsDi
         
-        
+
+
+
+
+
         
         def parse_testC(jsonParms):
             #print(str(jsonParms))
@@ -1129,15 +1145,24 @@ class JSON_Runner(QtCore.QRunnable):
             #./bitcoind -rpcport=7879 test "*" ---------      ['*']
 
 
+
+
+
+
         ##################################################
         #
         # 1 extract details from the incoming request        
-        
+        #
+        #
+        #
+        #
+        #
+        #
+        ####################################################
         
         jsonRaw = request.get_data()
 
         #
-        # we have to do a lot of things here that are not lege artis. thanks to bitcoin slop.   
         #
         #self.bridgeLogger.debug('nxtBridge rcvd raw: %s ', jsonRaw )
         
@@ -1190,7 +1215,17 @@ class JSON_Runner(QtCore.QRunnable):
         #   we are preparing for mostly list-type param passing
         #
         #
-        if isinstance(jsonParms, list):
+        ##################################################
+        #
+        # 2 call the local functions to parse the parameters received in the call
+        #
+        #
+        #
+        #
+        #
+        ####################################################
+
+        if isinstance(jsonParms, list):  # THIS IS NOT WELL FORMED JSON !!!!!!!!!!!!!
                 
             # we need this to determine the params extraction method for params in a list.
 
@@ -1226,15 +1261,15 @@ class JSON_Runner(QtCore.QRunnable):
             elif bitcoind_method == 'getreceivedbyaddress':
                 parmsDi = parse_getreceivedbyaddress(jsonParms)
 
+            elif bitcoind_method == 'gettransaction':
+                parmsDi = parse_gettransaction(jsonParms)
+
             elif bitcoind_method == 'listsinceblock':
                 parmsDi = parse_getreceivedbyaccount(jsonParms)
                 
             elif bitcoind_method == 'listunspent':
                 parmsDi = parse_getreceivedbyaddress(jsonParms)
 
-            elif bitcoind_method == 'gettransaction':
-                parmsDi = parse_gettransaction(jsonParms)
-                
             elif bitcoind_method == 'sendfrom':
                 parmsDi = parse_sendfrom(jsonParms)
 
@@ -1246,7 +1281,11 @@ class JSON_Runner(QtCore.QRunnable):
     
             elif bitcoind_method == 'validateaddress':
                 parmsDi = parse_validateaddress(jsonParms)
- 
+
+
+
+
+
             elif bitcoind_method == 'testC':
 
                 parmsDi = parse_testC(jsonParms)
@@ -1260,6 +1299,11 @@ class JSON_Runner(QtCore.QRunnable):
         ##################################################
         #
         # 3 here we forcible re-insert our custom made request into the request object
+        #
+        #
+        #
+        #
+        ###################################################
 
             #parmsDi['Runner'] = self # this is to include the 'self  namespace in the CB functions!
             
@@ -1270,7 +1314,7 @@ class JSON_Runner(QtCore.QRunnable):
             #self.consLogger.info('jsonStr= %s ', jsonStr )
          
             
-        elif isinstance(jsonParms, dict):
+        elif isinstance(jsonParms, dict): # THIS WOULD BE WELL FORMED JSON !!!!!!!!!!!!!
             self.consLogger.debug('jsonParms= %s ', str( jsonParms ) )
             # THESE ARE CURRENTLY NOT OPERABLE, BUT THE OPTION SHALL BE MAINTAINED
             # is the json request is well formed, we do not need to do anyting at all,
@@ -1281,8 +1325,14 @@ class JSON_Runner(QtCore.QRunnable):
               
         ##################################################
         #
-        # 4 send request to the NRS      
-            
+        # 4 send request to the NRS using the dispatcher functions registered with Werkzeug
+        #
+        #
+        #
+        #
+        #
+        #
+
         responseFromNxt = JSONRPCResponseManager.handle(jsonStr, dispatcher)
         response = Response( responseFromNxt.json, mimetype='application/json') #, mimetype='text/plain') 
         
@@ -1296,7 +1346,15 @@ class JSON_Runner(QtCore.QRunnable):
         
         self.consLogger.info('response = Response( responseFromNxt.json, ) = %s ', str(jsonEval) )
         
-        
+        ########################################################
+        #
+        # 5 return response object using dedicated 'method' label as originally in request object
+        #
+        #
+        #
+        #
+        #
+        #######################################################
         if bitcoind_method == 'getbalance':
             # we MUST forcible violate the response object here because bitcoind does not use proper json
             parseResponse = eval(response.response[0])
@@ -1310,22 +1368,6 @@ class JSON_Runner(QtCore.QRunnable):
             self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
 
-
-
-        elif bitcoind_method == 'testC':
-            print("\nelif bitcoind_method == 'testC':" + str(response))
-            #print("elif bitcoind_method == 'testC':" + str(response.__dir__()))
-
-            #   parseResponse = eval(response.response[0])
-            # parseResponse --> {'result': {'ACCOUNT': 2547600000000.0}, 'id': 1, 'jsonrpc': '2.0'}
-            #resultJson = parseResponse['result']
-            #amount  = resultJson['ACCOUNT']
-            #parseResponse['result'] = amount
-            #parseResponse = str(parseResponse)
-            #parseResponse = parseResponse.replace( "'",'"')
-            #response.response[0] = parseResponse
-            #print(str(wallTemp))
-            return response
 
 
 
@@ -1393,14 +1435,6 @@ class JSON_Runner(QtCore.QRunnable):
             self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             return response
 
-        elif bitcoind_method == 'listsinceblock':
-            self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
-            return response
-
-        elif bitcoind_method == 'listunspent':
-            self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
-            return response
- 
         elif bitcoind_method == 'getreceivedbyaccount':
             parseResponse = eval(response.response[0])
             resultJson = parseResponse['result']
@@ -1430,6 +1464,14 @@ class JSON_Runner(QtCore.QRunnable):
             self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             return response
 
+        elif bitcoind_method == 'listsinceblock':
+            self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
+            return response
+
+        elif bitcoind_method == 'listunspent':
+            self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
+            return response
+
         elif bitcoind_method == 'sendfrom':
 
             self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
@@ -1450,7 +1492,23 @@ class JSON_Runner(QtCore.QRunnable):
             self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             return response            
            
-        
+
+
+        elif bitcoind_method == 'testC':
+            print("\nelif bitcoind_method == 'testC':" + str(response))
+            #print("elif bitcoind_method == 'testC':" + str(response.__dir__()))
+
+            #   parseResponse = eval(response.response[0])
+            # parseResponse --> {'result': {'ACCOUNT': 2547600000000.0}, 'id': 1, 'jsonrpc': '2.0'}
+            #resultJson = parseResponse['result']
+            #amount  = resultJson['ACCOUNT']
+            #parseResponse['result'] = amount
+            #parseResponse = str(parseResponse)
+            #parseResponse = parseResponse.replace( "'",'"')
+            #response.response[0] = parseResponse
+            #print(str(wallTemp))
+            return response
+
         else:
             parmsDi = {'throwException':'here'}
         

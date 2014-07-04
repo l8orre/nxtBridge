@@ -748,3 +748,91 @@
 2014-07-02 12:28:08,714 - nxtBridge rcvd req: {'id': 1, 'method': 'getstate', 'params': []} 
 2014-07-02 12:28:12,507 - nxtBridge rcvd req: {'id': 1, 'method': 'getinfo', 'params': []} 
 2014-07-02 12:28:12,528 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "result": {"connections": 56, "errors": "", "balance": 0.0, "keypoololdest": 769654784, "keypoolsize": 326764176, "proxy": "", "version": "1.2.0e", "timeoffset": 0, "paytxfee": 0.0, "protocolversion": "1.2.0e", "blocks": 142754, "walletversion": "1.2.0e", "difficulty": "2552571948492161", "testnet": false}}' 
+2014-07-03 10:00:20,967 - nxtBridge listening on localhost:6876
+2014-07-03 10:01:36,423 - nxtBridge rcvd req: {'method': 'getinfo', 'params': [], 'id': 1} 
+2014-07-03 10:01:36,444 - nxtBridge returning: b'{"result": {"paytxfee": 0.0, "walletversion": "1.2.0e", "version": "1.2.0e", "blocks": 143597, "timeoffset": 0, "protocolversion": "1.2.0e", "keypoololdest": 815792128, "errors": "", "keypoolsize": 348534632, "testnet": false, "difficulty": "2555952799212014", "proxy": "", "balance": 0.0, "connections": 59}, "jsonrpc": "2.0", "id": 1}' 
+2014-07-03 13:04:42,086 - nxtBridge listening on localhost:6876
+2014-07-03 13:04:52,092 - nxtBridge rcvd req: {'method': 'getblockcount', 'id': 1, 'params': []} 
+2014-07-03 13:04:52,113 - nxtBridge returning: {"result": 143725, "jsonrpc": "2.0", "id": 1} 
+2014-07-03 13:04:59,364 - nxtBridge rcvd req: {'method': 'getblockhash', 'id': 1, 'params': [143000]} 
+2014-07-03 13:04:59,430 - nxtBridge returning: {"result": "1174181772532102687", "jsonrpc": "2.0", "id": 1} 
+2014-07-03 13:07:18,966 - nxtBridge listening on localhost:6876
+2014-07-03 13:07:25,476 - nxtBridge rcvd req: {'method': 'getblockhash', 'id': 1, 'params': [143000]} 
+2014-07-03 13:17:43,187 - nxtBridge listening on localhost:6876
+2014-07-03 13:53:24,723 - nxtBridge listening on localhost:6876
+2014-07-03 13:53:42,491 - nxtBridge listening on localhost:6876
+2014-07-03 13:54:11,091 - nxtBridge listening on localhost:6876
+2014-07-03 13:55:11,157 - nxtBridge listening on localhost:6876
+2014-07-03 13:55:32,376 - nxtBridge listening on localhost:6876
+2014-07-03 13:56:12,647 - nxtBridge listening on localhost:6876
+2014-07-03 13:56:34,055 - nxtBridge listening on localhost:6876
+2014-07-03 13:58:09,840 - nxtBridge listening on localhost:6876
+2014-07-03 13:58:59,219 - nxtBridge listening on localhost:6876
+2014-07-03 13:59:13,707 - nxtBridge listening on localhost:6876
+2014-07-03 13:59:42,928 - nxtBridge listening on localhost:6876
+2014-07-03 14:01:43,974 - nxtBridge listening on localhost:6876
+2014-07-03 14:10:04,473 - nxtBridge listening on localhost:6876
+2014-07-03 14:10:28,005 - nxtBridge listening on localhost:6876
+2014-07-03 14:13:06,528 - nxtBridge listening on localhost:6876
+2014-07-03 14:14:11,897 - nxtBridge listening on localhost:6876
+2014-07-03 14:18:20,740 - nxtBridge listening on localhost:6876
+2014-07-03 14:19:41,755 - nxtBridge listening on localhost:6876
+2014-07-03 14:20:37,609 - nxtBridge listening on localhost:6876
+2014-07-03 14:21:54,992 - nxtBridge listening on localhost:6876
+2014-07-03 14:26:58,403 - nxtBridge listening on localhost:6876
+2014-07-03 14:33:25,530 - nxtBridge listening on localhost:6876
+2014-07-03 14:37:41,795 - nxtBridge listening on localhost:6876
+2014-07-03 14:38:10,367 - nxtBridge listening on localhost:6876
+2014-07-03 14:44:15,635 - nxtBridge listening on localhost:6876
+2014-07-03 14:45:24,344 - nxtBridge listening on localhost:6876
+2014-07-03 15:11:52,031 - nxtBridge listening on localhost:6876
+2014-07-03 15:16:40,667 - nxtBridge listening on localhost:6876
+2014-07-03 15:16:47,633 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [143000]} 
+2014-07-03 15:16:47,685 - nxtBridge returning: {"id": 1, "jsonrpc": "2.0", "result": "1174181772532102687"} 
+2014-07-03 15:16:51,301 - nxtBridge rcvd req: {'id': 1, 'method': 'getblockhash', 'params': [143000]} 
+2014-07-03 15:16:51,356 - nxtBridge returning: {"id": 1, "jsonrpc": "2.0", "result": "1174181772532102687"} 
+2014-07-03 15:16:56,327 - nxtBridge rcvd req: {'id': 1, 'method': 'testC', 'params': []} 
+2014-07-03 15:22:21,714 - nxtBridge listening on localhost:6876
+2014-07-03 15:22:26,091 - nxtBridge rcvd req: {'params': [], 'id': 1, 'method': 'testC'} 
+2014-07-03 15:30:12,873 - nxtBridge listening on localhost:6876
+2014-07-03 15:30:24,685 - nxtBridge rcvd req: {'method': 'testC', 'params': [], 'id': 1} 
+2014-07-03 15:32:13,022 - nxtBridge listening on localhost:6876
+2014-07-03 15:32:17,153 - nxtBridge rcvd req: {'method': 'testC', 'id': 1, 'params': []} 
+2014-07-03 15:34:47,615 - nxtBridge listening on localhost:6876
+2014-07-03 15:34:51,911 - nxtBridge rcvd req: {'method': 'testC', 'params': [], 'id': 1} 
+2014-07-03 15:38:32,722 - nxtBridge listening on localhost:6876
+2014-07-03 15:38:36,791 - nxtBridge rcvd req: {'params': [], 'method': 'testC', 'id': 1} 
+2014-07-03 15:40:22,154 - nxtBridge listening on localhost:6876
+2014-07-03 15:40:26,448 - nxtBridge rcvd req: {'method': 'testC', 'params': [], 'id': 1} 
+2014-07-03 15:41:35,363 - nxtBridge listening on localhost:6876
+2014-07-03 15:41:38,929 - nxtBridge rcvd req: {'id': 1, 'method': 'testC', 'params': []} 
+2014-07-03 15:47:14,189 - nxtBridge listening on localhost:6876
+2014-07-03 15:47:18,427 - nxtBridge rcvd req: {'id': 1, 'method': 'testC', 'params': []} 
+2014-07-03 15:47:40,249 - nxtBridge rcvd req: {'id': 1, 'method': 'getinfo', 'params': []} 
+2014-07-03 15:47:40,268 - nxtBridge returning: b'{"result": {"version": "1.2.0e", "walletversion": "1.2.0e", "keypoololdest": 725614592, "paytxfee": 0.0, "errors": "", "proxy": "", "testnet": false, "difficulty": "2556305989143890", "connections": 59, "protocolversion": "1.2.0e", "keypoolsize": 283200112, "balance": 0.0, "blocks": 143835, "timeoffset": 0}, "id": 1, "jsonrpc": "2.0"}' 
+2014-07-03 15:47:54,038 - nxtBridge rcvd req: {'id': 1, 'method': 'testC', 'params': []} 
+2014-07-03 15:55:09,963 - nxtBridge listening on localhost:6876
+2014-07-03 15:55:14,465 - nxtBridge rcvd req: {'params': [], 'id': 1, 'method': 'testC'} 
+2014-07-03 15:55:20,662 - nxtBridge rcvd req: {'params': [], 'id': 1, 'method': 'getinfo'} 
+2014-07-03 15:55:20,684 - nxtBridge returning: b'{"id": 1, "result": {"difficulty": "2556316513326099", "keypoolsize": 345461128, "protocolversion": "1.2.0e", "testnet": false, "connections": 59, "keypoololdest": 739246080, "walletversion": "1.2.0e", "timeoffset": 0, "balance": 0.0, "version": "1.2.0e", "blocks": 143840, "errors": "", "proxy": "", "paytxfee": 0.0}, "jsonrpc": "2.0"}' 
+2014-07-03 15:55:22,883 - nxtBridge rcvd req: {'params': [], 'id': 1, 'method': 'testC'} 
+2014-07-03 15:57:45,494 - nxtBridge listening on localhost:6876
+2014-07-03 15:57:48,960 - nxtBridge rcvd req: {'id': 1, 'method': 'testC', 'params': []} 
+2014-07-03 15:59:05,374 - nxtBridge listening on localhost:6876
+2014-07-03 15:59:08,627 - nxtBridge rcvd req: {'params': [], 'id': 1, 'method': 'testC'} 
+2014-07-03 16:04:51,914 - nxtBridge listening on localhost:6876
+2014-07-03 16:04:55,388 - nxtBridge rcvd req: {'method': 'testC', 'id': 1, 'params': []} 
+2014-07-03 16:10:18,706 - nxtBridge listening on localhost:6876
+2014-07-03 16:10:22,035 - nxtBridge rcvd req: {'id': 1, 'params': [], 'method': 'testC'} 
+2014-07-03 16:10:26,590 - nxtBridge rcvd req: {'id': 1, 'params': [], 'method': 'testC'} 
+2014-07-04 08:14:22,701 - nxtBridge listening on localhost:6876
+2014-07-04 08:14:37,764 - nxtBridge rcvd req: {'id': 1, 'params': [], 'method': 'getinfo'} 
+2014-07-04 08:14:37,789 - nxtBridge returning: b'{"result": {"keypoololdest": 552599552, "version": "1.2.0e", "blocks": 144475, "keypoolsize": 98127048, "balance": 0.0, "paytxfee": 0.0, "timeoffset": 0, "proxy": "", "walletversion": "1.2.0e", "connections": 59, "errors": "", "protocolversion": "1.2.0e", "difficulty": "2557400719296378", "testnet": false}, "id": 1, "jsonrpc": "2.0"}' 
+2014-07-04 08:14:44,134 - nxtBridge rcvd req: {'id': 1, 'params': [], 'method': 'testC'} 
+2014-07-04 13:12:16,591 - nxtBridge listening on localhost:6876
+2014-07-04 13:13:07,468 - nxtBridge listening on localhost:6876
+2014-07-04 13:15:54,846 - nxtBridge listening on localhost:6876
+2014-07-04 13:16:18,842 - nxtBridge listening on localhost:6876
+2014-07-04 13:53:16,294 - nxtBridge listening on localhost:6876
+2014-07-04 13:54:37,963 - nxtBridge listening on localhost:6876
+2014-07-04 13:55:07,301 - nxtBridge listening on localhost:6876

@@ -6,6 +6,9 @@ on behalf of the NXT InfraStructure fund
 l8orre@yandex.com
 nxtforum.org
 
+Note: The 'blockheight.db' is a legacy artifact from NXT 1.1.6, which does not have the api call 'getBlockId'
+This feature will be removed with the transition to NXT 1.2.0
+
 
 
 The Bridge - access the NXT blockchain using legacy bitcoind jsonrpc calls
@@ -27,6 +30,8 @@ args: [nxtNET, walletFile]
 nxtNET = testNet or mainNet           default: testNet
 walletFile = filename for nxtWallet   default: nxtWallet.dat
 
+At startup, nxtBridge checks for existence of the sqlite3 db 'walletFile'.
+If it exists, it opens this db, if it does not exist, it creates a new one with one address and "" as accountName.
 
 
 1:
@@ -52,7 +57,11 @@ Notes:
 
 2:
 -------------------------------------
-nxtBridge listens on port 7879 for jsonrpc calls that are relayed to there form bitcoind
+nxtBridge listens on port 7879 for jsonrpc calls that are sent there in bitcoind format.
+
+This can be done either by relaying to there from bitcoind, i.e. by sending the calls to bitcoind on port 8332,
+
+OR directly by sending them to port 7879
 
 nxtBridge receives a jsonrpc call from bitcoind.
 
@@ -164,10 +173,35 @@ Subsequent calls to the 'getnewaddress' must supply an account name that does no
 If an account name is supplied with the 'getnewaddress' call that already exists, an error will be returned.
 
 
+Recommendations for operational security:
+
+The same security guidelines as for running a bitcoin wallet apply.
+Furthermore, the sqlite3 database is not encrypted, hence anybody obtaining access to this file can access the funds to all NXT funds
+contained in the NXT accounts represented by the passwords.
+
+Possible security measures: Set up an encrypted file container and mount it in the filesystem.
+Then use this file system in the encrypted file container to store the wallet.dat db file. Use eg truecrypt.
+
+Use an in-memory file system location to host the wallet.dat durig operations,
+and store backups of the wallet.dat file in an encrypted file container.
+
+Also, some slite3 security extensions exist:
+sqlite-crypt.com/documentation.htm
+www.hwaci.com/sw/sqlite/see.html
+
+
+Run your whole system from an encrypted LVM.
+
+Protect against loss of wallet.dat - when the api call 'getnewaddress' is issued, a new entry will be made in the wallet.dat.
+Since making a backup of wallet.dat every time a 'getnewaddress' is issued is unfeasible, the following solution can be used:
+Configure a python logger to send an email to an external mail system, with the email containing the added (accountName, accountNum, accountMen, PASSWORD)
+in an encrypted form.
 
 
 
-getbalance
+
+
+getbalance # under revision
 ----------
 without parameter returns the sum of the balances of all NXT addresses in the wallet
 with "" as parameter return the balance of the NXT address associated with the account named by the empty string ""
@@ -176,17 +210,17 @@ with "accountName" as parameter return the balance of the NXT address associated
 
 ./bitcoind -rpcport=7879 getbalance 2865886802744497404 1
 
-listunspent
+listunspent # under revision
 -----------
 without parameter returns list of balances of all NXT addresses in the wallet from the NXT blockchain
 with a  parameter (=nxtAddress) returns the balance of the NXT address from the NXT blockchain.
 
 
-getreceivedbyaccount
+getreceivedbyaccount # under revision
 --------------------
 returns the sum of all payments received by this address and the associated account
 
-getreceivedbyaddress
+getreceivedbyaddress # under revision
 --------------------
 returns the sum of all payments received by this address and the associated account
 

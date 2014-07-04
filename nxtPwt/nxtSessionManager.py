@@ -134,11 +134,10 @@ connection management.
 
         self.walletDB = nxtDB.WalletDB_Handler(self, walletDB_fName,   self.walletLogger, self.consLogger, host, port )
 
-        #self.walletDB
-        DBs = (self.walletDB, 0)
-
+        wallDB = {'walletDB' : self.walletDB}
+        wallDB['walletDB_fName'] = walletDB_fName
                                                 # self is sessMan!!
-        self.uc_bridge = nxtUC_Bridge.UC_Bridge1(self,  host, port, self.bridgeLogger, self.consLogger, DBs  )
+        self.uc_bridge = nxtUC_Bridge.UC_Bridge1(self,  host, port, self.bridgeLogger, self.consLogger, wallDB  )
        
 
 

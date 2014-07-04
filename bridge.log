@@ -836,3 +836,117 @@
 2014-07-04 13:53:16,294 - nxtBridge listening on localhost:6876
 2014-07-04 13:54:37,963 - nxtBridge listening on localhost:6876
 2014-07-04 13:55:07,301 - nxtBridge listening on localhost:6876
+2014-07-04 20:01:34,743 - nxtBridge listening on localhost:6876
+2014-07-04 20:03:01,942 - nxtBridge listening on localhost:6876
+2014-07-04 20:26:38,669 - nxtBridge listening on localhost:6876
+2014-07-04 20:27:58,241 - nxtBridge listening on localhost:6876
+2014-07-04 20:28:12,595 - nxtBridge rcvd req: {'method': 'getnewaddress', 'id': 1, 'params': ['aaa']} 
+2014-07-04 20:28:12,597 - nxtBridge returning: b'{"jsonrpc": "2.0", "result": {}, "id": 1}' 
+2014-07-04 20:46:28,639 - nxtBridge listening on localhost:6876
+2014-07-04 20:48:09,939 - nxtBridge listening on localhost:6876
+2014-07-04 20:48:27,462 - nxtBridge listening on localhost:6876
+2014-07-04 20:49:32,493 - nxtBridge listening on localhost:6876
+2014-07-04 20:49:38,689 - nxtBridge rcvd req: {'id': 1, 'params': ['aaa'], 'method': 'getnewaddress'} 
+2014-07-04 20:49:38,691 - nxtBridge returning: b'{"id": null, "error": {"code": -32700, "message": "Parse error"}, "jsonrpc": "2.0"}' 
+2014-07-04 20:49:48,749 - nxtBridge rcvd req: {'id': 1, 'params': [], 'method': 'getconnectioncount'} 
+2014-07-04 20:49:58,513 - nxtBridge rcvd req: {'id': 1, 'params': [], 'method': 'getconnectioncount'} 
+2014-07-04 20:50:17,607 - nxtBridge rcvd req: {'id': 1, 'params': ['aaa'], 'method': 'getnewaddress'} 
+2014-07-04 20:50:17,609 - nxtBridge returning: b'{"id": null, "error": {"code": -32700, "message": "Parse error"}, "jsonrpc": "2.0"}' 
+2014-07-04 20:53:09,402 - nxtBridge listening on localhost:6876
+2014-07-04 20:53:13,409 - nxtBridge rcvd req: {'params': ['aaa'], 'id': 1, 'method': 'getnewaddress'} 
+2014-07-04 20:53:13,411 - nxtBridge returning: b'{"jsonrpc": "2.0", "id": null, "error": {"message": "Parse error", "code": -32700}}' 
+2014-07-04 20:53:32,571 - nxtBridge rcvd req: {'params': [], 'id': 1, 'method': 'getconnectioncount'} 
+2014-07-04 20:55:14,486 - nxtBridge listening on localhost:6876
+2014-07-04 20:55:19,574 - nxtBridge rcvd req: {'id': 1, 'method': 'getnewaddress', 'params': ['aaa']} 
+2014-07-04 20:55:19,576 - nxtBridge returning: b'{"error": {"code": -32700, "message": "Parse error"}, "id": null, "jsonrpc": "2.0"}' 
+2014-07-04 20:55:35,094 - nxtBridge rcvd req: {'id': 1, 'method': 'getconnectioncount', 'params': []} 
+2014-07-04 20:55:42,700 - nxtBridge rcvd req: {'id': 1, 'method': 'getinfo', 'params': []} 
+2014-07-04 20:55:42,765 - nxtBridge returning: b'{"id": 1, "result": {"testnet": false, "timeoffset": 0, "connections": 58, "protocolversion": "1.2.0e", "version": "1.2.0e", "proxy": "", "blocks": 144990, "balance": 0.0, "keypoolsize": 274717624, "walletversion": "1.2.0e", "keypoololdest": 693633024, "difficulty": "2558169825899846", "paytxfee": 0.0, "errors": ""}, "jsonrpc": "2.0"}' 
+2014-07-04 20:55:46,015 - nxtBridge rcvd req: {'id': 1, 'method': 'getinfo', 'params': []} 
+2014-07-04 20:55:46,038 - nxtBridge returning: b'{"id": 1, "result": {"testnet": false, "timeoffset": 0, "connections": 58, "protocolversion": "1.2.0e", "version": "1.2.0e", "proxy": "", "blocks": 144990, "balance": 0.0, "keypoolsize": 273286752, "walletversion": "1.2.0e", "keypoololdest": 693633024, "difficulty": "2558169825899846", "paytxfee": 0.0, "errors": ""}, "jsonrpc": "2.0"}' 
+2014-07-04 21:02:52,926 - nxtBridge listening on localhost:6876
+2014-07-04 21:02:58,994 - nxtBridge rcvd req: {'params': ['aaa'], 'id': 1, 'method': 'getnewaddress'} 
+2014-07-04 21:02:58,996 - nxtBridge returning: b'{"jsonrpc": "2.0", "error": {"code": -32700, "message": "Parse error"}, "id": null}' 
+2014-07-04 21:03:06,266 - nxtBridge rcvd req: {'params': [], 'id': 1, 'method': 'getinfo'} 
+2014-07-04 21:03:06,287 - nxtBridge returning: b'{"jsonrpc": "2.0", "result": {"paytxfee": 0.0, "keypoolsize": 195151376, "balance": 0.0, "difficulty": "2558177169223679", "errors": "", "timeoffset": 0, "proxy": "", "keypoololdest": 693633024, "version": "1.2.0e", "protocolversion": "1.2.0e", "testnet": false, "walletversion": "1.2.0e", "blocks": 144993, "connections": 58}, "id": 1}' 
+2014-07-04 21:03:11,295 - nxtBridge rcvd req: {'params': [], 'id': 1, 'method': 'getconnectioncount'} 
+2014-07-04 21:04:41,770 - nxtBridge listening on localhost:6876
+2014-07-04 21:04:46,182 - nxtBridge rcvd req: {'params': [], 'method': 'getconnectioncount', 'id': 1} 
+2014-07-04 21:04:57,446 - nxtBridge rcvd req: {'params': ['aaa'], 'method': 'getnewaddress', 'id': 1} 
+2014-07-04 21:04:57,448 - nxtBridge returning: b'{"id": null, "jsonrpc": "2.0", "error": {"code": -32700, "message": "Parse error"}}' 
+2014-07-04 21:08:05,251 - nxtBridge listening on localhost:6876
+2014-07-04 21:08:12,377 - nxtBridge rcvd req: {'method': 'getnewaddress', 'params': [], 'id': 1} 
+2014-07-04 21:08:16,238 - nxtBridge rcvd req: {'method': 'getnewaddress', 'params': ['aaa'], 'id': 1} 
+2014-07-04 21:08:16,240 - nxtBridge returning: b'{"error": {"code": -32700, "message": "Parse error"}, "jsonrpc": "2.0", "id": null}' 
+2014-07-04 21:08:25,514 - nxtBridge rcvd req: {'method': 'getnewaddress', 'params': ['aaa'], 'id': 1} 
+2014-07-04 21:08:25,516 - nxtBridge returning: b'{"error": {"code": -32700, "message": "Parse error"}, "jsonrpc": "2.0", "id": null}' 
+2014-07-04 21:09:41,542 - nxtBridge listening on localhost:6876
+2014-07-04 21:09:47,474 - nxtBridge rcvd req: {'params': [], 'id': 1, 'method': 'getinfo'} 
+2014-07-04 21:09:47,501 - nxtBridge returning: b'{"result": {"paytxfee": 0.0, "connections": 58, "errors": "", "difficulty": "2558181627497674", "protocolversion": "1.2.0e", "walletversion": "1.2.0e", "version": "1.2.0e", "keypoolsize": 268688816, "timeoffset": 0, "balance": 0.0, "proxy": "", "keypoololdest": 698875904, "blocks": 144998, "testnet": false}, "jsonrpc": "2.0", "id": 1}' 
+2014-07-04 21:11:27,076 - nxtBridge rcvd req: {'params': ['aaa'], 'id': 1, 'method': 'getnewaddress'} 
+2014-07-04 21:11:27,077 - nxtBridge returning: b'{"jsonrpc": "2.0", "error": {"code": -32700, "message": "Parse error"}, "id": null}' 
+2014-07-04 21:11:57,522 - nxtBridge rcvd req: {'params': [], 'id': 1, 'method': 'getbalance'} 
+2014-07-04 21:12:08,261 - nxtBridge rcvd req: {'params': ['aaa'], 'id': 1, 'method': 'getnewaddress'} 
+2014-07-04 21:12:08,263 - nxtBridge returning: b'{"jsonrpc": "2.0", "error": {"code": -32700, "message": "Parse error"}, "id": null}' 
+2014-07-04 21:12:33,590 - nxtBridge rcvd req: {'params': [], 'id': 1, 'method': 'testC'} 
+2014-07-04 21:13:21,633 - nxtBridge rcvd req: {'params': [], 'id': 1, 'method': 'testC'} 
+2014-07-04 21:13:22,984 - nxtBridge rcvd req: {'params': [], 'id': 1, 'method': 'testC'} 
+2014-07-04 21:14:44,823 - nxtBridge listening on localhost:6876
+2014-07-04 21:14:49,108 - nxtBridge rcvd req: {'method': 'testC', 'id': 1, 'params': []} 
+2014-07-04 21:14:53,633 - nxtBridge rcvd req: {'method': 'getnewaddress', 'id': 1, 'params': ['aaa']} 
+2014-07-04 21:14:53,635 - nxtBridge returning: b'{"id": null, "jsonrpc": "2.0", "error": {"code": -32700, "message": "Parse error"}}' 
+2014-07-04 21:14:58,420 - nxtBridge rcvd req: {'method': 'getnewaddress', 'id': 1, 'params': []} 
+2014-07-04 21:15:05,740 - nxtBridge rcvd req: {'method': 'getnewaddress', 'id': 1, 'params': ['aaa']} 
+2014-07-04 21:15:05,742 - nxtBridge returning: b'{"id": null, "jsonrpc": "2.0", "error": {"code": -32700, "message": "Parse error"}}' 
+2014-07-04 21:15:57,969 - nxtBridge rcvd req: {'method': 'testC', 'id': 1, 'params': []} 
+2014-07-04 21:16:01,748 - nxtBridge rcvd req: {'method': 'getinfo', 'id': 1, 'params': []} 
+2014-07-04 21:16:01,768 - nxtBridge returning: b'{"result": {"version": "1.2.0e", "paytxfee": 0.0, "walletversion": "1.2.0e", "timeoffset": 0, "keypoolsize": 196024856, "errors": "", "keypoololdest": 698875904, "testnet": false, "protocolversion": "1.2.0e", "blocks": 145004, "connections": 58, "proxy": "", "balance": 0.0, "difficulty": "2558186380216209"}, "id": 1, "jsonrpc": "2.0"}' 
+2014-07-04 21:16:07,166 - nxtBridge rcvd req: {'method': 'getnewaddress', 'id': 1, 'params': ['aaa']} 
+2014-07-04 21:16:07,168 - nxtBridge returning: b'{"id": null, "jsonrpc": "2.0", "error": {"code": -32700, "message": "Parse error"}}' 
+2014-07-04 21:17:11,068 - nxtBridge rcvd req: {'method': 'getreceivedbyaccount', 'id': 1, 'params': ['123']} 
+2014-07-04 21:17:11,082 - nxtBridge returning: {"result": 1.0, "id": 1, "jsonrpc": "2.0"} 
+2014-07-04 21:18:22,179 - nxtBridge rcvd req: {'method': 'getnewaddress', 'id': 1, 'params': ['aaa']} 
+2014-07-04 21:18:22,181 - nxtBridge returning: b'{"id": null, "jsonrpc": "2.0", "error": {"code": -32700, "message": "Parse error"}}' 
+2014-07-04 21:18:24,196 - nxtBridge rcvd req: {'method': 'getnewaddress', 'id': 1, 'params': ['aaa']} 
+2014-07-04 21:18:24,197 - nxtBridge returning: b'{"id": null, "jsonrpc": "2.0", "error": {"code": -32700, "message": "Parse error"}}' 
+2014-07-04 21:18:25,949 - nxtBridge rcvd req: {'method': 'getnewaddress', 'id': 1, 'params': ['aaa']} 
+2014-07-04 21:18:25,951 - nxtBridge returning: b'{"id": null, "jsonrpc": "2.0", "error": {"code": -32700, "message": "Parse error"}}' 
+2014-07-04 21:18:28,241 - nxtBridge rcvd req: {'method': 'getnewaddress', 'id': 1, 'params': ['aaa']} 
+2014-07-04 21:18:28,243 - nxtBridge returning: b'{"id": null, "jsonrpc": "2.0", "error": {"code": -32700, "message": "Parse error"}}' 
+2014-07-04 21:18:30,379 - nxtBridge rcvd req: {'method': 'getnewaddress', 'id': 1, 'params': ['aaa']} 
+2014-07-04 21:18:30,381 - nxtBridge returning: b'{"id": null, "jsonrpc": "2.0", "error": {"code": -32700, "message": "Parse error"}}' 
+2014-07-04 21:18:33,804 - nxtBridge rcvd req: {'method': 'getnewaddress', 'id': 1, 'params': ['aaa']} 
+2014-07-04 21:18:33,806 - nxtBridge returning: b'{"id": null, "jsonrpc": "2.0", "error": {"code": -32700, "message": "Parse error"}}' 
+2014-07-04 21:21:11,984 - nxtBridge listening on localhost:6876
+2014-07-04 21:21:14,791 - nxtBridge rcvd req: {'id': 1, 'params': ['aaa'], 'method': 'getnewaddress'} 
+2014-07-04 21:21:14,794 - nxtBridge returning: b'{"id": 1, "result": {"testC": "(\'\', \'13213972467074363956\', \'NXT-6WKN-YCXW-ZJFJ-DPDSG\', \'NXTx6WKNxYCXWxZJFJxDPDSGnxtnxtnxt\', \'vYMS7uPxrRljmdufqPB50ckWuWzLG4kxEB4MEgp4VzWwiuGqe9aOiG2EZfQz1sXTdkAjkT2mch3qVSK3mcaUCxAbJXDg3b1k\', \'N\')"}, "jsonrpc": "2.0"}' 
+2014-07-04 21:29:13,673 - nxtBridge listening on localhost:6876
+2014-07-04 21:29:18,320 - nxtBridge rcvd req: {'id': 1, 'params': ['aaa'], 'method': 'getnewaddress'} 
+2014-07-04 21:29:18,346 - nxtBridge returning: b'{"id": 1, "error": {"message": "Server error", "data": {"args": ["walletDB_fName"], "message": "\'walletDB_fName\'", "type": "KeyError"}, "code": -32000}, "jsonrpc": "2.0"}' 
+2014-07-04 21:31:09,628 - nxtBridge listening on localhost:6876
+2014-07-04 21:31:13,960 - nxtBridge rcvd req: {'id': 1, 'params': ['aaa'], 'method': 'getnewaddress'} 
+2014-07-04 21:31:13,964 - nxtBridge returning: b'{"jsonrpc": "2.0", "id": 1, "result": {}}' 
+2014-07-04 21:34:30,566 - nxtBridge listening on localhost:6876
+2014-07-04 21:34:34,974 - nxtBridge rcvd req: {'method': 'getnewaddress', 'params': ['aaa'], 'id': 1} 
+2014-07-04 21:34:34,976 - nxtBridge returning: b'{"error": {"message": "Invalid params", "code": -32602}, "jsonrpc": "2.0", "id": 1}' 
+2014-07-04 21:35:04,094 - nxtBridge listening on localhost:6876
+2014-07-04 21:35:07,506 - nxtBridge rcvd req: {'params': ['aaa'], 'id': 1, 'method': 'getnewaddress'} 
+2014-07-04 21:35:07,509 - nxtBridge returning: b'{"result": {}, "jsonrpc": "2.0", "id": 1}' 
+2014-07-04 21:35:12,556 - nxtBridge rcvd req: {'params': ['aaa'], 'id': 1, 'method': 'getnewaddress'} 
+2014-07-04 21:35:12,560 - nxtBridge returning: b'{"result": {}, "jsonrpc": "2.0", "id": 1}' 
+2014-07-04 21:35:13,489 - nxtBridge rcvd req: {'params': ['aaa'], 'id': 1, 'method': 'getnewaddress'} 
+2014-07-04 21:35:13,492 - nxtBridge returning: b'{"result": {}, "jsonrpc": "2.0", "id": 1}' 
+2014-07-04 21:35:14,164 - nxtBridge rcvd req: {'params': ['aaa'], 'id': 1, 'method': 'getnewaddress'} 
+2014-07-04 21:35:14,167 - nxtBridge returning: b'{"result": {}, "jsonrpc": "2.0", "id": 1}' 
+2014-07-04 21:35:14,738 - nxtBridge rcvd req: {'params': ['aaa'], 'id': 1, 'method': 'getnewaddress'} 
+2014-07-04 21:35:14,741 - nxtBridge returning: b'{"result": {}, "jsonrpc": "2.0", "id": 1}' 
+2014-07-04 21:35:15,326 - nxtBridge rcvd req: {'params': ['aaa'], 'id': 1, 'method': 'getnewaddress'} 
+2014-07-04 21:35:15,329 - nxtBridge returning: b'{"result": {}, "jsonrpc": "2.0", "id": 1}' 
+2014-07-04 21:35:16,387 - nxtBridge rcvd req: {'params': ['aaa'], 'id': 1, 'method': 'getnewaddress'} 
+2014-07-04 21:35:16,390 - nxtBridge returning: b'{"result": {}, "jsonrpc": "2.0", "id": 1}' 
+2014-07-04 21:35:17,318 - nxtBridge rcvd req: {'params': ['aaa'], 'id': 1, 'method': 'getnewaddress'} 
+2014-07-04 21:35:17,321 - nxtBridge returning: b'{"result": {}, "jsonrpc": "2.0", "id": 1}' 
+2014-07-04 21:35:18,171 - nxtBridge rcvd req: {'params': ['aaa'], 'id': 1, 'method': 'getnewaddress'} 
+2014-07-04 21:35:18,173 - nxtBridge returning: b'{"result": {}, "jsonrpc": "2.0", "id": 1}' 
+2014-07-04 21:35:19,035 - nxtBridge rcvd req: {'params': ['aaa'], 'id': 1, 'method': 'getnewaddress'} 
+2014-07-04 21:35:19,039 - nxtBridge returning: b'{"result": {}, "jsonrpc": "2.0", "id": 1}' 

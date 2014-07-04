@@ -50,6 +50,9 @@ from werkzeug.serving import run_simple
 
 from jsonrpc import JSONRPCResponseManager, dispatcher
 
+from string import ascii_letters as letters
+from string import digits
+from numpy.random import randint as ri
 import sqlite3 as sq
 
     
@@ -82,7 +85,7 @@ class UC_Bridge1(nxtUseCaseMeta):
 
    #     self.uc_bridge = nxtUC_Bridge.UC_Bridge1(self, self.qPool, host, port, self.bridgeLogger, self.consLogger, DB  )
        
-    def __init__(self, sessMan, host = 'localhost', port = '6876',bridgeLogger=None , consLogger=None, DBs=None  ):
+    def __init__(self, sessMan, host = 'localhost', port = '6876',bridgeLogger=None , consLogger=None, wallDB=None  ):
         super(UC_Bridge1   , self   ).__init__(sessMan)
         self.sessMan = sessMan
         self.qPool = sessMan.qPool
@@ -90,34 +93,33 @@ class UC_Bridge1(nxtUseCaseMeta):
         self.bridgeLogger = bridgeLogger
         self.consLogger = consLogger
 
+        self.walletDB = wallDB['walletDB']
+        self.walletDB_fName = wallDB['walletDB_fName']
+        #self.uc_bridge = nxtUC_Bridge.UC_Bridge1(self,  host, port, self.bridgeLogger, self.consLogger, wallDB  )
 
         #        lg.info('nxtBridge listening on host %s : port %s', host, port)
-        self.mm = BridgeThread( self.qPool, host  , port ,  bridgeLogger,  consLogger ,DBs )
+        self.mm = BridgeThread( self.qPool, host  , port ,  bridgeLogger,  consLogger ,wallDB )
 
  
 class BridgeThread(QObject):
     """ 2680262203532249785 nxt genesis block """
-    # housekeeping of the threads may have to be taken care of
-    
-    
-    def __init__(self, qPool, host, port, bridgeLogger, consLogger, DBs ):
+    def __init__(self, qPool, host, port, bridgeLogger, consLogger, wallDB ):
         # check : is this the same as calling super(BridgeThread, etc) ???????
         super(QObject, self).__init__( parent = None)
-        self.DBs=DBs
         self.qPool = qPool
         self.host = host
         self.port = port
         self.bridgeLogger = bridgeLogger
         self.consLogger = consLogger
-        self.walletDB = DBs[0]
-        self.blockDB  = DBs[1]
+        self.wallDB = wallDB
+        #self.walletDB = wallDB['walletDB']
+        #self.walletDB_fName = wallDB['walletDB_fName']
 
-    
     
     @pyqtSlot() # 61
     def jsonServ_Slot(self, ):
         """-"""
-        self.json_Runner = JSON_Runner( self.host, self.port, self.bridgeLogger, self.consLogger , self.qPool, self.DBs) # json_Emitter, self to THIS !!!!!!
+        self.json_Runner = JSON_Runner( self.host, self.port, self.bridgeLogger, self.consLogger , self.qPool, self.wallDB) # json_Emitter, self to THIS !!!!!!
         self.json_Runner.setAutoDelete(False) 
         self.qPool.start(self.json_Runner)
         self.consLogger.info('  self.qPool.activeThreadCount() = %s ', str(   self.qPool.activeThreadCount()) )
@@ -129,7 +131,7 @@ class JSON_Runner(QtCore.QRunnable):
     """- This is what needs to be put into the QThreadpool """
     nxtApi = nxtApi
     
-    def __init__(self,   host = 'localhost', port = '6876', fileLogger = None, consLogger = None , qPool=None, DBs=None ): #emitter,
+    def __init__(self,   host = 'localhost', port = '6876', fileLogger = None, consLogger = None , qPool=None, wallDB=None ): #emitter,
         super(QtCore.QRunnable, self).__init__()
         global session # this must be global to be accessible from the dispatcher methods
         session = Session()
@@ -137,16 +139,11 @@ class JSON_Runner(QtCore.QRunnable):
         sessUrl = 'http://' + host + ':' + port + '/nxt?' 
         global NxtReq
 
-        self.walletDB = DBs[0]
-        self.blockDB  = DBs[1]
-
-
-        
-        # !!!! use a dedicated DBTrhead later on. Will be no problem! For now, make cursor objects as needed in the QTHreapool runnables
-        # self.blockDBConn = DB[0]
-        #self.blockDBCur = DB[1]
-        
+        self.walletDB = wallDB['walletDB']
+        self.walletDB_fName = wallDB['walletDB_fName']
         NxtReq = Req( method='POST', url = sessUrl, params = {}, headers = headers        )
+
+        # ToDo here we can also include a walletLogger to snd encrypted emails to a safe location as backup!
         self.bridgeLogger = fileLogger
         self.consLogger = consLogger
         self.qPool = qPool
@@ -466,7 +463,7 @@ class JSON_Runner(QtCore.QRunnable):
    
     @dispatcher.add_method
     def getconnectioncount( **kwargs):
-
+        print("\n\n getconnectioncount \nstr(kwargs['bridgeRunner'])" + str(kwargs['bridgeRunner']))
         payload = { "requestType" : "getState" }  
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
@@ -489,6 +486,7 @@ class JSON_Runner(QtCore.QRunnable):
     @dispatcher.add_method
     def getinfo( **kwargs):
         print("\ngetinfo\n")
+
         # it is possible to iclude the parent object namespace (runner) in the kwargs to have access!
         #self = kwargs['Runner']
         
@@ -529,17 +527,54 @@ class JSON_Runner(QtCore.QRunnable):
 
         return Nxt2Btc  
 
-
     @dispatcher.add_method
-    def getnewaddress( **kwargs):
+    def getnewaddress(**kwargs):
+        print("-2-------->"  )
 
-        # if accName exists in DB, return ERROR
-        # generate random pw
-        # check if exists -
-        # convert RS
-        # pad RS to bitcoinRS
-        # enter into DB
-        # : accName,
+
+        def genRanSec():
+            allchars = letters+digits
+            numChars = len(allchars) # 62 no special chars, just caps, digs, mins
+            ranSec = ''
+            charList = ri(0,numChars, 96 )
+            for char in charList:
+                ranSec += allchars[char]
+            return ranSec
+
+        nxtSecret = genRanSec()
+        print("kwargs: " + str(kwargs) + "\n\n" + nxtSecret)
+        # #{'nxtWalletDB': <nxtPwt.nxtDB.WalletDB_Handler object at 0x7fca49515ca8>, 'bridgeRunner': <nxtPwt.nxtUC_Bridge.JSON_Runner object at 0x7fca46d981f8>}
+        #
+        # bridgeRunner = kwargs['bridgeRunner'] # <nxtPwt.nxtUC_Bridge.JSON_Runner object
+        # nxtWalletDB = kwargs['nxtWalletDB']   #<nxtPwt.nxtDB.WalletDB_Handler object at 0x7fca49515ca8>
+        #
+        #
+        # print("-1-------->"  )
+        walletDB_fName = kwargs['walletDB_fName']
+        #walletDB_fName  = "nxtWallet.dat" # NAME OF DB HERE ---------- THIS WILL BE HNADED IN AS KWARGS!!!!
+        print("-2-------->" +walletDB_fName )
+        walletDBConn = sq.connect(walletDB_fName)
+        print(str(walletDBConn))
+
+        walletDBCur = walletDBConn.cursor()
+        print(str(walletDBCur))
+
+        #walletDBCur.execute("SELECT * FROM   nxtWallet WHERE accountName = ?   ", ( "", )) # WHERE height = ?   ", ( blockHeight, )  )
+        walletDBCur.execute("SELECT * FROM   nxtWallet") # WHERE height = ?   ", ( blockHeight, )  )
+
+        WALLET = walletDBCur.fetchone()
+        #WALLET = WALLET[0]
+        print("-3-------->"  )
+        print("--str(WALLET)------->" +str(WALLET))
+
+        #
+        # self.walletLogger.info('wallet: nxtBridge  : %s ', "in json thread" )
+        # self.walletDB = "nxtWalletDB.dat" # NAME OF DB HERE
+        # self.walletDBConn = sq.connect(self.walletDB)
+        # self.walletDBCur = self.walletDBConn.cursor()
+        # self.walletDBCur.execute("SELECT * from   nxtWallet WHERE accountName = ?   ", ( "", )  )
+        #
+        # wallTemp = self.walletDBCur.fetchone()
 
 
         Nxt2Btc = {}
@@ -558,7 +593,7 @@ class JSON_Runner(QtCore.QRunnable):
 
     @dispatcher.add_method
     def getreceivedbyaccount( **kwargs):
-        #print("getreceivedbyaccount" +str(kwargs))
+        print("getreceivedbyaccount" +str(kwargs))
         ACCOUNT = kwargs["account"] #kwargs['account']
         payload = { "requestType" : "getBalance" } #getTime"   }
         NxtApi = {}
@@ -568,14 +603,11 @@ class JSON_Runner(QtCore.QRunnable):
         preppedReq = NxtReq.prepare()
         response = session.send(preppedReq)
         NxtResp = response.json()
-        Nxt2Btc = {}
-
+        #Nxt2Btc = {}
 
         Nxt2Btc =  {
                     'ACCOUNT' : float(NxtResp['balanceNQT'] ) * 0.00000001
                     }
-
-
 
         return Nxt2Btc
 
@@ -660,9 +692,6 @@ class JSON_Runner(QtCore.QRunnable):
 
         return Nxt2Btc
 
-
-
-
     @dispatcher.add_method
     def listsinceblock( **kwargs):
 #        ACCOUNT = kwargs["account"] #kwargs['account']
@@ -684,7 +713,6 @@ class JSON_Runner(QtCore.QRunnable):
           
         
         return Nxt2Btc  
-        
         
 
 
@@ -740,8 +768,7 @@ class JSON_Runner(QtCore.QRunnable):
         preppedReq = NxtReq.prepare()
         response = session.send(preppedReq)
         NxtResp = response.json()
-        
-        
+
         try:
             
             TX_ID = NxtResp['transaction']
@@ -969,6 +996,7 @@ class JSON_Runner(QtCore.QRunnable):
         
         #<nxtPwt.nxtUC_Bridge.JSON_Runner object at 0x7fcb351e8048>
 
+        print(self.walletDB_fName)
 
         def parse_getbalance(jsonParms):
             account = str(jsonParms[0])
@@ -982,7 +1010,6 @@ class JSON_Runner(QtCore.QRunnable):
             return parmsDi
 
         def parse_getblock(jsonParms):
-            parmsDi = {} 
             block = str(jsonParms[0])
             parmsDi = {'block':block} 
             return parmsDi
@@ -992,44 +1019,26 @@ class JSON_Runner(QtCore.QRunnable):
             return parmsDi
             
         def parse_getblockhash(jsonParms):
-            parmsDi = {} 
             blockHeight = str(jsonParms[0])
-            #print("test")
-
-            # maybe later this can be done ONCE for the object instance...
-            #self.blockHeightDB = "nxtBlockDB.db"
-            #self.blockDBConn = sq.connect(self.blockHeightDB)
-
-            #self.blockDBCur = self.blockDBConn.cursor()
-
-
-
-
-
-            self.blockHeightDB = "nxtBlockDB.db" # NAME OF DB HERE
-            self.blockDBConn = sq.connect(self.blockHeightDB)
-            self.blockDBCur = self.blockDBConn.cursor()
-
-            self.blockDBCur.execute("SELECT blockAddr from   nxtBlockH_to_Addr WHERE height = ?   ", ( blockHeight, )  )
-
-            blockAddress_from_blockHeight = self.blockDBCur.fetchone()
-            blockAddress = blockAddress_from_blockHeight[0]
-            parmsDi = {'blockAddress':blockAddress} 
+            print(blockHeight)
+            parmsDi = {'blockAddress':blockAddress}
             return parmsDi
 
-
-
-        def parse_getconnectioncount(jsonParms):
-            parmsDi = {} 
+        def parse_getconnectioncount(jsonParms ):
+            #print("\nparse_getconnectioncount"+str(self))
+            parmsDi = {} #{'bridgeRunner' : self}
             return parmsDi
         
         def parse_getinfo(jsonParms):
-            parmsDi = {} 
+            parmsDi = {}
             return parmsDi
             
-        def parse_getnewaddress(jsonParms):
+        def parse_getnewaddress(jsonParms): # 'self' is the bridgeRunner namespace
+            #print("\nparse_getnewaddress"+str(self))
+            parmsDi = {'walletDB_fName' : self.walletDB_fName}
             account = str(jsonParms[0])
-            parmsDi = {'account':account}             
+            parmsDi['account'] = account
+            #print("parse_getnewaddress" + str(parmsDi))
             return parmsDi
           
         def parse_getreceivedbyaccount(jsonParms):
@@ -1045,28 +1054,25 @@ class JSON_Runner(QtCore.QRunnable):
             return parmsDi
         
         def parse_gettransaction(jsonParms):
-            parmsDi = {} 
             txid = str(jsonParms[0])
             parmsDi = {'txid':txid}             
             return parmsDi
 
 
         def parse_listsinceblock(jsonParms):
-            parmsDi = {}
             blockAddress = str(jsonParms[0])
             parmsDi = {'blockAddress':blockAddress}
             minimumConfs = str(jsonParms[0])
-            parmsDi = {'minimumConfs':minimumConfs}
+            parmsDi['minimumConfs'] = minimumConfs
             return parmsDi
 
         def parse_listunspent(jsonParms):
-            parmsDi = {}
             minimumConfs = str(jsonParms[0])
             parmsDi = {'minimumConfs':minimumConfs}
             maximumConfs = str(jsonParms[0])
-            parmsDi = {'maximumConfs':maximumConfs}
+            parmsDi['maximumConfs']  = maximumConfs
             addresses = str(jsonParms[0])
-            parmsDi = {'addresses':addresses}
+            parmsDi['addresses'] = addresses
             return parmsDi
 
         def parse_sendfrom(jsonParms):
@@ -1119,21 +1125,12 @@ class JSON_Runner(QtCore.QRunnable):
             parmsDi = {} 
             return parmsDi
             
-            
-        
         def parse_validateaddress(jsonParms):
-            parmsDi = {} 
             PASSPHRASE = str(jsonParms[0])
             parmsDi = {'PASSPHRASE':PASSPHRASE}             
-            
             return parmsDi
         
 
-
-
-
-
-        
         def parse_testC(jsonParms):
             #print(str(jsonParms))
             parmsDi = {}
@@ -1253,7 +1250,7 @@ class JSON_Runner(QtCore.QRunnable):
                 parmsDi = parse_getinfo(jsonParms)
 
             elif bitcoind_method == 'getnewaddress':
-                parmsDi = parse_getinfo(jsonParms)
+                parmsDi = parse_getnewaddress(jsonParms)
 
             elif bitcoind_method == 'getreceivedbyaccount':
                 parmsDi = parse_getreceivedbyaccount(jsonParms)
@@ -1265,10 +1262,10 @@ class JSON_Runner(QtCore.QRunnable):
                 parmsDi = parse_gettransaction(jsonParms)
 
             elif bitcoind_method == 'listsinceblock':
-                parmsDi = parse_getreceivedbyaccount(jsonParms)
+                parmsDi = parse_listsinceblock(jsonParms)
                 
             elif bitcoind_method == 'listunspent':
-                parmsDi = parse_getreceivedbyaddress(jsonParms)
+                parmsDi = parse_listunspent(jsonParms)
 
             elif bitcoind_method == 'sendfrom':
                 parmsDi = parse_sendfrom(jsonParms)
@@ -1330,9 +1327,12 @@ class JSON_Runner(QtCore.QRunnable):
         #
         #
         #
+        # TWO ways of handling this!!
+        # can't hand the 'self' namespace in here, because it uses a string!
         #
+        # we CAN use a non-dispatcher method here, but the we have to MANUALLY construct the RESPONSE object!
+        # should work also!
         #
-
         responseFromNxt = JSONRPCResponseManager.handle(jsonStr, dispatcher)
         response = Response( responseFromNxt.json, mimetype='application/json') #, mimetype='text/plain') 
         

@@ -117,7 +117,12 @@ validateaddress		# OK
 
 
 
-Note: Since NXT does not have a 'wallet' feature, the Bridge emulates a wallet-like database.
+Note: 
+
+NXT does not have a 'wallet' feature, the Bridge emulates a wallet-like database.
+The Bridge internally maintains an sqlite3 database to do this.
+Recommended handling of cryptographic keys will be documented in an upcoming version. 
+
 
 
 Below are examples for the implemented bitcoind calls using the curl tool, given with two different parameter syntaxes.

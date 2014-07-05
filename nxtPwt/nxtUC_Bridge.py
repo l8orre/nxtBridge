@@ -463,16 +463,14 @@ class JSON_Runner(QtCore.QRunnable):
    
     @dispatcher.add_method
     def getconnectioncount( **kwargs):
-        print("\n\n getconnectioncount \nstr(kwargs['bridgeRunner'])" + str(kwargs['bridgeRunner']))
-        payload = { "requestType" : "getState" }  
+        payload = { "requestType" : "getState" }
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
         NxtReq.params=NxtApi # same obj, only replace params
         preppedReq = NxtReq.prepare()
         response = session.send(preppedReq)
         NxtResp = response.json()
-        Nxt2Btc = {}
-         
+
         Nxt2Btc =  {
                     'numberOfPeers':NxtResp['numberOfPeers']
                     }
@@ -741,9 +739,6 @@ class JSON_Runner(QtCore.QRunnable):
         
 
 
-
-
-
 # 52 sendfrom
         
     @dispatcher.add_method
@@ -787,13 +782,13 @@ class JSON_Runner(QtCore.QRunnable):
  
     @dispatcher.add_method
     def sendtoaddress( **kwargs):
-         
+        TX_ID='temp'
         Nxt2Btc = {}
         Nxt2Btc =  {
                 
                 "txid" : TX_ID,
                 
-                            }
+                    }
                     
         return Nxt2Btc  
  
@@ -888,56 +883,23 @@ class JSON_Runner(QtCore.QRunnable):
 ####################################
 ####################################
 ####################################
-
-
-
-
-     # this is a method that is NOT routed through dispatcher and it can beused also!!!
+    # customizations:
+    @dispatcher.add_method
+    def test_return_arbitrary_JSON_DICT(**kwargs):
+        return {"test_return_arbitrary_JSON_DICT": "test_return_arbitrary_JSON_DICT"} # WALLET
 
     @dispatcher.add_method
-    def testC(**kwargs):
-        print("-2-------->"  )
-        print("kwargs: " + str(kwargs))
-        # #{'nxtWalletDB': <nxtPwt.nxtDB.WalletDB_Handler object at 0x7fca49515ca8>, 'bridgeRunner': <nxtPwt.nxtUC_Bridge.JSON_Runner object at 0x7fca46d981f8>}
-        #
-        # bridgeRunner = kwargs['bridgeRunner'] # <nxtPwt.nxtUC_Bridge.JSON_Runner object
-        # nxtWalletDB = kwargs['nxtWalletDB']   #<nxtPwt.nxtDB.WalletDB_Handler object at 0x7fca49515ca8>
-        #
-        #
-        # print("-1-------->"  )
-        walletDB_fName  = "nxtWallet.dat" # NAME OF DB HERE ---------- THIS WILL BE HNADED IN AS KWARGS!!!!
-        walletDBConn = sq.connect(walletDB_fName)
-        print(str(walletDBConn))
+    def test_return_arbitrary_NON_JSON(**kwargs):
+        return {'ripThisIntoAList': 1387}
 
-        walletDBCur = walletDBConn.cursor()
-        print(str(walletDBCur))
-
-        #walletDBCur.execute("SELECT * FROM   nxtWallet WHERE accountName = ?   ", ( "", )) # WHERE height = ?   ", ( blockHeight, )  )
-        walletDBCur.execute("SELECT * FROM   nxtWallet") # WHERE height = ?   ", ( blockHeight, )  )
-
-        WALLET = walletDBCur.fetchone()
-        #WALLET = WALLET[0]
-        print("-3-------->"  )
-        print("--str(WALLET)------->" +str(WALLET))
-
-        #
-        # self.walletLogger.info('wallet: nxtBridge  : %s ', "in json thread" )
-        # self.walletDB = "nxtWalletDB.dat" # NAME OF DB HERE
-        # self.walletDBConn = sq.connect(self.walletDB)
-        # self.walletDBCur = self.walletDBConn.cursor()
-        # self.walletDBCur.execute("SELECT * from   nxtWallet WHERE accountName = ?   ", ( "", )  )
-        #
-        # wallTemp = self.walletDBCur.fetchone()
+    def _any_method(self):
+        self.consLogger.info('_any_method')
+        return {"ripThisIntoAList": 5387}
 
 
-        return {"testC":str(WALLET)} # WALLET
- 
 
-    def test(self):
-        pass
-        return "ok3"
 
- 
+
 
     @Request.application
     def application(self, request ):
@@ -996,7 +958,7 @@ class JSON_Runner(QtCore.QRunnable):
         
         #<nxtPwt.nxtUC_Bridge.JSON_Runner object at 0x7fcb351e8048>
 
-        print(self.walletDB_fName)
+        self.consLogger.info('self.walletDB_fName  : %s ', self.walletDB_fName )
 
         def parse_getbalance(jsonParms):
             account = str(jsonParms[0])
@@ -1025,8 +987,7 @@ class JSON_Runner(QtCore.QRunnable):
             return parmsDi
 
         def parse_getconnectioncount(jsonParms ):
-            #print("\nparse_getconnectioncount"+str(self))
-            parmsDi = {} #{'bridgeRunner' : self}
+            parmsDi = {}
             return parmsDi
         
         def parse_getinfo(jsonParms):
@@ -1130,17 +1091,18 @@ class JSON_Runner(QtCore.QRunnable):
             parmsDi = {'PASSPHRASE':PASSPHRASE}             
             return parmsDi
         
+        #
+        # DEMO FUNCS
+        def parse_test_return_arbitrary_NON_JSON(jsonPArms):
+            parmsDi = {}
+            return parmsDi
 
-        def parse_testC(jsonParms):
-            #print(str(jsonParms))
+        def parse_test_return_arbitrary_JSON_DICT(jsonParms):
             parmsDi = {}
             parmsDi['bridgeRunner'] = self # here we add the walletDB to the parms to hand it into the callback
 
             parmsDi['nxtWalletDB'] = self.walletDB # here we add the walletDB to the parms to hand it into the callback
             return parmsDi
-            #./bitcoind -rpcport=7879 test "" --------------  ['']
-            #./bitcoind -rpcport=7879 test "*" ---------      ['*']
-
 
 
 
@@ -1172,7 +1134,7 @@ class JSON_Runner(QtCore.QRunnable):
         #        
         jsonEval = eval(jsonRaw)
         
-        self.bridgeLogger.info('nxtBridge rcvd req: %s ', str(jsonEval) )
+        #self.bridgeLogger.info('nxtBridge rcvd req: %s ', str(jsonEval) )
         
         self.consLogger.info('nxtBridge rcvd req: %s ', str(jsonEval) )
          
@@ -1281,13 +1243,17 @@ class JSON_Runner(QtCore.QRunnable):
 
 
 
+            elif bitcoind_method == 'test_return_arbitrary_NON_JSON':
+
+                #parmsDi = parse_test_return_arbitrary_NON_JSON(jsonParms)
+                parmsDi = {'test_return_arbitrary_NON_JSON':'testtest_return_arbitrary_NON_JSON'}
 
 
-            elif bitcoind_method == 'testC':
+            elif bitcoind_method == 'test_return_arbitrary_JSON_DICT':
 
-                parmsDi = parse_testC(jsonParms)
-                parmsDi = {'testC':'testc_PARMSDI'}
-                print("\nparse json: elif bitcoind_method == 'testC': str(parmsDi) " + str(parmsDi) )
+                parmsDi = parse_test_return_arbitrary_JSON_DICT(jsonParms)
+                parmsDi = {'test_return_arbitrary_JSON_DICT':'test_return_arbitrary_JSON_DICT_PARMSDI'}
+                print("\nparse json: elif bitcoind_method == 'test_return_arbitrary_JSON_DICT': str(parmsDi) " + str(parmsDi) )
 
                 
             else:
@@ -1333,20 +1299,27 @@ class JSON_Runner(QtCore.QRunnable):
         # we CAN use a non-dispatcher method here, but the we have to MANUALLY construct the RESPONSE object!
         # should work also!
         #
+
         responseFromNxt = JSONRPCResponseManager.handle(jsonStr, dispatcher)
-        response = Response( responseFromNxt.json, mimetype='application/json') #, mimetype='text/plain') 
-        
-        self.consLogger.info('self.qPool.activeThreadCount()  = %s ', str( self.qPool.activeThreadCount() ) )
-        
+
+        #
+        # this construction allows to introduce ANY dict as result into the response object.
+        # the local dispatcher functions that are wrapped as decorators are not really needed here!
+        # dispatcher_override = True
+        # if dispatcher_override:
+        #     result = self._any_method()
+        #     responseFromNxt._data['result'] = result
+
+        response = Response( responseFromNxt.json, mimetype='application/json') #, mimetype='text/plain')
+
+        #self.consLogger.info('self.qPool.activeThreadCount()  = %s ', str( self.qPool.activeThreadCount() ) )
+        #
         # *SOME* of the replies do not seem to be correct JSON format in {key:value} format.
-        
+        #
         # 5 prepare the details of the response in non-JSON but bitcoind compliant format
         # to be sent back to the original requester
-        
-        
-        self.consLogger.info('response = Response( responseFromNxt.json, ) = %s ', str(jsonEval) )
-        
-        ########################################################
+        #
+        # ########################################################
         #
         # 5 return response object using dedicated 'method' label as originally in request object
         #
@@ -1355,28 +1328,27 @@ class JSON_Runner(QtCore.QRunnable):
         #
         #
         #######################################################
-        if bitcoind_method == 'getbalance':
+        if bitcoind_method == 'getbalance': #
+            """  RETURN NON - JSON  """
             # we MUST forcible violate the response object here because bitcoind does not use proper json
             parseResponse = eval(response.response[0])
             # parseResponse --> {'result': {'ACCOUNT': 2547600000000.0}, 'id': 1, 'jsonrpc': '2.0'}
             resultJson = parseResponse['result']
             amount  = resultJson['ACCOUNT']
-            parseResponse['result'] = amount
-            parseResponse = str(parseResponse)
+            parseResponse['result'] = amount # force in a string or int instead of a dict!
+            parseResponse = str(parseResponse) # re-package
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
             self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
 
-
-
-
         elif bitcoind_method == 'getbestblockhash':
+            """  RETURN NON - JSON  """
             # this is the ugly stuff where we butcher the dict, and re-configure a synthetic json response object
             parseResponse = eval(response.response[0])
             resultJson = parseResponse['result']
             blockcount  = resultJson['lastBlock']
-            parseResponse['result'] = blockcount
+            parseResponse['result'] = blockcount    # force in a string or int instead of a dict!
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
@@ -1384,29 +1356,31 @@ class JSON_Runner(QtCore.QRunnable):
             return response
  
         elif bitcoind_method == 'getblock':
+            """  RETURN GOOD - JSON  """
             # this format is used when we pass through a nice dict as json reply            
-            self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             # return a dict directly as dict, no need to make a fake list from it
-            #self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
+            # self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
        
         elif bitcoind_method == 'getblockcount':
+            """  RETURN NON - JSON  """
             parseResponse = eval(response.response[0])
             resultJson = parseResponse['result']
             blockcount  = resultJson['numberOfBlocks']
-            parseResponse['result'] = blockcount
+            parseResponse['result'] = blockcount         # force in a string or int instead of a dict!
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
-            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
+            #self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
  
         elif bitcoind_method == 'getblockhash':
+            """  RETURN NON - JSON  """
             # this is the ugly stuff where we butcher the dict, and re-configure a synthetic json response object
             parseResponse = eval(response.response[0])
             resultJson = parseResponse['result']
             blockAddress  = resultJson['blockAddress']
-            parseResponse['result'] = blockAddress
+            parseResponse['result'] = blockAddress        # force in a string or int instead of a dict!
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
@@ -1416,11 +1390,13 @@ class JSON_Runner(QtCore.QRunnable):
              # AND THAT IS ONE LESS THAN THE BLOCKCOUNT, BEAUSE GENESIS IS HEIGHT = ZERO!
  
         elif bitcoind_method == 'getconnectioncount':
+            """  RETURN NON - JSON  """
             parseResponse = eval(response.response[0])
             # parseResponse --> {'result': {'ACCOUNT': 2547600000000.0}, 'id': 1, 'jsonrpc': '2.0'}
+            print(str(parseResponse))
             resultJson = parseResponse['result']
             numberOfPeers  = resultJson['numberOfPeers']
-            parseResponse['result'] = numberOfPeers
+            parseResponse['result'] = numberOfPeers         # force in a string or int instead of a dict!
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
@@ -1428,93 +1404,101 @@ class JSON_Runner(QtCore.QRunnable):
             return response
  
         elif bitcoind_method == 'getinfo':
-            self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
+            """  RETURN   JSON  """
+            #self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
  
         elif bitcoind_method == 'getnewaddress':
-            self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
+            """  RETURN   JSON  """
+            #self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
 
         elif bitcoind_method == 'getreceivedbyaccount':
+            """  RETURN NON - JSON  """
             parseResponse = eval(response.response[0])
             resultJson = parseResponse['result']
             amount  = resultJson['ACCOUNT']
-            parseResponse['result'] = amount
+            parseResponse['result'] = amount           # force in a string or int instead of a dict!
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
-
-            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
+            #self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
       
         elif bitcoind_method == 'getreceivedbyaddress':
+            """  RETURN NON - JSON  """
             parseResponse = eval(response.response[0])
             resultJson = parseResponse['result']
             amount  = resultJson['ACCOUNT']
-            parseResponse['result'] = amount
+            parseResponse['result'] = amount        # force in a string or int instead of a dict!
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
-
-            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
+            #self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
 
         elif bitcoind_method == 'gettransaction':
-
+            """  RETURN   JSON  """
             self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             return response
 
         elif bitcoind_method == 'listsinceblock':
+            """  RETURN   JSON  """
             self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             return response
 
         elif bitcoind_method == 'listunspent':
+            """  RETURN   JSON  """
             self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             return response
 
         elif bitcoind_method == 'sendfrom':
-
+            """  RETURN   JSON  """
             self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             return response
 
         elif bitcoind_method == 'sendtoaddress':
-
+            """  RETURN   JSON  """
             self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             return response
 
         elif bitcoind_method == 'settxfee':
-            
+            """  RETURN   JSON  """
             self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             return response
             
         elif bitcoind_method == 'validateaddress':
-
+            """  RETURN   JSON  """
             self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             return response            
-           
-
-
-        elif bitcoind_method == 'testC':
-            print("\nelif bitcoind_method == 'testC':" + str(response))
-            #print("elif bitcoind_method == 'testC':" + str(response.__dir__()))
-
-            #   parseResponse = eval(response.response[0])
-            # parseResponse --> {'result': {'ACCOUNT': 2547600000000.0}, 'id': 1, 'jsonrpc': '2.0'}
-            #resultJson = parseResponse['result']
-            #amount  = resultJson['ACCOUNT']
-            #parseResponse['result'] = amount
-            #parseResponse = str(parseResponse)
-            #parseResponse = parseResponse.replace( "'",'"')
-            #response.response[0] = parseResponse
-            #print(str(wallTemp))
+        #
+        #
+        # example methods:
+        elif bitcoind_method == 'test_return_arbitrary_JSON_DICT':
+            """  RETURN  JSON  """
+            self.bridgeLogger.info(' test_return_arbitrary_JSON_DICT nxtBridge returning: %s ', response.response[0] )
             return response
+
+        elif bitcoind_method == 'test_return_arbitrary_NON_JSON':
+            """  RETURN NON - JSON  """
+            parseResponse = eval(response.response[0])
+            resultJson = parseResponse['result']
+            parseResponse['result'] = resultJson['ripThisIntoAList']    # force in a string or int instead of a dict!
+            parseResponse['result'] = [1,2,3,4,'1599']   # force in a string or int instead of a dict!
+            parseResponse['result'] = 1599   # force in a string or int instead of a dict!
+            parseResponse = str(parseResponse)
+            parseResponse = parseResponse.replace( "'",'"')
+            response.response[0] = parseResponse
+            return response
+
+
 
         else:
             parmsDi = {'throwException':'here'}
         
           
 
-        return   0 # shoulnd't get here
+        return   0 # shouldn't get here
               
     def run(self,):
         run_simple('localhost', 7879, self.application,  ) # WERKZEUG !!!!

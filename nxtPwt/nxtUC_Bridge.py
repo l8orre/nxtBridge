@@ -363,7 +363,6 @@ class JSON_Runner(QtCore.QRunnable):
  
     @dispatcher.add_method
     def getblockhash( **kwargs):
-
         payload = { "requestType" : "getBlockId" }
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
@@ -373,11 +372,11 @@ class JSON_Runner(QtCore.QRunnable):
         response = session.send(preppedReq)
         NxtResp = response.json()
         blockAddress = NxtResp['block']
+        print("blockAddress - " + str(blockAddress))
         Nxt2Btc =  {
                     "blockAddress" : blockAddress,
                     }
-        
-        return Nxt2Btc  
+        return Nxt2Btc
 
 
 
@@ -447,8 +446,7 @@ class JSON_Runner(QtCore.QRunnable):
 
     @dispatcher.add_method
     def getnewaddress(**kwargs):
-        print("-2-------->"  )
-
+        #print("\n\n-2--getnewaddress------>"  )
 
         def genRanSec():
             allchars = letters+digits
@@ -459,41 +457,54 @@ class JSON_Runner(QtCore.QRunnable):
                 ranSec += allchars[char]
             return ranSec
 
-        nxtSecret = genRanSec()
-        print("kwargs: " + str(kwargs) + "\n\n" + nxtSecret)
-        # #{'nxtWalletDB': <nxtPwt.nxtDB.WalletDB_Handler object at 0x7fca49515ca8>, 'bridgeRunner': <nxtPwt.nxtUC_Bridge.JSON_Runner object at 0x7fca46d981f8>}
-        #
-        # bridgeRunner = kwargs['bridgeRunner'] # <nxtPwt.nxtUC_Bridge.JSON_Runner object
-        # nxtWalletDB = kwargs['nxtWalletDB']   #<nxtPwt.nxtDB.WalletDB_Handler object at 0x7fca49515ca8>
-        #
-        #
-        # print("-1-------->"  )
         walletDB_fName = kwargs['walletDB_fName']
-        #walletDB_fName  = "nxtWallet.dat" # NAME OF DB HERE ---------- THIS WILL BE HNADED IN AS KWARGS!!!!
-        print("-2-------->" +walletDB_fName )
         walletDBConn = sq.connect(walletDB_fName)
-        print(str(walletDBConn))
-
         walletDBCur = walletDBConn.cursor()
-        print(str(walletDBCur))
 
-        #walletDBCur.execute("SELECT * FROM   nxtWallet WHERE accountName = ?   ", ( "", )) # WHERE height = ?   ", ( blockHeight, )  )
-        walletDBCur.execute("SELECT * FROM   nxtWallet") # WHERE height = ?   ", ( blockHeight, )  )
+        nxtSecret = genRanSec()
 
-        WALLET = walletDBCur.fetchone()
-        #WALLET = WALLET[0]
-        print("-3-------->"  )
-        print("--str(WALLET)------->" +str(WALLET))
+        getAccountId = {
+                                        "requestType" : "getAccountId" ,  \
+                                        "secretPhrase" : nxtSecret ,  \
+                                        "pubKey" : ""
+                                        }
 
-        #
-        # self.walletLogger.info('wallet: nxtBridge  : %s ', "in json thread" )
-        # self.walletDB = "nxtWalletDB.dat" # NAME OF DB HERE
-        # self.walletDBConn = sq.connect(self.walletDB)
-        # self.walletDBCur = self.walletDBConn.cursor()
-        # self.walletDBCur.execute("SELECT * from   nxtWallet WHERE accountName = ?   ", ( "", )  )
-        #
-        # wallTemp = self.walletDBCur.fetchone()
 
+# make sure it has no pubKey here!!! # ToDo !!!!!!!!!!!!!!!!!!
+
+#  and if it has raise a huge alarm!
+
+        accName = kwargs['account']
+        has_pubKey = "N"
+        check_accName_exists= """select exists(select accountName from nxtWallet where accountName= ?)"""
+        check_accName = (accName,)
+        walletDBCur.execute(check_accName_exists,check_accName)
+
+        accName_already_exists = walletDBCur.fetchall()[0]
+        accName_already_exists = accName_already_exists[0] # <class 'int'>
+        if accName_already_exists == 1:
+            return {'account':'accountAlreadyExistsError'}
+        elif accName_already_exists == 0:
+
+            NxtReq.params=getAccountId # same obj, only replace params
+            preppedReq = NxtReq.prepare() # NxtReq is global!
+            response = session.send(preppedReq)
+            NxtResp = response.json()
+            nxtNumAcc = NxtResp['account']
+            nxtRSAcc = NxtResp['accountRS']
+            NxtRS_BTC = NxtResp['accountRS']
+            NxtRS_BTC =NxtRS_BTC.replace("-","x")
+            NxtRS_BTC += 'nxtnxtnxt'
+
+            newNxtAccount = (accName,nxtNumAcc ,nxtRSAcc ,NxtRS_BTC ,nxtSecret , has_pubKey)
+            insertNewNxtAccount = """insert into nxtWallet values (?,?,?,?,?,?)"""
+            walletDBCur.execute(insertNewNxtAccount, newNxtAccount )
+            walletDBConn.commit()
+            return {'account': NxtRS_BTC} # THIS IS THE RETURN STRING
+
+        #walletDBCur.execute("SELECT * FROM   nxtWallet") # WHERE height = ?   ", ( blockHeight, )  )
+        #WALLET = walletDBCur.fetchall()
+        #print("--str(WALLET)--TEST new account----->" +str(WALLET))
 
         # 1Ce1NpJJAH9uLKMR37vzAmnqTjB4Ck8L4g
         # NXT-JTA7-B2QR-8BFC-2V222
@@ -894,9 +905,9 @@ class JSON_Runner(QtCore.QRunnable):
             return parmsDi
             
         def parse_getblockhash(jsonParms):
-            blockHeight = str(jsonParms[0])
-            print(blockHeight)
-            parmsDi = {'blockAddress':blockAddress}
+            height = str(jsonParms[0])
+            print(height)
+            parmsDi = {'height':height}
             return parmsDi
 
         def parse_getconnectioncount(jsonParms ):
@@ -908,9 +919,8 @@ class JSON_Runner(QtCore.QRunnable):
             return parmsDi
             
         def parse_getnewaddress(jsonParms): # 'self' is the bridgeRunner namespace
-            #print("\nparse_getnewaddress"+str(self))
-            parmsDi = {'walletDB_fName' : self.walletDB_fName}
             account = str(jsonParms[0])
+            parmsDi = {'walletDB_fName' : self.walletDB_fName}
             parmsDi['account'] = account
             #print("parse_getnewaddress" + str(parmsDi))
             return parmsDi
@@ -1313,8 +1323,18 @@ class JSON_Runner(QtCore.QRunnable):
  
         elif bitcoind_method == 'getnewaddress':
             """  RETURN   JSON  """
+            parseResponse = eval(response.response[0])
+            resultJson = parseResponse['result']
+            account  = resultJson['account']
+            parseResponse['result'] = account           # force in a string or int instead of a dict!
+            parseResponse = str(parseResponse)
+            parseResponse = parseResponse.replace( "'",'"')
+            response.response[0] = parseResponse
             #self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
+              #account
+
+
 
         elif bitcoind_method == 'getreceivedbyaccount':
             """  RETURN NON - JSON  """

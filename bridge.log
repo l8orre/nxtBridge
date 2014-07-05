@@ -55,3 +55,24 @@
 2014-07-05 16:23:56,993 - nxtBridge returning: {"id": 1, "result": 58, "jsonrpc": "2.0"} 
 2014-07-05 16:25:50,092 -  test_return_arbitrary_JSON_DICT nxtBridge returning: b'{"id": 1, "result": {"test_return_arbitrary_JSON_DICT": "test_return_arbitrary_JSON_DICT"}, "jsonrpc": "2.0"}' 
 2014-07-05 16:32:10,040 - nxtBridge returning: {"id": 1, "result": "12455825543994022347", "jsonrpc": "2.0"} 
+2014-07-05 17:13:14,741 - nxtBridge listening on localhost:6876
+2014-07-05 17:14:37,739 - nxtBridge listening on localhost:6876
+2014-07-05 17:14:40,364 - nxtBridge returning: {"jsonrpc": "2.0", "result": "2874341937819216310", "id": 1} 
+2014-07-05 17:14:44,438 - nxtBridge returning: {"jsonrpc": "2.0", "result": "8337621464192887437", "id": 1} 
+2014-07-05 17:14:52,208 - nxtBridge returning: {"jsonrpc": "2.0", "result": "6077653498093594854", "id": 1} 
+2014-07-05 17:15:06,529 - nxtBridge returning: {"jsonrpc": "2.0", "result": "6077653498093594854", "id": 1} 
+2014-07-05 17:15:09,558 - nxtBridge returning: {"jsonrpc": "2.0", "result": "6077653498093594854", "id": 1} 
+2014-07-05 18:18:39,515 - nxtBridge listening on localhost:6876
+2014-07-05 18:19:32,812 - nxtBridge listening on localhost:6876
+2014-07-05 18:20:23,548 - nxtBridge listening on localhost:6876
+2014-07-05 18:21:00,153 - nxtBridge listening on localhost:6876
+2014-07-05 18:30:31,427 - nxtBridge listening on localhost:6876
+2014-07-05 18:32:09,754 - nxtBridge listening on localhost:6876
+2014-07-05 18:32:39,325 - nxtBridge listening on localhost:6876
+2014-07-05 18:33:51,298 - nxtBridge listening on localhost:6876
+2014-07-05 18:35:26,180 - nxtBridge listening on localhost:6876
+2014-07-05 18:36:01,426 - nxtBridge listening on localhost:6876
+2014-07-05 18:37:37,355 - nxtBridge listening on localhost:6876
+2014-07-05 18:43:59,962 - nxtBridge listening on localhost:6876
+2014-07-05 18:47:00,702 - nxtBridge listening on localhost:6876
+2014-07-05 18:47:50,408 - nxtBridge listening on localhost:6876

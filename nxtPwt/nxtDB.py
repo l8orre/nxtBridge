@@ -71,16 +71,38 @@ class WalletDB_Handler(nxtUseCaseMeta): # need to talk to NRS, hence UC derived
         return ranSec
 
     def init_WalletDB(self, ):
+
+        # CREATE TABLE customer(
+	     #           id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+        #             firstname VARCHAR(50),
+        #             lastname VARCHAR(50),
+        #             age INTEGER
+        #             )
+        #
+
+
+        #id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
         wallet_is_new = not os.path.exists(self.walletDB_fName)
         nxtWallet_sqlite3_schema =  """create table nxtWallet (
                                         accountName text unique,
                                         NxtNumeric text primary key,
-                                        NxtRS text  unique,
-                                        NxtRS_BTC text,
-                                        NxtSecret text unique,
-                                        Nxt_hasPubkey text
+                                        NxtRS VARCHAR(36)  unique,
+                                        NxtRS_BTC VARCHAR(36),
+                                        NxtSecret VARCHAR(96) unique,
+                                        Nxt_hasPubkey VARCHAR(5)
                                         );
                                     """
+        # nxtWallet_sqlite3_schema =  """create table nxtWallet (
+        #                                 accountName text unique,
+        #                                 NxtNumeric text primary key,
+        #                                 NxtRS text  unique,
+        #                                 NxtRS_BTC text,
+        #                                 NxtSecret text unique,
+        #                                 Nxt_hasPubkey text
+        #                                 );
+        #                             """
+        #
+
         if wallet_is_new:
             self.consLogger.info('creating wallet.db with filename: %s ', self.walletDB_fName )
             self.walletDBConn = sq.connect(self.walletDB_fName)

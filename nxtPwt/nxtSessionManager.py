@@ -108,7 +108,6 @@ connection management.
         self.bridgeLogger.addHandler(fh)
         self.bridgeLogger.info('nxtBridge listening on %s:%s', host, port)
 
-
         self.walletLogger = lg.getLogger('walletLogger')
         self.walletLogger.setLevel(lg.INFO)
         fh=lg.FileHandler('wallet.log')
@@ -117,8 +116,6 @@ connection management.
         fh.setFormatter(fter)
         self.walletLogger.addHandler(fh)
         self.walletLogger.info('nxtwallet: %s',  walletDB_fName)
-
-
         #
         self.consLogger = lg.getLogger('consoleDebugger')
         self.consLogger.setLevel(lg.INFO)        
@@ -128,8 +125,6 @@ connection management.
         self.consLogger.addHandler(ch)
 
         self.walletDB_fName = walletDB_fName # filenmae
-
-        #self.blockDB = nxtDB.BlockDB_Handler(self, host, port, self.consLogger )
 
 
         self.walletDB = nxtDB.WalletDB_Handler(self, walletDB_fName,   self.walletLogger, self.consLogger, host, port )

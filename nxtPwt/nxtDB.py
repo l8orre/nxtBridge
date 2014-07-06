@@ -81,29 +81,41 @@ class WalletDB_Handler(nxtUseCaseMeta): # need to talk to NRS, hence UC derived
         #
 
 
+        #
+        # 1Ce1NpJJAH9uLKMR37vzAmnqTjB4Ck8L4g l=34
+        # NXT-JTA7-B2QR-8BFC-2V222 l =24
+        # NXTxJTA7xB2QRx8BFCx2V222nxtnxtnxtx l =34
+        #
+        # NFD-AQQA-MREZ-U45Z-FWSZG     l=24
+        # 15528161504488872648         l=20
+
+#Longer answer: If you declare a column of a table to be INTEGER PRIMARY KEY, then whenever you insert a NULL into that column of the table, the NULL is automatically converted into an integer which is one greater than the largest value of that column over all other rows in the table, or 1 if the table is empty.
+
         #id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
         wallet_is_new = not os.path.exists(self.walletDB_fName)
-        nxtWallet_sqlite3_schema =  """create table nxtWallet (
-                                        accountName text unique,
-                                        NxtNumeric text primary key,
-                                        NxtRS VARCHAR(36)  unique,
-                                        NxtRS_BTC VARCHAR(36),
-                                        NxtSecret VARCHAR(96) unique,
-                                        Nxt_hasPubkey VARCHAR(5)
-                                        );
-                                    """
-        # nxtWallet_sqlite3_schema =  """create table nxtWallet (
-        #                                 accountName text unique,
-        #                                 NxtNumeric text primary key,
-        #                                 NxtRS text  unique,
-        #                                 NxtRS_BTC text,
-        #                                 NxtSecret text unique,
-        #                                 Nxt_hasPubkey text
-        #                                 );
-        #                             """
-        #
+        try:
+            nxtWallet_sqlite3_schema =  """create table nxtWallet (
+                                            accountName text unique,
+                                            NxtNumeric VARCHAR(20) unique primary key,
+                                            NxtRS VARCHAR(24)  unique,
+                                            NxtRS_BTC VARCHAR(34),
+                                            NxtSecret VARCHAR(96) unique,
+                                            Nxt_hasPubkey VARCHAR(5)
+                                            );
+                                        """
+            # nxtWallet_sqlite3_schema =  """create table nxtWallet (
+            #                                 accountName text unique,
+            #                                 NxtNumeric text primary key,
+            #                                 NxtRS text  unique,
+            #                                 NxtRS_BTC text,
+            #                                 NxtSecret text unique,
+            #                                 Nxt_hasPubkey text
+            #                                 );
+            #                             """
+            #
 
-        if wallet_is_new:
+        #if wallet_is_new:
+        #try:
             self.consLogger.info('creating wallet.db with filename: %s ', self.walletDB_fName )
             self.walletDBConn = sq.connect(self.walletDB_fName)
             self.walletDBCur = self.walletDBConn.cursor()
@@ -134,12 +146,13 @@ class WalletDB_Handler(nxtUseCaseMeta): # need to talk to NRS, hence UC derived
 #  and if it has raise a huge alarm!
             accName = ""
             has_pubKey = "N"
-            newNxtAccount = (accName,nxtNumAcc ,nxtRSAcc ,NxtRS_BTC ,nxtSecret , has_pubKey)
-            insertNewNxtAccount = """insert into nxtWallet values (?,?,?,?,?,?)"""
+            newNxtAccount = (  accName,nxtNumAcc ,nxtRSAcc ,NxtRS_BTC ,nxtSecret , has_pubKey)
+            insertNewNxtAccount = """insert into nxtWallet values (  ?,?,?,?,?,?)"""
             self.walletDBCur.execute(insertNewNxtAccount, newNxtAccount )
             self.walletDBConn.commit()
-        else:
-            self.consLogger.info('using exisiting wallet.db with filename: %s ', self.walletDB_fName )
+            #http://stackoverflow.com/questions/11490100/no-autoincrement-for-integer-primary-key-in-sqlite3 shit.
+        except:
+            self.consLogger.info('could not create wallet db with filename %s Assuming it exists already.', self.walletDB_fName )
             self.walletDBConn = sq.connect(self.walletDB_fName)
             self.walletDBCur = self.walletDBConn.cursor()
             self.walletDBCur.execute('SELECT SQLITE_VERSION()')

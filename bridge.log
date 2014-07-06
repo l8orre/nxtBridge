@@ -76,3 +76,96 @@
 2014-07-05 18:43:59,962 - nxtBridge listening on localhost:6876
 2014-07-05 18:47:00,702 - nxtBridge listening on localhost:6876
 2014-07-05 18:47:50,408 - nxtBridge listening on localhost:6876
+2014-07-06 09:38:08,472 - nxtBridge listening on localhost:6876
+2014-07-06 09:40:58,716 - nxtBridge listening on localhost:6876
+2014-07-06 09:43:39,132 - nxtBridge listening on localhost:6876
+2014-07-06 09:45:11,575 - nxtBridge listening on localhost:6876
+2014-07-06 09:45:45,676 - nxtBridge listening on localhost:6876
+2014-07-06 09:46:47,020 - nxtBridge listening on localhost:6876
+2014-07-06 09:51:18,979 - nxtBridge listening on localhost:6876
+2014-07-06 09:55:54,953 - nxtBridge listening on localhost:6876
+2014-07-06 10:05:04,774 - nxtBridge listening on localhost:6876
+2014-07-06 10:23:52,604 - nxtBridge listening on localhost:6876
+2014-07-06 10:24:32,648 - nxtBridge listening on localhost:6876
+2014-07-06 10:24:50,799 - nxtBridge returning: {"id": 1, "result": "15002738166049640212", "jsonrpc": "2.0"} 
+2014-07-06 10:25:19,469 - nxtBridge returning: {"id": 1, "result": "15002738166049640212", "jsonrpc": "2.0"} 
+2014-07-06 10:25:44,712 - nxtBridge returning: {"id": 1, "result": "15002738166049640212", "jsonrpc": "2.0"} 
+2014-07-06 10:25:59,323 - nxtBridge returning: {"id": 1, "result": "15002738166049640212", "jsonrpc": "2.0"} 
+2014-07-06 10:26:05,127 - nxtBridge returning: {"id": 1, "result": 58, "jsonrpc": "2.0"} 
+2014-07-06 10:26:36,777 - nxtBridge returning: {"id": 1, "result": "8011210789897290928", "jsonrpc": "2.0"} 
+2014-07-06 10:30:04,607 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "result": {"txid": "3515074356657480623", "time": 19340955, "details": [{"address": "16159101027034403504", "amount": 1.11e-06, "account": "2865886802744497404", "category": "receive"}], "confirmations": 1, "amount": 1.11e-06, "timereceived": 19340955}}' 
+2014-07-06 10:30:21,580 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "result": {"settxfee": "n/a"}}' 
+2014-07-06 10:30:39,386 - nxtBridge returning: b'{"id": 1, "error": {"message": "Server error", "data": {"args": ["accountId"], "message": "\'accountId\'", "type": "KeyError"}, "code": -32000}, "jsonrpc": "2.0"}' 
+2014-07-06 11:07:11,005 - nxtBridge listening on localhost:6876
+2014-07-06 11:07:22,230 - nxtBridge returning: b'{"id": 1, "error": {"code": -32000, "data": {"args": ["account"], "message": "\'account\'", "type": "KeyError"}, "message": "Server error"}, "jsonrpc": "2.0"}' 
+2014-07-06 11:14:12,735 - nxtBridge listening on localhost:6876
+2014-07-06 11:14:17,425 - nxtBridge returning: b'{"id": 1, "result": {"address": "2865886802744497404", "ismine": "false", "isvalid": "true"}, "jsonrpc": "2.0"}' 
+2014-07-06 11:14:56,435 - nxtBridge returning: b'{"id": 1, "result": {"address": "NXT-3P9W-VMQ3-9DRR-4EFKH", "ismine": "false", "isvalid": "true"}, "jsonrpc": "2.0"}' 
+2014-07-06 11:55:28,477 - nxtBridge listening on localhost:6876
+2014-07-06 11:59:35,244 - nxtBridge listening on localhost:6876
+2014-07-06 11:59:51,101 - nxtBridge returning: b'{"jsonrpc": "2.0", "error": {"message": "Server error", "code": -32000, "data": {"message": "near \\"select\\": syntax error", "type": "OperationalError", "args": ["near \\"select\\": syntax error"]}}, "id": 1}' 
+2014-07-06 12:00:13,047 - nxtBridge returning: b'{"jsonrpc": "2.0", "error": {"message": "Server error", "code": -32000, "data": {"message": "near \\"select\\": syntax error", "type": "OperationalError", "args": ["near \\"select\\": syntax error"]}}, "id": 1}' 
+2014-07-06 12:01:00,501 - nxtBridge listening on localhost:6876
+2014-07-06 12:03:28,638 - nxtBridge returning: b'{"jsonrpc": "2.0", "error": {"message": "Server error", "data": {"args": ["near \\"select\\": syntax error"], "type": "OperationalError", "message": "near \\"select\\": syntax error"}, "code": -32000}, "id": 1}' 
+2014-07-06 12:06:14,788 - nxtBridge returning: b'{"jsonrpc": "2.0", "error": {"message": "Server error", "data": {"args": ["near \\"select\\": syntax error"], "type": "OperationalError", "message": "near \\"select\\": syntax error"}, "code": -32000}, "id": 1}' 
+2014-07-06 12:07:52,519 - nxtBridge listening on localhost:6876
+2014-07-06 12:07:56,933 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "error": {"code": -32000, "data": {"args": ["near \\"select\\": syntax error"], "type": "OperationalError", "message": "near \\"select\\": syntax error"}, "message": "Server error"}}' 
+2014-07-06 12:08:44,796 - nxtBridge listening on localhost:6876
+2014-07-06 12:08:47,731 - nxtBridge returning: b'{"id": null, "error": {"code": -32700, "message": "Parse error"}, "jsonrpc": "2.0"}' 
+2014-07-06 12:09:40,132 - nxtBridge returning: b'{"id": null, "error": {"code": -32700, "message": "Parse error"}, "jsonrpc": "2.0"}' 
+2014-07-06 12:12:04,238 - nxtBridge listening on localhost:6876
+2014-07-06 12:12:07,798 - nxtBridge returning: b'{"error": {"code": -32700, "message": "Parse error"}, "id": null, "jsonrpc": "2.0"}' 
+2014-07-06 12:15:07,630 - nxtBridge listening on localhost:6876
+2014-07-06 12:15:11,682 - nxtBridge returning: b'{"jsonrpc": "2.0", "id": 1, "error": {"data": {"message": "\'walletDB_fName\'", "args": ["walletDB_fName"], "type": "KeyError"}, "message": "Server error", "code": -32000}}' 
+2014-07-06 12:17:35,170 - nxtBridge listening on localhost:6876
+2014-07-06 12:17:39,411 - nxtBridge returning: b'{"error": {"message": "Parse error", "code": -32700}, "id": null, "jsonrpc": "2.0"}' 
+2014-07-06 12:18:20,239 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "result": {"ismine": "false", "address": "NXT-3P9W-VMQ3-9DRR-4EFKH", "isvalid": "true"}}' 
+2014-07-06 12:18:23,489 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "result": {"ismine": "false", "address": "NXT-3P9W-VMQ3-9DRR-4EFKH", "isvalid": "true"}}' 
+2014-07-06 12:18:31,719 - nxtBridge returning: b'{"error": {"message": "Parse error", "code": -32700}, "id": null, "jsonrpc": "2.0"}' 
+2014-07-06 12:21:35,927 - nxtBridge listening on localhost:6876
+2014-07-06 12:22:41,533 - nxtBridge listening on localhost:6876
+2014-07-06 12:22:45,472 - nxtBridge returning: b'{"error": {"message": "Parse error", "code": -32700}, "id": null, "jsonrpc": "2.0"}' 
+2014-07-06 12:23:47,292 - nxtBridge listening on localhost:6876
+2014-07-06 12:23:51,067 - nxtBridge returning: b'{"error": {"message": "Parse error", "code": -32700}, "jsonrpc": "2.0", "id": null}' 
+2014-07-06 12:24:49,506 - nxtBridge returning: b'{"error": {"data": {"message": "near \\"select\\": syntax error", "type": "OperationalError", "args": ["near \\"select\\": syntax error"]}, "message": "Server error", "code": -32000}, "jsonrpc": "2.0", "id": 1}' 
+2014-07-06 12:25:13,667 - nxtBridge returning: b'{"error": {"message": "Parse error", "code": -32700}, "jsonrpc": "2.0", "id": null}' 
+2014-07-06 12:25:32,679 - nxtBridge returning: b'{"error": {"data": {"message": "near \\"select\\": syntax error", "type": "OperationalError", "args": ["near \\"select\\": syntax error"]}, "message": "Server error", "code": -32000}, "jsonrpc": "2.0", "id": 1}' 
+2014-07-06 12:26:07,891 - nxtBridge returning: b'{"error": {"message": "Parse error", "code": -32700}, "jsonrpc": "2.0", "id": null}' 
+2014-07-06 12:27:12,807 - nxtBridge listening on localhost:6876
+2014-07-06 12:27:16,072 - nxtBridge returning: b'{"jsonrpc": "2.0", "error": {"message": "Parse error", "code": -32700}, "id": null}' 
+2014-07-06 12:27:56,736 - nxtBridge returning: b'{"jsonrpc": "2.0", "error": {"message": "Parse error", "code": -32700}, "id": null}' 
+2014-07-06 12:28:07,961 - nxtBridge returning: b'{"jsonrpc": "2.0", "id": 1, "result": {"acc": "accts_in_wallet"}}' 
+2014-07-06 12:28:21,717 - nxtBridge returning: b'{"jsonrpc": "2.0", "error": {"message": "Parse error", "code": -32700}, "id": null}' 
+2014-07-06 12:29:39,926 - nxtBridge listening on localhost:6876
+2014-07-06 12:29:43,795 - nxtBridge returning: b'{"error": {"message": "Parse error", "code": -32700}, "id": null, "jsonrpc": "2.0"}' 
+2014-07-06 12:29:55,448 - nxtBridge returning: b'{"jsonrpc": "2.0", "result": {"acc": "accts_in_wallet"}, "id": 1}' 
+2014-07-06 12:31:00,058 - nxtBridge listening on localhost:6876
+2014-07-06 12:31:03,396 - nxtBridge returning: b'{"result": {"acc": "accts_in_wallet"}, "id": 1, "jsonrpc": "2.0"}' 
+2014-07-06 12:31:10,182 - nxtBridge returning: b'{"error": {"message": "Parse error", "code": -32700}, "id": null, "jsonrpc": "2.0"}' 
+2014-07-06 12:31:45,967 - nxtBridge listening on localhost:6876
+2014-07-06 12:31:48,745 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "result": {"acc": "accts_in_wallet"}}' 
+2014-07-06 12:32:32,786 - nxtBridge listening on localhost:6876
+2014-07-06 12:32:37,212 - nxtBridge returning: b'{"jsonrpc": "2.0", "result": {"acc": "accts_in_wallet"}, "id": 1}' 
+2014-07-06 12:32:53,163 - nxtBridge returning: b'{"jsonrpc": "2.0", "result": {"acc": "accts_in_wallet"}, "id": 1}' 
+2014-07-06 12:33:20,430 - nxtBridge returning: b'{"jsonrpc": "2.0", "result": {"acc": "accts_in_wallet"}, "id": 1}' 
+2014-07-06 12:34:22,266 - nxtBridge listening on localhost:6876
+2014-07-06 12:34:26,157 - nxtBridge returning: b'{"id": 1, "result": {"acc": "accts_in_wallet"}, "jsonrpc": "2.0"}' 
+2014-07-06 12:36:02,572 - nxtBridge listening on localhost:6876
+2014-07-06 12:36:11,844 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "result": {"acc": "accts_in_wallet"}}' 
+2014-07-06 12:36:31,947 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "result": {"acc": "accts_in_wallet"}}' 
+2014-07-06 12:36:36,446 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "result": {"acc": "accts_in_wallet"}}' 
+2014-07-06 12:37:17,456 - nxtBridge listening on localhost:6876
+2014-07-06 12:37:21,248 - nxtBridge returning: b'{"jsonrpc": "2.0", "result": {"acc": "accts_in_wallet"}, "id": 1}' 
+2014-07-06 12:37:27,889 - nxtBridge returning: b'{"jsonrpc": "2.0", "result": {"acc": "accts_in_wallet"}, "id": 1}' 
+2014-07-06 12:41:35,103 - nxtBridge listening on localhost:6876
+2014-07-06 12:41:38,358 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "result": {"acc": "accts_in_wallet"}}' 
+2014-07-06 12:41:49,935 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "result": {"acc": "accts_in_wallet"}}' 
+2014-07-06 12:42:15,184 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "result": {"acc": "accts_in_wallet"}}' 
+2014-07-06 12:42:23,240 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "result": {"acc": "accts_in_wallet"}}' 
+2014-07-06 12:42:24,975 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "result": {"acc": "accts_in_wallet"}}' 
+2014-07-06 12:46:25,159 - nxtBridge listening on localhost:6876
+2014-07-06 12:46:30,550 - nxtBridge returning: b'{"jsonrpc": "2.0", "result": {"accountsListunspent": [{"errorCode": 5, "errorDescription": "Unknown account"}, {"errorCode": 5, "errorDescription": "Unknown account"}, {"errorCode": 5, "errorDescription": "Unknown account"}, {"errorCode": 5, "errorDescription": "Unknown account"}, {"errorCode": 5, "errorDescription": "Unknown account"}, {"errorCode": 5, "errorDescription": "Unknown account"}, {"errorCode": 5, "errorDescription": "Unknown account"}]}, "id": 1}' 
+2014-07-06 12:46:44,925 - nxtBridge returning: b'{"jsonrpc": "2.0", "result": {"accountsListunspent": [{"errorCode": 5, "errorDescription": "Unknown account"}, {"errorCode": 5, "errorDescription": "Unknown account"}, {"errorCode": 5, "errorDescription": "Unknown account"}, {"errorCode": 5, "errorDescription": "Unknown account"}, {"errorCode": 5, "errorDescription": "Unknown account"}, {"errorCode": 5, "errorDescription": "Unknown account"}, {"errorCode": 5, "errorDescription": "Unknown account"}]}, "id": 1}' 
+2014-07-06 12:47:27,419 - nxtBridge listening on localhost:6876
+2014-07-06 12:48:54,749 - nxtBridge listening on localhost:6876
+2014-07-06 12:48:57,516 - nxtBridge returning: b'{"id": 1, "result": {"accountsListunspent": [{"errorDescription": "Unknown account", "errorCode": 5}, {"errorDescription": "Unknown account", "errorCode": 5}, {"errorDescription": "Unknown account", "errorCode": 5}, {"errorDescription": "Unknown account", "errorCode": 5}, {"errorDescription": "Unknown account", "errorCode": 5}, {"errorDescription": "Unknown account", "errorCode": 5}, {"errorDescription": "Unknown account", "errorCode": 5}, {"unconfirmedBalanceNQT": "4979307947821", "balanceNQT": "4979307947821", "guaranteedBalanceNQT": "4979307947821", "forgedBalanceNQT": "100000000", "effectiveBalanceNXT": 49793}]}, "jsonrpc": "2.0"}' 

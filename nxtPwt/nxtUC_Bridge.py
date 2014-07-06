@@ -169,21 +169,21 @@ class JSON_Runner(QtCore.QRunnable):
 # Function Calls implemented below
 # Numbers as per appeearance in listing of bitcoind help 
 #
-# getbalance	    	# under revision
+# getbalance	    	# under revision  -uses wallet.dat DB
 # getbestblockhash   	# OK
 # getblock	        	# OK
 # getblockcount	    	# OK
 # getblockhash		    # OK
 # getconnectioncount	# OK
 # getinfo		    	# OK
-# getnewaddress	    	# under revision
-# getreceivedbyaccount	# under revision
-# getreceivedbyaddress	# under revision
+# getnewaddress	    	# OK    -uses wallet.dat DB
+# getreceivedbyaccount	# under revision  -uses wallet.dat DB
+# getreceivedbyaddress	# under revision  -uses wallet.dat DB
 # gettransaction		# OK
-# listsinceblock		# under revision
-# listunspent		   # under revision
-# sendfrom		       # under revision
-# sendtoaddress	    	# under revision
+# listsinceblock		# under revision  -uses wallet.dat DB
+# listunspent		   # under revision  -uses wallet.dat DB
+# sendfrom		       # under revision  -uses wallet.dat DB
+# sendtoaddress	    	# under revision  -uses wallet.dat DB
 # settxfee		        # OK (n/a)
 # validateaddress		# OK
 
@@ -564,7 +564,7 @@ class JSON_Runner(QtCore.QRunnable):
 
 
     @dispatcher.add_method
-    def gettransaction( **kwargs):
+    def gettransaction( **kwargs):# 3515074356657480623 testNet 070614
 
         TXid = kwargs["txid"] #kwargs['account']
         try:
@@ -641,20 +641,43 @@ class JSON_Runner(QtCore.QRunnable):
 
     @dispatcher.add_method
     def listunspent( **kwargs):
-#        ACCOUNT = kwargs["account"] #kwargs['account']
-#        payload = { "requestType" : "getBalance" } #getTime"   }
-#        NxtApi = {}
-#        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
-#        NxtApi['account'] = ACCOUNT 
-#        NxtReq.params=NxtApi # same obj, only replace params
-#        preppedReq = NxtReq.prepare()
-#        response = session.send(preppedReq)
-#        NxtResp = response.json()
-#        Nxt2Btc = {}
+        print("-3--> listunspent" + str(kwargs))
+        #listunspent ( minconf maxconf  ["address",...] )
 
+#        ACCOUNT = kwargs["account"] #kwargs['account']
+
+        # we need to loop over all address/account pairs int the wallet.dat db here
+        walletDB_fName = kwargs['walletDB_fName']
+        walletDBConn = sq.connect(walletDB_fName)
+        walletDBCur = walletDBConn.cursor()
+
+        get_all_accs_from_wallet = """select  NxtNumeric from nxtWallet"""
+        #get_all_accs_from_wallet = """select  * from nxtWallet"""
+
+        walletDBCur.execute(get_all_accs_from_wallet  )
+
+        accts_in_wallet = walletDBCur.fetchall()#[0]
+        print("4: " + str(accts_in_wallet))
+        payload = { "requestType" : "getBalance" } #getTime"   }
+        NxtApi = {}
+        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
+        accounts_queried = []
+        testNetAcc = ('2865886802744497404',)
+        accts_in_wallet.append(testNetAcc)
+        for ACCOUNT in accts_in_wallet:  # a list of tuples of len 1
+            NxtApi['account'] = ACCOUNT[0] # a list of tuples
+            NxtReq.params=NxtApi # same obj, only replace params
+            preppedReq = NxtReq.prepare()
+            response = session.send(preppedReq)
+            NxtResp = response.json()
+            accounts_queried.append(NxtResp)
+
+
+
+            print(ACCOUNT)
 
         Nxt2Btc =  {
-                    'A' : "B"
+                    'accountsListunspent' : accounts_queried
                     }
      
           
@@ -741,41 +764,82 @@ class JSON_Runner(QtCore.QRunnable):
 
 # 63 validateaddress
 
+    #  ./bitcoind validateaddress 1Ce1NpJJAH9uLKMR37vzAmnqTjB4Ck8L4g
+    # {
+    #     "isvalid" : true,
+    #     "address" : "1Ce1NpJJAH9uLKMR37vzAmnqTjB4Ck8L4g",
+    #     "ismine" : true,
+    #     "isscript" : false,
+    #     "pubkey" : "0207d0373b78dafd79e4caad7abaa9b77e685c2af6ae125c0c0378c0b44b48789c",
+    #     "iscompressed" : true,
+    #     "account" : ""
+    # }
+    # azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$
+    #
+
     @dispatcher.add_method
     def validateaddress( **kwargs):
 
-        payload = { "requestType" : "getAccountId" } 
-        NxtApi = {}
-        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
-        NxtApi['secretPhrase'] =  kwargs['PASSPHRASE'] # here we translate BTC params to NXT params
-        NxtReq.params=NxtApi # same obj, only replace params
-        preppedReq = NxtReq.prepare()
-        response = session.send(preppedReq)
-        NxtResp1 = response.json()
+        # ToDo: maybe parse BTC-congruent padded RS acct to real ACCT!
+        #payload = { "requestType" : "getAccountId" }
+        #NxtApi = {}
+        #NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
+        #NxtApi['secretPhrase'] =  kwargs['PASSPHRASE'] # here we translate BTC params to NXT params
+        #NxtReq.params=NxtApi # same obj, only replace params
+        #preppedReq = NxtReq.prepare()
+        #response = session.send(preppedReq)
+        #NxtResp1 = response.json()
         #print(" NxtResp1 "+str(NxtResp1))   
+        # getAccountId
+        #         secretPhrase:
+        # publicKey:
+        #
+        # {
+        #     "accountRS": "NXT-3P9W-VMQ3-9DRR-4EFKH",
+        #     "account": "2865886802744497404"
+        # }
 
-        ACCOUNT = NxtResp1['accountId']
+        #ACCOUNT = NxtResp1['accountId']
+        #
+        # {
+        #     "errorCode": 5,
+        #     "errorDescription": "Account is not forging"
+        # }
+        # #
+        #         {
+        #     "errorCode": 5,
+        #     "errorDescription": "Unknown account"
+        # }
+        #
+        #   {
+        #     "remaining": 36518,
+        #     "deadline": 36546
+        # }
+        #
 
-        
-        payload = { "requestType" : "getForging" } 
-        NxtApi = {}
-        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
-        NxtApi['secretPhrase'] =  kwargs['PASSPHRASE'] # here we translate BTC params to NXT params
-        NxtReq.params=NxtApi # same obj, only replace params
-        preppedReq = NxtReq.prepare()
-        response = session.send(preppedReq)
-        NxtResp2 = response.json()
+        print(str(kwargs))
+        account = kwargs['account']
+        # this needs knowledge of the secret- but with BTC call 'validateaddress', you can also ask for ALL accounts w/o secret!
+        #payload = { "requestType" : "getForging" }
+        #NxtApi = {}
+        #NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
+        #NxtApi['secretPhrase'] =  kwargs['PASSPHRASE'] # here we translate BTC params to NXT params
+        #NxtReq.params=NxtApi # same obj, only replace params
+        #preppedReq = NxtReq.prepare()
+        #response = session.send(preppedReq)
+        #NxtResp2 = response.json()
 
-        if "errorCode" in NxtResp2.keys():
-            isForging = False
-        elif "remaining" in NxtResp2.keys():
-            isForging = True
-   
+        #if "remaining" in NxtResp2.keys():
+        #    ismine = 'true'
+        #else:
+        #    ismine = 'false'
+        ismine = 'false'
+
 
         payload = { "requestType" : "getAccountPublicKey" } #getTime"   }
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
-        NxtApi['account'] =  ACCOUNT
+        NxtApi['account'] =  account
         #ACCOUNT = kwargs["account"] #kwargs['account']
         NxtReq.params=NxtApi # same obj, only replace params
         preppedReq = NxtReq.prepare()
@@ -783,18 +847,63 @@ class JSON_Runner(QtCore.QRunnable):
         NxtResp3 = response.json()
          
         if "errorCode" in NxtResp3.keys():
-            isvalid = False
+            isvalid = 'false'
+            publicKey = ''
         elif "publicKey" in NxtResp3.keys():
-            isvalid = True
+            isvalid = 'true'
             
-            
-        Nxt2Btc = {}
+
+
         Nxt2Btc =  {
                     "isvalid" : isvalid,
-                    "address" : ACCOUNT,
-                    "ismine" : isForging
+                    "address" : account,
+                    "ismine" : ismine
                     }
-        
+
+
+
+#       getAccount
+#         {
+#     "publicKey": "10eb3c8cb67b4898e2993b1b463448f4f018939022c13892d682073a511ffa4a",
+#     "assetBalances": [
+#         {
+#             "asset": "13294423783048908944",
+#             "balanceQNT": "55"
+#         },
+#         {
+#             "asset": "13309267173964952697",
+#             "balanceQNT": "1200"
+#         },
+#         {
+#             "asset": "13388701969217905199",
+#             "balanceQNT": "39"
+#         }
+#     ],
+#     "description": "description1",
+#     "guaranteedBalanceNQT": "4979307947821",
+#     "balanceNQT": "4979307947821",
+#     "name": "name1",
+#     "accountRS": "NXT-3P9W-VMQ3-9DRR-4EFKH",
+#     "unconfirmedAssetBalances": [
+#         {
+#             "unconfirmedBalanceQNT": "55",
+#             "asset": "13294423783048908944"
+#         },
+#         {
+#             "unconfirmedBalanceQNT": "1200",
+#             "asset": "13309267173964952697"
+#         },
+#         {
+#             "unconfirmedBalanceQNT": "39",
+#             "asset": "13388701969217905199"
+#         }
+#     ],
+#     "account": "2865886802744497404",
+#     "effectiveBalanceNXT": 49793,
+#     "unconfirmedBalanceNQT": "4979307947821",
+#     "forgedBalanceNQT": "100000000"
+# }
+#
         return Nxt2Btc  
 
 
@@ -951,12 +1060,81 @@ class JSON_Runner(QtCore.QRunnable):
             return parmsDi
 
         def parse_listunspent(jsonParms):
+            #print('parse_listunspent' + str(jsonParms))
             minimumConfs = str(jsonParms[0])
             parmsDi = {'minimumConfs':minimumConfs}
-            maximumConfs = str(jsonParms[0])
+            maximumConfs = str(jsonParms[1])
             parmsDi['maximumConfs']  = maximumConfs
-            addresses = str(jsonParms[0])
-            parmsDi['addresses'] = addresses
+            try:
+                addresses = str(jsonParms[2])
+                # ['1PGFqEzfmQch1gKD3ra4k18PNj3tTUUSqg', '1LtvqCaApEdUGFkpKMM4MstjcaL4dKg8SP']
+                #<class 'str'>
+                addresses = eval(addresses) #['1PGFqEzfmQch1gKD3ra4k18PNj3tTUUSqg', '1LtvqCaApEdUGFkpKMM4MstjcaL4dKg8SP']
+
+                print(str(addresses))
+                print(str(type(addresses)))
+
+
+
+                parmsDi['addresses'] = addresses # SHOULD BE A LIST !?!
+            except:
+                print("NO ADDRESSES HERE!")
+            parmsDi['walletDB_fName'] = self.walletDB_fName
+            print("parmsDi parse_listunspent " +str(parmsDi))
+#./bitcoind -rpcport=7879 listunspent 0 1111111  "[\"1PGFqEzfmQch1gKD3ra4k18PNj3tTUUSqg\",\"1LtvqCaApEdUGFkpKMM4MstjcaL4dKg8SP\"]"
+
+#  nxtBridge rcvd req: {'method': 'listunspent', 'params': [0, 1111111, ['1PGFqEzfmQch1gKD3ra4k18PNj3tTUUSqg', '1LtvqCaApEdUGFkpKMM4MstjcaL4dKg8SP']], 'id': 1}
+# {'walletDB_fName': 'nxtWallet.dat'}
+#
+
+# azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$ ./bitcoind  listunspent 0 1111111
+# [
+#     {
+#         "txid" : "790388dd2037863a302e738d24beb92fc4821fd6542b964009e12b8f6ef40e00",
+#         "vout" : 0,
+#         "address" : "1E5bdoMrBFkffc7hjXnNxFcm2Dh32SDRUH",
+#         "account" : "Portster1",
+#         "scriptPubKey" : "76a9148f7835df29a1b08958e59ff68caf572547a1eae188ac",
+#         "amount" : 0.00007000,
+#         "confirmations" : 31652
+#     },
+#     {
+#         "txid" : "f0b20213346b14361795a9a387ac28078dc9a8a14fd9ced4f7b32eab9966820f",
+#         "vout" : 0,
+#         "address" : "1Ce1NpJJAH9uLKMR37vzAmnqTjB4Ck8L4g",
+#         "account" : "",
+#         "scriptPubKey" : "76a9147fa916934255d62febf440a3fad445e1d743d95a88ac",
+#         "amount" : 0.00050000,
+#         "confirmations" : 11964
+#     }
+# ]
+# azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$
+#
+#             azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$ ./bitcoind  listunspent 0 1111111  "[\"1E5bdoMrBFkffc7hjXnNxFcm2Dh32SDRUH\",\"1Ce1NpJJAH9uLKMR37vzAmnqTjB4Ck8L4g\"]"
+# [
+#     {
+#         "txid" : "790388dd2037863a302e738d24beb92fc4821fd6542b964009e12b8f6ef40e00",
+#         "vout" : 0,
+#         "address" : "1E5bdoMrBFkffc7hjXnNxFcm2Dh32SDRUH",
+#         "account" : "Portster1",
+#         "scriptPubKey" : "76a9148f7835df29a1b08958e59ff68caf572547a1eae188ac",
+#         "amount" : 0.00007000,
+#         "confirmations" : 31652
+#     },
+#     {
+#         "txid" : "f0b20213346b14361795a9a387ac28078dc9a8a14fd9ced4f7b32eab9966820f",
+#         "vout" : 0,
+#         "address" : "1Ce1NpJJAH9uLKMR37vzAmnqTjB4Ck8L4g",
+#         "account" : "",
+#         "scriptPubKey" : "76a9147fa916934255d62febf440a3fad445e1d743d95a88ac",
+#         "amount" : 0.00050000,
+#         "confirmations" : 11964
+#     }
+# ]
+# azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$
+#
+
+
             return parmsDi
 
         def parse_sendfrom(jsonParms):
@@ -1010,8 +1188,8 @@ class JSON_Runner(QtCore.QRunnable):
             return parmsDi
             
         def parse_validateaddress(jsonParms):
-            PASSPHRASE = str(jsonParms[0])
-            parmsDi = {'PASSPHRASE':PASSPHRASE}             
+            account = str(jsonParms[0])
+            parmsDi = {'account':account}
             return parmsDi
 
         # DEMO FUNCS
@@ -1145,7 +1323,12 @@ class JSON_Runner(QtCore.QRunnable):
                 parmsDi = parse_listsinceblock(jsonParms)
                 
             elif bitcoind_method == 'listunspent':
-                parmsDi = parse_listunspent(jsonParms)
+                parmsDi = parse_listunspent(jsonParms) #{'TTT':'GGG'} #
+                print("parmsDi    -- > "  +str(parmsDi))
+#                {'addresses': "['1PGFqEzfmQch1gKD3ra4k18PNj3tTUUSqg', '1LtvqCaApEdUGFkpKMM4MstjcaL4dKg8SP']", 'minimumConfs': '0', 'maximumConfs': '1111111', 'walletDB_fName': 'nxtWallet.dat'}
+
+
+
 
             elif bitcoind_method == 'sendfrom':
                 parmsDi = parse_sendfrom(jsonParms)

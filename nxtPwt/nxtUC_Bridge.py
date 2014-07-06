@@ -31,6 +31,7 @@ from PyQt4 import Qt, QtCore
 from nxtPwt.nxtApiSigs import nxtApi
 from nxtPwt.nxtApiPrototypes import nxtQs
 
+from copy import copy
 import time
 
 import sqlite3 as sq
@@ -200,6 +201,16 @@ class JSON_Runner(QtCore.QRunnable):
 
 
 #######################
+
+# ./bitcoind help getbalance
+# getbalance ( "account" minconf )
+#
+# If account is not specified, returns the server's total available balance.
+# If account is specified, returns the balance in the account.
+# Note that the account "" is not the same as leaving the parameter out.
+# The server total may be different to the balance in the default "" account.
+#
+#
 
     @dispatcher.add_method
     def getbalance( **kwargs):
@@ -641,8 +652,27 @@ class JSON_Runner(QtCore.QRunnable):
 
     @dispatcher.add_method
     def listunspent( **kwargs):
-        print("-3--> listunspent" + str(kwargs))
+        print("-3-----> listunspent" + str(kwargs))
         #listunspent ( minconf maxconf  ["address",...] )
+
+        # getBalance
+        # {
+        #     "guaranteedBalanceNQT": "4979307947821",
+        #     "balanceNQT": "4979307947821",
+        #     "effectiveBalanceNXT": 49793,
+        #     "unconfirmedBalanceNQT": "4979307947821",
+        #     "forgedBalanceNQT": "100000000"
+        # }
+
+        acctTemplate = {
+                            "txid" : "0",\
+                            "vout" : 0,\
+                            "address" : "NXT-ABCD-EFGH-IJKL-MNOP",\
+                            "account" : "Portster1",\
+                            "scriptPubKey" : "notAvailable",\
+                            "amount" : 0.00000000,\
+                            "confirmations" : 0,\
+                            }
 
 #        ACCOUNT = kwargs["account"] #kwargs['account']
 
@@ -651,37 +681,160 @@ class JSON_Runner(QtCore.QRunnable):
         walletDBConn = sq.connect(walletDB_fName)
         walletDBCur = walletDBConn.cursor()
 
-        get_all_accs_from_wallet = """select  NxtNumeric from nxtWallet"""
+        get_all_accs_from_wallet = """select  NxtNumeric,accountName from nxtWallet"""
         #get_all_accs_from_wallet = """select  * from nxtWallet"""
 
         walletDBCur.execute(get_all_accs_from_wallet  )
 
         accts_in_wallet = walletDBCur.fetchall()#[0]
-        print("4: " + str(accts_in_wallet))
+        # print("4: " + str(accts_in_wallet))
         payload = { "requestType" : "getBalance" } #getTime"   }
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
         accounts_queried = []
-        testNetAcc = ('2865886802744497404',)
+        testNetAcc = ('2865886802744497404','') # <------------------- FOR TESTING!!!
         accts_in_wallet.append(testNetAcc)
         for ACCOUNT in accts_in_wallet:  # a list of tuples of len 1
             NxtApi['account'] = ACCOUNT[0] # a list of tuples
+            try:
+                NxtNumeric = ACCOUNT[0] # a list of tuples
+                accountName = ACCOUNT[1] # a list of tuples
+            except:
+                print("oops:2" +str(ACCOUNT))
             NxtReq.params=NxtApi # same obj, only replace params
             preppedReq = NxtReq.prepare()
             response = session.send(preppedReq)
             NxtResp = response.json()
-            accounts_queried.append(NxtResp)
+            # getBalance
+            try:
+                guaranteedBalanceNQT = NxtResp['guaranteedBalanceNQT']# "": "4979307947821",
+                guaranteedBalanceNXT = int(guaranteedBalanceNQT) * 0.00000001
+                balanceNQT = NxtResp['balanceNQT'] #"": "4979307947821",
+                balanceNXT = int(balanceNQT) * 0.00000001
+                #effectiveBalanceNXT =NxtResp['effectiveBalanceNXT']# "": 49793,
+                unconfirmedBalanceNQT = NxtResp['unconfirmedBalanceNQT'] #"": "4979307947821",
+                unconfirmedBalanceNXT = int(unconfirmedBalanceNQT) * 0.00000001
+            except:
+                guaranteedBalanceNXT = 0
+                balanceNXT = 0
+                unconfirmedBalanceNXT = 0
 
 
+            #forgedBalanceNQT = NxtResp['forgedBalanceNQT'] #"": "100000000"
+            retAcct = copy(acctTemplate)
+            retAcct['amount'] = guaranteedBalanceNXT
+            retAcct['account']=accountName
+            retAcct['address']=NxtNumeric
+            retAcct['vout']=balanceNXT
+            retAcct['txid']=unconfirmedBalanceNXT
+
+
+            accounts_queried.append(retAcct)
+
+        #
+        # acctTemplate = {
+        #                     "txid" : "0",\
+        #                     "vout" : 0,\
+        #                     "address" : "NXT-ABCD-EFGH-IJKL-MNOP",\
+        #                     "account" : "Portster1",\
+        #                     "scriptPubKey" : "notAvailable",\
+        #                     "amount" : 0.00000000,\
+        #                     "confirmations" : 0,\
+        #                     }
+        #
 
             print(ACCOUNT)
+        Nxt2Btc = accounts_queried # IT IS EASY TO JUST RETURN A LIST! SAME AS BITCOIN DOES!
+        #Nxt2Btc =  {
+        #            'accountsListunspent' : accounts_queried
+        #            }
+# [
+#     {
+#         "vout" : 0,
+#         "confirmations" : 0,
+#         "txid" : 0,
+#         "account" : "a1a6",
+#         "address" : "13229287245520819191",
+#         "scriptPubKey" : "notAvailable",
+#         "amount" : 0
+#     },
+#     {
+#         "vout" : 49793.07947821,
+#         "confirmations" : 0,
+#         "txid" : 49793.07947821,
+#         "account" : "",
+#         "address" : "2865886802744497404",
+#         "scriptPubKey" : "notAvailable",
+#         "amount" : 49793.07947821
+#     }
+# ]
 
-        Nxt2Btc =  {
-                    'accountsListunspent' : accounts_queried
-                    }
-     
-          
-        
+
+#
+#       azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$ ./bitcoind -rpcport=7879 listunspent 0 1111111  "[\"1PGFqEzfmQch1gKD3ra4k18PNj3tTUUSqg\"]"[
+#     {
+#         "errorDescription" : "Unknown account",
+#         "errorCode" : 5
+#     },
+#     {
+#         "errorDescription" : "Unknown account",
+#         "errorCode" : 5
+#     },
+#     {
+#         "errorDescription" : "Unknown account",
+#         "errorCode" : 5
+#     },
+#     {
+#         "errorDescription" : "Unknown account",
+#         "errorCode" : 5
+#     },
+#     {
+#         "errorDescription" : "Unknown account",
+#         "errorCode" : 5
+#     },
+#     {
+#         "errorDescription" : "Unknown account",
+#         "errorCode" : 5
+#     },
+#     {
+#         "errorDescription" : "Unknown account",
+#         "errorCode" : 5
+#     },
+#     {
+#         "effectiveBalanceNXT" : 49793,
+#         "unconfirmedBalanceNQT" : "4979307947821",
+#         "balanceNQT" : "4979307947821",
+#         "forgedBalanceNQT" : "100000000",
+#         "guaranteedBalanceNQT" : "4979307947821"
+#     }
+# ]
+# azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$
+#
+        #
+#           azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$ ./bitcoind listunspent
+# [
+#     {
+#         "txid" : "790388dd2037863a302e738d24beb92fc4821fd6542b964009e12b8f6ef40e00",
+#         "vout" : 0,
+#         "address" : "1E5bdoMrBFkffc7hjXnNxFcm2Dh32SDRUH",
+#         "account" : "Portster1",
+#         "scriptPubKey" : "76a9148f7835df29a1b08958e59ff68caf572547a1eae188ac",
+#         "amount" : 0.00007000,
+#         "confirmations" : 31675
+#     },
+#     {
+#         "txid" : "f0b20213346b14361795a9a387ac28078dc9a8a14fd9ced4f7b32eab9966820f",
+#         "vout" : 0,
+#         "address" : "1Ce1NpJJAH9uLKMR37vzAmnqTjB4Ck8L4g",
+#         "account" : "",
+#         "scriptPubKey" : "76a9147fa916934255d62febf440a3fad445e1d743d95a88ac",
+#         "amount" : 0.00050000,
+#         "confirmations" : 11987
+#     }
+# ]
+# azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$
+
+
         return Nxt2Btc  
         
 
@@ -1060,82 +1213,84 @@ class JSON_Runner(QtCore.QRunnable):
             return parmsDi
 
         def parse_listunspent(jsonParms):
-            #print('parse_listunspent' + str(jsonParms))
-            minimumConfs = str(jsonParms[0])
-            parmsDi = {'minimumConfs':minimumConfs}
-            maximumConfs = str(jsonParms[1])
-            parmsDi['maximumConfs']  = maximumConfs
-            try:
+            # can be 0,1,2,3 args
+            # 0 : parse_listunspent as list[]
+            # 1 args : parse_listunspent as list[1]
+            # 2 args : parse_listunspent as list[0, 1111111]
+            # 3 args : parse_listunspent as list[0, 1111111, ['1PGFqEzfmQch1gKD3ra4k18PNj3tTUUSqg', '1LtvqCaApEdUGFkpKMM4MstjcaL4dKg8SP']]
+            numargs=len(jsonParms)
+            parmsDi = {
+                        'minimumConfs': 0,\
+                        'maximumConfs': 0,\
+                        'addresses' :   [],
+                        }
+            if numargs == 1:
+                parmsDi['minimumConfs'] =str(jsonParms[0])
+            elif numargs == 2:
+                parmsDi['minimumConfs'] =str(jsonParms[0])
+                parmsDi['maximumConfs'] =str(jsonParms[1])
+
+            elif numargs == 3:
+                parmsDi['minimumConfs'] =str(jsonParms[0])
+                parmsDi['maximumConfs'] =str(jsonParms[1])
                 addresses = str(jsonParms[2])
-                # ['1PGFqEzfmQch1gKD3ra4k18PNj3tTUUSqg', '1LtvqCaApEdUGFkpKMM4MstjcaL4dKg8SP']
-                #<class 'str'>
-                addresses = eval(addresses) #['1PGFqEzfmQch1gKD3ra4k18PNj3tTUUSqg', '1LtvqCaApEdUGFkpKMM4MstjcaL4dKg8SP']
+                addresses = eval(addresses)
 
-                print(str(addresses))
-                print(str(type(addresses)))
+                parmsDi['addresses'] = addresses
 
 
-
-                parmsDi['addresses'] = addresses # SHOULD BE A LIST !?!
-            except:
-                print("NO ADDRESSES HERE!")
             parmsDi['walletDB_fName'] = self.walletDB_fName
-            print("parmsDi parse_listunspent " +str(parmsDi))
-#./bitcoind -rpcport=7879 listunspent 0 1111111  "[\"1PGFqEzfmQch1gKD3ra4k18PNj3tTUUSqg\",\"1LtvqCaApEdUGFkpKMM4MstjcaL4dKg8SP\"]"
-
-#  nxtBridge rcvd req: {'method': 'listunspent', 'params': [0, 1111111, ['1PGFqEzfmQch1gKD3ra4k18PNj3tTUUSqg', '1LtvqCaApEdUGFkpKMM4MstjcaL4dKg8SP']], 'id': 1}
-# {'walletDB_fName': 'nxtWallet.dat'}
-#
-
-# azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$ ./bitcoind  listunspent 0 1111111
-# [
-#     {
-#         "txid" : "790388dd2037863a302e738d24beb92fc4821fd6542b964009e12b8f6ef40e00",
-#         "vout" : 0,
-#         "address" : "1E5bdoMrBFkffc7hjXnNxFcm2Dh32SDRUH",
-#         "account" : "Portster1",
-#         "scriptPubKey" : "76a9148f7835df29a1b08958e59ff68caf572547a1eae188ac",
-#         "amount" : 0.00007000,
-#         "confirmations" : 31652
-#     },
-#     {
-#         "txid" : "f0b20213346b14361795a9a387ac28078dc9a8a14fd9ced4f7b32eab9966820f",
-#         "vout" : 0,
-#         "address" : "1Ce1NpJJAH9uLKMR37vzAmnqTjB4Ck8L4g",
-#         "account" : "",
-#         "scriptPubKey" : "76a9147fa916934255d62febf440a3fad445e1d743d95a88ac",
-#         "amount" : 0.00050000,
-#         "confirmations" : 11964
-#     }
-# ]
-# azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$
-#
-#             azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$ ./bitcoind  listunspent 0 1111111  "[\"1E5bdoMrBFkffc7hjXnNxFcm2Dh32SDRUH\",\"1Ce1NpJJAH9uLKMR37vzAmnqTjB4Ck8L4g\"]"
-# [
-#     {
-#         "txid" : "790388dd2037863a302e738d24beb92fc4821fd6542b964009e12b8f6ef40e00",
-#         "vout" : 0,
-#         "address" : "1E5bdoMrBFkffc7hjXnNxFcm2Dh32SDRUH",
-#         "account" : "Portster1",
-#         "scriptPubKey" : "76a9148f7835df29a1b08958e59ff68caf572547a1eae188ac",
-#         "amount" : 0.00007000,
-#         "confirmations" : 31652
-#     },
-#     {
-#         "txid" : "f0b20213346b14361795a9a387ac28078dc9a8a14fd9ced4f7b32eab9966820f",
-#         "vout" : 0,
-#         "address" : "1Ce1NpJJAH9uLKMR37vzAmnqTjB4Ck8L4g",
-#         "account" : "",
-#         "scriptPubKey" : "76a9147fa916934255d62febf440a3fad445e1d743d95a88ac",
-#         "amount" : 0.00050000,
-#         "confirmations" : 11964
-#     }
-# ]
-# azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$
-#
-
 
             return parmsDi
+
+            #./bitcoind -rpcport=7879 listunspent 0 1111111  "[\"1PGFqEzfmQch1gKD3ra4k18PNj3tTUUSqg\",\"1LtvqCaApEdUGFkpKMM4MstjcaL4dKg8SP\"]"
+
+
+            # azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$ ./bitcoind  listunspent 0 1111111
+            # [
+            #     {
+            #         "txid" : "790388dd2037863a302e738d24beb92fc4821fd6542b964009e12b8f6ef40e00",
+            #         "vout" : 0,
+            #         "address" : "1E5bdoMrBFkffc7hjXnNxFcm2Dh32SDRUH",
+            #         "account" : "Portster1",
+            #         "scriptPubKey" : "76a9148f7835df29a1b08958e59ff68caf572547a1eae188ac",
+            #         "amount" : 0.00007000,
+            #         "confirmations" : 31652
+            #     },
+            #     {
+            #         "txid" : "f0b20213346b14361795a9a387ac28078dc9a8a14fd9ced4f7b32eab9966820f",
+            #         "vout" : 0,
+            #         "address" : "1Ce1NpJJAH9uLKMR37vzAmnqTjB4Ck8L4g",
+            #         "account" : "",
+            #         "scriptPubKey" : "76a9147fa916934255d62febf440a3fad445e1d743d95a88ac",
+            #         "amount" : 0.00050000,
+            #         "confirmations" : 11964
+            #     }
+            # ]
+            # azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$
+            #
+            #             azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$ ./bitcoind  listunspent 0 1111111  "[\"1E5bdoMrBFkffc7hjXnNxFcm2Dh32SDRUH\",\"1Ce1NpJJAH9uLKMR37vzAmnqTjB4Ck8L4g\"]"
+            # [
+            #     {
+            #         "txid" : "790388dd2037863a302e738d24beb92fc4821fd6542b964009e12b8f6ef40e00",
+            #         "vout" : 0,
+            #         "address" : "1E5bdoMrBFkffc7hjXnNxFcm2Dh32SDRUH",
+            #         "account" : "Portster1",
+            #         "scriptPubKey" : "76a9148f7835df29a1b08958e59ff68caf572547a1eae188ac",
+            #         "amount" : 0.00007000,
+            #         "confirmations" : 31652
+            #     },
+            #     {
+            #         "txid" : "f0b20213346b14361795a9a387ac28078dc9a8a14fd9ced4f7b32eab9966820f",
+            #         "vout" : 0,
+            #         "address" : "1Ce1NpJJAH9uLKMR37vzAmnqTjB4Ck8L4g",
+            #         "account" : "",
+            #         "scriptPubKey" : "76a9147fa916934255d62febf440a3fad445e1d743d95a88ac",
+            #         "amount" : 0.00050000,
+            #         "confirmations" : 11964
+            #     }
+            # ]
+            # azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$
 
         def parse_sendfrom(jsonParms):
         

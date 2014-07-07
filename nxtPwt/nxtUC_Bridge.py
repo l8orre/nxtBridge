@@ -627,7 +627,7 @@ class JSON_Runner(QtCore.QRunnable):
         walletDBConn = sq.connect(walletDB_fName)
         walletDBCur = walletDBConn.cursor()
 
-        print("-----------__>1: " + str(kwargs))
+        #print("-----------__>1: " + str(kwargs))
 
         accountName = kwargs['accountName']
 
@@ -639,21 +639,19 @@ class JSON_Runner(QtCore.QRunnable):
         #walletDBCur.execute(get_accNum_from_wallet, accountNameTuple  )
         #acct_in_wallet = walletDBCur.fetchall()#[0]
 
-
-
         get_address_from_wallet = """select  NxtNumeric from nxtWallet where accountName = ? """
 
         walletDBCur.execute(get_address_from_wallet, accountName  )
 
         NXTaccount = walletDBCur.fetchall()[0]
-        print(str(NXTaccount))
+        #print(str(NXTaccount))
         NXTaccount = NXTaccount[0]
-        print(str(NXTaccount))
+        #print(str(NXTaccount))
 
         # get ALL account TXs
         # loop and select the 'IN' TXs
         # sum over these
-        print("NXTaccount" +NXTaccount)
+        #print("NXTaccount" +NXTaccount)
 
         payload1 = { "requestType" : "getAccountTransactionIds" } #getTime"   }
         NxtApi = {}
@@ -752,6 +750,9 @@ class JSON_Runner(QtCore.QRunnable):
 
     @dispatcher.add_method
     def listsinceblock( **kwargs):
+        print(str(kwargs))
+
+
 #        ACCOUNT = kwargs["account"] #kwargs['account']
 #        payload = { "requestType" : "getBalance" } #getTime"   }
 #        NxtApi = {}
@@ -1050,8 +1051,21 @@ class JSON_Runner(QtCore.QRunnable):
         
     @dispatcher.add_method
     def sendfrom( **kwargs):
+        recipient = kwargs['tobitcoinaddress']
+        walletDB_fName = kwargs['walletDB_fName']
+        walletDBConn = sq.connect(walletDB_fName)
+        walletDBCur = walletDBConn.cursor()
+        accountName = kwargs['accountName']
+        accountName = (accountName,) # wrap inot tuple
 
- 
+        get_address_from_wallet = """select  NxtNumeric,NxtSecret, NxtRS from nxtWallet where accountName = ? """
+        walletDBCur.execute(get_address_from_wallet, accountName  )
+        NXTaccount = walletDBCur.fetchall()[0]
+        NXTaccountNum = NXTaccount[0]
+
+        NXTsecret = NXTaccount[1]
+        NXTaccountRS = NXTaccount[2]
+
         payload = { "requestType" : "sendMoney" }  
         # NOTE: THE AMOUNT IS PASSED IN AS NXT.NQT AND IS CONVERTED TO NQT HERE
         amountNQT = int( float(kwargs['amount'] ) * 100000000 )
@@ -1060,11 +1074,11 @@ class JSON_Runner(QtCore.QRunnable):
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
         NxtApi['publicKey'] =  ""
         NxtApi['referencedTransaction'] =  ""
-        NxtApi['secretPhrase'] =  kwargs['fromaccount']
-        NxtApi['deadline'] =  kwargs['minconf']
+        NxtApi['secretPhrase'] =  NXTsecret
+        NxtApi['deadline'] =  180 #     kwargs['minconf']
         NxtApi['feeNQT'] =  "100000000"
         NxtApi['amountNQT'] = amountNQT
-        NxtApi['recipient'] =  kwargs['tobitcoinaddress']
+        NxtApi['recipient'] =  recipient
         
         NxtReq.params=NxtApi # same obj, only replace params
         preppedReq = NxtReq.prepare()
@@ -1076,7 +1090,6 @@ class JSON_Runner(QtCore.QRunnable):
             TX_ID = NxtResp['transaction']
         except:
             TX_ID = 'errorDescription'
-        Nxt2Btc = {}
         Nxt2Btc =  {
                 
                 "txid" : TX_ID,
@@ -1084,21 +1097,55 @@ class JSON_Runner(QtCore.QRunnable):
                             }
                     
         return Nxt2Btc  
- 
+
+
 
  
     @dispatcher.add_method
     def sendtoaddress( **kwargs):
-        TX_ID='temp'
-        Nxt2Btc = {}
+        recipient = kwargs['tobitcoinaddress']
+        walletDB_fName = kwargs['walletDB_fName']
+        walletDBConn = sq.connect(walletDB_fName)
+        walletDBCur = walletDBConn.cursor()
+        accountName = '' # the default '' OK!
+        accountName = (accountName,) # wrap inot tuple
+
+        get_address_from_wallet = """select  NxtNumeric,NxtSecret, NxtRS from nxtWallet where accountName = ? """
+        walletDBCur.execute(get_address_from_wallet, accountName  )
+        NXTaccount = walletDBCur.fetchall()[0]
+        NXTaccountNum = NXTaccount[0]
+
+        NXTsecret = NXTaccount[1]
+        NXTaccountRS = NXTaccount[2]
+
+        payload = { "requestType" : "sendMoney" }
+        # NOTE: THE AMOUNT IS PASSED IN AS NXT.NQT AND IS CONVERTED TO NQT HERE
+        amountNQT = int( float(kwargs['amount'] ) * 100000000 )
+        NxtApi = {}
+        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
+        NxtApi['publicKey'] =  ""
+        NxtApi['referencedTransaction'] =  ""
+        NxtApi['secretPhrase'] =  NXTsecret
+        NxtApi['deadline'] =  180 #     kwargs['minconf']
+        NxtApi['feeNQT'] =  "100000000"
+        NxtApi['amountNQT'] = amountNQT
+        NxtApi['recipient'] =  recipient
+        NxtReq.params=NxtApi # same obj, only replace params
+        preppedReq = NxtReq.prepare()
+        response = session.send(preppedReq)
+        NxtResp = response.json()
+        try:
+
+            TX_ID = NxtResp['transaction']
+        except:
+            TX_ID = 'errorDescription'
         Nxt2Btc =  {
-                
+
                 "txid" : TX_ID,
-                
-                    }
-                    
-        return Nxt2Btc  
- 
+
+                            }
+
+        return Nxt2Btc
 
   
 
@@ -1502,50 +1549,52 @@ class JSON_Runner(QtCore.QRunnable):
 
         def parse_sendfrom(jsonParms):
         
-            parmsDi = {} 
-            
-            fromaccount = str(jsonParms[0])
-            parmsDi['fromaccount']  = fromaccount             
-
+            parmsDi = {'walletDB_fName' : self.walletDB_fName}
+            accountName = str(jsonParms[0])
+            parmsDi['accountName']  = accountName
             tobitcoinaddress = str(jsonParms[1])
             parmsDi['tobitcoinaddress']  = tobitcoinaddress
-             
             amount = str(jsonParms[2])
             parmsDi['amount']  = amount
-            
+
             try:
                 minconf = str(jsonParms[3])
                 parmsDi['minconf']  = minconf
             except:
-                parmsDi = {'minconf':1}             
+                parmsDi['minconf']  = 180
             try:
                 comment = str(jsonParms[4])
                 parmsDi['comment']  = comment
             except:
-                parmsDi = {'comment':''}
+                parmsDi['comment']  = 'cmt'
             try:
                 comment_to = str(jsonParms[5])
                 parmsDi['comment_to']  = comment_to
             except:
-                parmsDi = {'comment_to':''}
-            
+                parmsDi['comment_to']  = 'cmt2'
+
             return parmsDi
-        
-        
+
         def parse_sendtoaddress(jsonParms):
             """ - """
-            parmsDi = {} 
+            parmsDi = {'walletDB_fName' : self.walletDB_fName}
             tobitcoinaddress = str(jsonParms[0])
             parmsDi['tobitcoinaddress']  = tobitcoinaddress
             amount = str(jsonParms[1])
             parmsDi['amount']  = amount
-            comment = str(jsonParms[2])
-            parmsDi['comment']  = comment
-            commentTo = str(jsonParms[3])
-            parmsDi['commentTo']  = commentTo
+            try:
+                comment = str(jsonParms[3])
+                parmsDi['comment']  = comment
+            except:
+                parmsDi['comment']  = 'cmt'
+            try:
+                comment_to = str(jsonParms[4])
+                parmsDi['comment_to']  = comment_to
+            except:
+                parmsDi['comment_to']  = 'cmt2'
             return parmsDi
-        
-        
+
+
         def parse_settxfee(jsonParms):
             parmsDi = {} 
             return parmsDi
@@ -1693,7 +1742,7 @@ class JSON_Runner(QtCore.QRunnable):
                 parmsDi = parse_sendfrom(jsonParms)
 
             elif bitcoind_method == 'sendtoaddress':
-                parmsDi = parse_sendfrom(jsonParms)
+                parmsDi = parse_sendtoaddress(jsonParms)
                 
             elif bitcoind_method == 'settxfee':
                 parmsDi = parse_settxfee(jsonParms)

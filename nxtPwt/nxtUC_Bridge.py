@@ -179,7 +179,7 @@ class JSON_Runner(QtCore.QRunnable):
 # getinfo		    	# OK
 # getnewaddress	    	# OK    -uses wallet.dat DB
 # getreceivedbyaccount	# under revision  -uses wallet.dat DB
-# getreceivedbyaddress	# under revision  -uses wallet.dat DB
+# getreceivedbyaddress	# OK    -uses wallet.dat DB  WOKRING ON !!!! ALMOST READY
 # gettransaction		# OK
 # listsinceblock		# under revision  -uses wallet.dat DB
 # listunspent		    #  OK   -uses wallet.dat DB
@@ -480,7 +480,6 @@ class JSON_Runner(QtCore.QRunnable):
         CURMEMORY = NxtResp['totalMemory']
         FREEMEMORY = NxtResp['freeMemory']
         FALSE = False
-        Nxt2Btc = {}
         Nxt2Btc =  {
                     "version" : VERSION,
                     "protocolversion" : VERSION,
@@ -527,8 +526,7 @@ class JSON_Runner(QtCore.QRunnable):
 
 
 # make sure it has no pubKey here!!! # ToDo !!!!!!!!!!!!!!!!!!
-
-#  and if it has raise a huge alarm!
+ #  and if it has raise a huge alarm!
 
         accName = kwargs['account']
         has_pubKey = "N"
@@ -558,10 +556,6 @@ class JSON_Runner(QtCore.QRunnable):
             walletDBConn.commit()
             return {'account': NxtRS_BTC} # THIS IS THE RETURN STRING
 
-        #walletDBCur.execute("SELECT * FROM   nxtWallet") # WHERE height = ?   ", ( blockHeight, )  )
-        #WALLET = walletDBCur.fetchall()
-        #print("--str(WALLET)--TEST new account----->" +str(WALLET))
-
         # 1Ce1NpJJAH9uLKMR37vzAmnqTjB4Ck8L4g
         # NXT-JTA7-B2QR-8BFC-2V222
         # NXTxJTA7xB2QRx8BFCx2V222nxtnxtnxtx
@@ -581,8 +575,6 @@ class JSON_Runner(QtCore.QRunnable):
         # loop and select the 'IN' TXs
         # sum over these
         print("NXTaccount" +NXTaccount)
-
-
 
         payload1 = { "requestType" : "getAccountTransactionIds" } #getTime"   }
         NxtApi = {}
@@ -610,7 +602,7 @@ class JSON_Runner(QtCore.QRunnable):
             #print(str(NxtResp['recipient']))
 
             if NxtResp['recipient'] == str(NXTaccount):
-                print(str( NQT_received )) # pass
+                #print(str( NQT_received )) # pass
                 NQT_received += float(NxtResp['amountNQT'])
 
         #Nxt2Btc = {}
@@ -627,24 +619,81 @@ class JSON_Runner(QtCore.QRunnable):
 
     @dispatcher.add_method
     def getreceivedbyaccount( **kwargs):
-    #print("getreceivedbyaddress" +str(kwargs))
-        ACCOUNT = kwargs["account"] #kwargs['account']
-        payload = { "requestType" : "getBalance" } #getTime"   }
+
+
+
+        # we need to loop over all address/account pairs int the wallet.dat db here
+        walletDB_fName = kwargs['walletDB_fName']
+        walletDBConn = sq.connect(walletDB_fName)
+        walletDBCur = walletDBConn.cursor()
+
+        print("-----------__>1: " + str(kwargs))
+
+        accountName = kwargs['accountName']
+
+        accountName = (accountName,) # wrap inot tuple
+
+
+        #get_accNum_from_wallet = """select  NxtNumeric from nxtWallet where accountName = ?  """
+        #accountNameTuple = (accountName,)
+        #walletDBCur.execute(get_accNum_from_wallet, accountNameTuple  )
+        #acct_in_wallet = walletDBCur.fetchall()#[0]
+
+
+
+        get_address_from_wallet = """select  NxtNumeric from nxtWallet where accountName = ? """
+
+        walletDBCur.execute(get_address_from_wallet, accountName  )
+
+        NXTaccount = walletDBCur.fetchall()[0]
+        print(str(NXTaccount))
+        NXTaccount = NXTaccount[0]
+        print(str(NXTaccount))
+
+        # get ALL account TXs
+        # loop and select the 'IN' TXs
+        # sum over these
+        print("NXTaccount" +NXTaccount)
+
+        payload1 = { "requestType" : "getAccountTransactionIds" } #getTime"   }
         NxtApi = {}
-        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
-        NxtApi['account'] = ACCOUNT
+        NxtApi['requestType'] =  payload1['requestType'] # here we translate BTC params to NXT params
+        NxtApi['account'] = NXTaccount
         NxtReq.params=NxtApi # same obj, only replace params
         preppedReq = NxtReq.prepare()
         response = session.send(preppedReq)
         NxtResp = response.json()
-        Nxt2Btc = {}
+        payload2 = { "requestType" : "getTransaction" } #getTime"   }
+        TXs = NxtResp['transactionIds']
+        #print(str(TXs))
+        NQT_received = 0.0
+        for TX in TXs:
+            #print("1"+str(TX))
 
+            NxtApi = {}
+            NxtApi['requestType'] =  payload2['requestType'] # here we translate BTC params to NXT params
+            NxtApi['transaction'] = TX
+            NxtReq.params=NxtApi # same obj, only replace params
+            preppedReq = NxtReq.prepare()
+            response = session.send(preppedReq)
+            NxtResp = response.json()
+            #print("2"+str(NxtResp))
+            #print(str(NxtResp['recipient']))
 
+            if NxtResp['recipient'] == str(NXTaccount):
+                #print(str( NQT_received )) # pass
+                NQT_received += float(NxtResp['amountNQT'])
+
+        #Nxt2Btc = {}
+
+        NXT_received =  NQT_received * 0.00000001
+        #print(str(NXT_received))
         Nxt2Btc =  {
-                    'ACCOUNT' : float(NxtResp['balanceNQT'] ) * 0.00000001
+                    'NXT_received' : NXT_received
                     }
 
         return Nxt2Btc
+
 
 
 
@@ -1346,9 +1395,9 @@ class JSON_Runner(QtCore.QRunnable):
             return parmsDi
           
         def parse_getreceivedbyaccount(jsonParms):
-            parmsDi = {}
-            account = str(jsonParms[0])
-            parmsDi = {'account':account}             
+            accountName = str(jsonParms[0])
+            parmsDi = {'walletDB_fName' : self.walletDB_fName}
+            parmsDi['accountName'] = accountName
             return parmsDi
         
         def parse_getreceivedbyaddress(jsonParms):
@@ -1838,7 +1887,7 @@ class JSON_Runner(QtCore.QRunnable):
             """  RETURN NON - JSON  """
             parseResponse = eval(response.response[0])
             resultJson = parseResponse['result']
-            amount  = resultJson['ACCOUNT']
+            amount  = resultJson['NXT_received']
             parseResponse['result'] = amount           # force in a string or int instead of a dict!
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"') 

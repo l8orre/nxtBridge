@@ -170,7 +170,7 @@ class JSON_Runner(QtCore.QRunnable):
 # Function Calls implemented below
 # Numbers as per appeearance in listing of bitcoind help 
 #
-# getbalance	    	# under revision  -uses wallet.dat DB
+# getbalance	    	# OK -uses wallet.dat DB
 # getbestblockhash   	# OK
 # getblock	        	# OK
 # getblockcount	    	# OK
@@ -182,8 +182,8 @@ class JSON_Runner(QtCore.QRunnable):
 # getreceivedbyaddress	# under revision  -uses wallet.dat DB
 # gettransaction		# OK
 # listsinceblock		# under revision  -uses wallet.dat DB
-# listunspent		   # under revision  -uses wallet.dat DB
-# sendfrom		       # under revision  -uses wallet.dat DB
+# listunspent		    #  OK   -uses wallet.dat DB
+# sendfrom		        # under revision  -uses wallet.dat DB
 # sendtoaddress	    	# under revision  -uses wallet.dat DB
 # settxfee		        # OK (n/a)
 # validateaddress		# OK
@@ -573,21 +573,52 @@ class JSON_Runner(QtCore.QRunnable):
 
 
     @dispatcher.add_method
-    def getreceivedbyaccount( **kwargs):
+    def getreceivedbyaddress( **kwargs):
         #print("getreceivedbyaccount" +str(kwargs))
-        ACCOUNT = kwargs["account"] #kwargs['account']
-        payload = { "requestType" : "getBalance" } #getTime"   }
+        NXTaccount = kwargs["NXTaccount"] #kwargs['account']
+
+        # get ALL account TXs
+        # loop and select the 'IN' TXs
+        # sum over these
+        print("NXTaccount" +NXTaccount)
+
+
+
+        payload1 = { "requestType" : "getAccountTransactionIds" } #getTime"   }
         NxtApi = {}
-        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
-        NxtApi['account'] = ACCOUNT
+        NxtApi['requestType'] =  payload1['requestType'] # here we translate BTC params to NXT params
+        NxtApi['account'] = NXTaccount
         NxtReq.params=NxtApi # same obj, only replace params
         preppedReq = NxtReq.prepare()
         response = session.send(preppedReq)
         NxtResp = response.json()
+        payload2 = { "requestType" : "getTransaction" } #getTime"   }
+        TXs = NxtResp['transactionIds']
+        #print(str(TXs))
+        NQT_received = 0.0
+        for TX in TXs:
+            #print("1"+str(TX))
+
+            NxtApi = {}
+            NxtApi['requestType'] =  payload2['requestType'] # here we translate BTC params to NXT params
+            NxtApi['transaction'] = TX
+            NxtReq.params=NxtApi # same obj, only replace params
+            preppedReq = NxtReq.prepare()
+            response = session.send(preppedReq)
+            NxtResp = response.json()
+            #print("2"+str(NxtResp))
+            #print(str(NxtResp['recipient']))
+
+            if NxtResp['recipient'] == str(NXTaccount):
+                print(str( NQT_received )) # pass
+                NQT_received += float(NxtResp['amountNQT'])
+
         #Nxt2Btc = {}
 
+        NXT_received =  NQT_received * 0.00000001
+        #print(str(NXT_received))
         Nxt2Btc =  {
-                    'ACCOUNT' : float(NxtResp['balanceNQT'] ) * 0.00000001
+                    'NXT_received' : NXT_received
                     }
 
         return Nxt2Btc
@@ -595,7 +626,7 @@ class JSON_Runner(QtCore.QRunnable):
 
 
     @dispatcher.add_method
-    def getreceivedbyaddress( **kwargs):
+    def getreceivedbyaccount( **kwargs):
     #print("getreceivedbyaddress" +str(kwargs))
         ACCOUNT = kwargs["account"] #kwargs['account']
         payload = { "requestType" : "getBalance" } #getTime"   }
@@ -688,8 +719,45 @@ class JSON_Runner(QtCore.QRunnable):
                     'A' : "B"
                     }
      
-          
-        
+#
+#   azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$ ./bitcoind help listsinceblock
+# listsinceblock ( "blockhash" target-confirmations )
+#
+# Get all transactions in blocks since block [blockhash], or all transactions if omitted
+#
+# Arguments:
+# 1. "blockhash"   (string, optional) The block hash to list transactions since
+# 2. target-confirmations:    (numeric, optional) The confirmations required, must be 1 or more
+#
+# Result:
+# {
+#   "transactions": [
+#     "account":"accountname",       (string) The account name associated with the transaction. Will be "" for the default account.
+#     "address":"bitcoinaddress",    (string) The bitcoin address of the transaction. Not present for move transactions (category = move).
+#     "category":"send|receive",     (string) The transaction category. 'send' has negative amounts, 'receive' has positive amounts.
+#     "amount": x.xxx,          (numeric) The amount in btc. This is negative for the 'send' category, and for the 'move' category for moves
+#                                           outbound. It is positive for the 'receive' category, and for the 'move' category for inbound funds.
+#     "fee": x.xxx,             (numeric) The amount of the fee in btc. This is negative and only available for the 'send' category of transactions.
+#     "confirmations": n,       (numeric) The number of confirmations for the transaction. Available for 'send' and 'receive' category of transactions.
+#     "blockhash": "hashvalue",     (string) The block hash containing the transaction. Available for 'send' and 'receive' category of transactions.
+#     "blockindex": n,          (numeric) The block index containing the transaction. Available for 'send' and 'receive' category of transactions.
+#     "blocktime": xxx,         (numeric) The block time in seconds since epoch (1 Jan 1970 GMT).
+#     "txid": "transactionid",  (string) The transaction id (see https://blockchain.info/tx/[transactionid]. Available for 'send' and 'receive' category of transactions.
+#     "time": xxx,              (numeric) The transaction time in seconds since epoch (Jan 1 1970 GMT).
+#     "timereceived": xxx,      (numeric) The time received in seconds since epoch (Jan 1 1970 GMT). Available for 'send' and 'receive' category of transactions.
+#     "comment": "...",       (string) If a comment is associated with the transaction.
+#     "to": "...",            (string) If a comment to is associated with the transaction.
+#   ],
+#   "lastblock": "lastblockhash"     (string) The hash of the last block
+# }
+#
+# Examples:
+# > bitcoin-cli listsinceblock
+# > bitcoin-cli listsinceblock "000000000000000bacf66f7497b7dc45ef753ee9a7d38571037cdb1a57f663ad" 6
+# > curl --user myusername --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "listsinceblock", "params": ["000000000000000bacf66f7497b7dc45ef753ee9a7d38571037cdb1a57f663ad", 6] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+#
+# azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$
+#
         return Nxt2Btc  
         
 
@@ -1278,15 +1346,15 @@ class JSON_Runner(QtCore.QRunnable):
             return parmsDi
           
         def parse_getreceivedbyaccount(jsonParms):
-            parmsDi = {} 
+            parmsDi = {}
             account = str(jsonParms[0])
             parmsDi = {'account':account}             
             return parmsDi
         
         def parse_getreceivedbyaddress(jsonParms):
-            parmsDi = {} 
             account = str(jsonParms[0])
-            parmsDi = {'account':account}             
+            parmsDi = {'NXTaccount':account}
+            #print(str(parmsDi))
             return parmsDi
         
         def parse_gettransaction(jsonParms):
@@ -1782,7 +1850,7 @@ class JSON_Runner(QtCore.QRunnable):
             """  RETURN NON - JSON  """
             parseResponse = eval(response.response[0])
             resultJson = parseResponse['result']
-            amount  = resultJson['ACCOUNT']
+            amount  = resultJson['NXT_received']
             parseResponse['result'] = amount        # force in a string or int instead of a dict!
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"') 

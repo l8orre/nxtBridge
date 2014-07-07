@@ -211,35 +211,80 @@ class JSON_Runner(QtCore.QRunnable):
 # The server total may be different to the balance in the default "" account.
 #
 #
+        #listunspent ( minconf maxconf  ["address",...] )
 
-    @dispatcher.add_method
+        # getBalance
+        # {
+        #     "guaranteedBalanceNQT": "4979307947821",
+        #     "balanceNQT": "4979307947821",
+        #     "effectiveBalanceNXT": 49793,
+        #     "unconfirmedBalanceNQT": "4979307947821",
+        #     "forgedBalanceNQT": "100000000"
+        # }
+
+    @dispatcher.add_method # note: NEGATIVE account balances are unaccessible in this implementation.
     def getbalance( **kwargs):
+        #kwargs: {'account': 'popo', 'walletDB_fName': 'nxtWallet.dat', 'minconf': '13'}
+        # fetch guaranteed balance #
+        #ignore minconf
+        # fecth ONE or loop over all in wallet
 
-        ACCOUNT = kwargs["account"] #kwargs['account']
+        #print("getbalance----> " + str(kwargs))
+        walletDB_fName = kwargs['walletDB_fName']
+        walletDBConn = sq.connect(walletDB_fName)
+        walletDBCur = walletDBConn.cursor()
 
         payload = { "requestType" : "getBalance" } #getTime"   }
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
-        NxtApi['account'] = ACCOUNT 
-        NxtReq.params=NxtApi # same obj, only replace params
-        preppedReq = NxtReq.prepare()
-        response = session.send(preppedReq)
-        NxtResp = response.json()
+        accountName = kwargs['accountName'] #kwargs['account']
+        balance_local = 0.0
 
+        #print("---->        accountName "+ str(accountName ))
+        if accountName == 'None':
+            get_all_accs_from_wallet = """select  NxtNumeric from nxtWallet"""
+            walletDBCur.execute(get_all_accs_from_wallet  )
+            accts_in_wallet = walletDBCur.fetchall()#[0]
+            for accountNum in accts_in_wallet:
+                #print("accountNum[0]: " + accountNum[0])
+                NxtApi['account'] = accountNum[0]
+                NxtReq.params=NxtApi # same obj, only replace params
+                preppedReq = NxtReq.prepare()
+                response = session.send(preppedReq)
+                NxtResp = response.json()
+                #print("----------->"+str(NxtResp))
+                if 'guaranteedBalanceNQT' in NxtResp.keys():
+                    guaranteedBalanceNQT = NxtResp['guaranteedBalanceNQT']
+                    guaranteedBalanceNXT = float(guaranteedBalanceNQT) * 0.00000001
+                    balance_local += guaranteedBalanceNXT
+        else:
+            #                print("--------------->4" + str(accountName))
+            get_accNum_from_wallet = """select  NxtNumeric from nxtWallet where accountName = ?  """
+            accountNameTuple = (accountName,)
+            walletDBCur.execute(get_accNum_from_wallet, accountNameTuple  )
+            acct_in_wallet = walletDBCur.fetchall()#[0]
+            #print("fetcing aaconuit from NRS:" + str(acct_in_wallet))
+            try:
+                #print("fetcing aaconuit from NRS:" + str(acct_in_wallet[0]))
+                NxtApi['account'] = acct_in_wallet[0]
+                NxtReq.params=NxtApi # same obj, only replace params
+                preppedReq = NxtReq.prepare()
+                response = session.send(preppedReq)
+                NxtResp = response.json()
+                guaranteedBalanceNQT = NxtResp['guaranteedBalanceNQT']
+                guaranteedBalanceNXT = float(guaranteedBalanceNQT) * 0.00000001
+                balance_local += guaranteedBalanceNXT
+            except Exception as inst:
+                print('account does not exist: %s ', str(inst) )
         try:
-
-         
             Nxt2Btc =  {
-                        'ACCOUNT' : float(NxtResp['balanceNQT'] ) * 0.00000001
+                        'amount' : balance_local
                         }
-         
-
-        
         except:
             Nxt2Btc =  {
-                        ACCOUNT: 0.0
+                        'amount': 0.0
                         }
-            
+        #print(str(Nxt2Btc))
         return Nxt2Btc  
 
  
@@ -383,7 +428,7 @@ class JSON_Runner(QtCore.QRunnable):
         response = session.send(preppedReq)
         NxtResp = response.json()
         blockAddress = NxtResp['block']
-        print("blockAddress - " + str(blockAddress))
+        #print("blockAddress - " + str(blockAddress))
         Nxt2Btc =  {
                     "blockAddress" : blockAddress,
                     }
@@ -414,7 +459,7 @@ class JSON_Runner(QtCore.QRunnable):
 # 25 getinfo 
     @dispatcher.add_method
     def getinfo( **kwargs):
-        print("\ngetinfo\n")
+        #print("\ngetinfo\n")
 
         # it is possible to iclude the parent object namespace (runner) in the kwargs to have access!
         #self = kwargs['Runner']
@@ -529,7 +574,7 @@ class JSON_Runner(QtCore.QRunnable):
 
     @dispatcher.add_method
     def getreceivedbyaccount( **kwargs):
-        print("getreceivedbyaccount" +str(kwargs))
+        #print("getreceivedbyaccount" +str(kwargs))
         ACCOUNT = kwargs["account"] #kwargs['account']
         payload = { "requestType" : "getBalance" } #getTime"   }
         NxtApi = {}
@@ -652,7 +697,10 @@ class JSON_Runner(QtCore.QRunnable):
 
     @dispatcher.add_method
     def listunspent( **kwargs):
-        print("-3-----> listunspent" + str(kwargs))
+
+        #./bitcoind -rpcport=7879 listunspent 0 1111111  "[\"2865886802744497404\",\"16159101027034403504\"]"
+
+        #print("-3-----> listunspent" + str(kwargs))
         #listunspent ( minconf maxconf  ["address",...] )
 
         # getBalance
@@ -674,62 +722,105 @@ class JSON_Runner(QtCore.QRunnable):
                             "confirmations" : 0,\
                             }
 
-#        ACCOUNT = kwargs["account"] #kwargs['account']
+        #        ACCOUNT = kwargs["account"] #kwargs['account']
 
         # we need to loop over all address/account pairs int the wallet.dat db here
         walletDB_fName = kwargs['walletDB_fName']
         walletDBConn = sq.connect(walletDB_fName)
         walletDBCur = walletDBConn.cursor()
 
-        get_all_accs_from_wallet = """select  NxtNumeric,accountName from nxtWallet"""
-        #get_all_accs_from_wallet = """select  * from nxtWallet"""
-
-        walletDBCur.execute(get_all_accs_from_wallet  )
-
-        accts_in_wallet = walletDBCur.fetchall()#[0]
         # print("4: " + str(accts_in_wallet))
         payload = { "requestType" : "getBalance" } #getTime"   }
         NxtApi = {}
         NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
         accounts_queried = []
-        testNetAcc = ('2865886802744497404','') # <------------------- FOR TESTING!!!
-        accts_in_wallet.append(testNetAcc)
-        for ACCOUNT in accts_in_wallet:  # a list of tuples of len 1
-            NxtApi['account'] = ACCOUNT[0] # a list of tuples
-            try:
-                NxtNumeric = ACCOUNT[0] # a list of tuples
-                accountName = ACCOUNT[1] # a list of tuples
-            except:
-                print("oops:2" +str(ACCOUNT))
-            NxtReq.params=NxtApi # same obj, only replace params
-            preppedReq = NxtReq.prepare()
-            response = session.send(preppedReq)
-            NxtResp = response.json()
-            # getBalance
-            try:
-                guaranteedBalanceNQT = NxtResp['guaranteedBalanceNQT']# "": "4979307947821",
-                guaranteedBalanceNXT = int(guaranteedBalanceNQT) * 0.00000001
-                balanceNQT = NxtResp['balanceNQT'] #"": "4979307947821",
-                balanceNXT = int(balanceNQT) * 0.00000001
-                #effectiveBalanceNXT =NxtResp['effectiveBalanceNXT']# "": 49793,
-                unconfirmedBalanceNQT = NxtResp['unconfirmedBalanceNQT'] #"": "4979307947821",
-                unconfirmedBalanceNXT = int(unconfirmedBalanceNQT) * 0.00000001
-            except:
-                guaranteedBalanceNXT = 0
-                balanceNXT = 0
-                unconfirmedBalanceNXT = 0
+
+        #testNetAcc = ('2865886802744497404','') # <------testNet------------- FOR TESTING with  non-existing accounts in wallet!!!
+        #accts_in_wallet.append(testNetAcc)
+
+        if kwargs['addresses'] == []:
+            get_all_accs_from_wallet = """select  NxtNumeric,accountName from nxtWallet"""
+            walletDBCur.execute(get_all_accs_from_wallet  )
+            accts_in_wallet = walletDBCur.fetchall()#[0]
+            for ACCOUNT in accts_in_wallet:  # a list of tuples of len 1
+                NxtApi['account'] = ACCOUNT[0] # a list of tuples
+                try:
+                    NxtNumeric = ACCOUNT[0] # a list of tuples
+                    accountName = ACCOUNT[1] # a list of tuples
+                except:
+                    print("oops: " +str(ACCOUNT))
+                NxtReq.params=NxtApi # same obj, only replace params
+                preppedReq = NxtReq.prepare()
+                response = session.send(preppedReq)
+                NxtResp = response.json()
+                # getBalance
+                try:
+                    guaranteedBalanceNQT = NxtResp['guaranteedBalanceNQT']# "": "4979307947821",
+                    guaranteedBalanceNXT = int(guaranteedBalanceNQT) * 0.00000001
+                    balanceNQT = NxtResp['balanceNQT'] #"": "4979307947821",
+                    balanceNXT = int(balanceNQT) * 0.00000001
+                    #effectiveBalanceNXT =NxtResp['effectiveBalanceNXT']# "": 49793,
+                    unconfirmedBalanceNQT = NxtResp['unconfirmedBalanceNQT'] #"": "4979307947821",
+                    unconfirmedBalanceNXT = int(unconfirmedBalanceNQT) * 0.00000001
+                except:
+                    guaranteedBalanceNXT = 0
+                    balanceNXT = 0
+                    unconfirmedBalanceNXT = 0
+
+                #forgedBalanceNQT = NxtResp['forgedBalanceNQT'] #"": "100000000"
+                retAcct = copy(acctTemplate)
+                retAcct['amount'] = guaranteedBalanceNXT
+                retAcct['account']=accountName
+                retAcct['address']=NxtNumeric
+                retAcct['vout']=balanceNXT
+                retAcct['txid']=unconfirmedBalanceNXT
+                accounts_queried.append(retAcct)
+
+        else:
+            get_all_accs_from_wallet = """select  NxtNumeric,accountName from nxtWallet"""
+            walletDBCur.execute(get_all_accs_from_wallet  )
+            accts_in_wallet = walletDBCur.fetchall()#[0]
+            #print("kwargs['addresses']------->" + str(kwargs['addresses']))
+            for ACCOUNT in accts_in_wallet:
+                #print("ACCOUNT[0]: " + ACCOUNT[0])
+                if not ACCOUNT[0] in kwargs['addresses']:
+                    continue
+
+                NxtApi['account'] = ACCOUNT[0] # a list of tuples
+                try:
+                    NxtNumeric = ACCOUNT[0] # a list of tuples
+                    accountName = ACCOUNT[1] # a list of tuples
+                except:
+                    print("oops: " +str(ACCOUNT))
+                NxtReq.params=NxtApi # same obj, only replace params
+                preppedReq = NxtReq.prepare()
+                response = session.send(preppedReq)
+                NxtResp = response.json()
+                # getBalance
+                try:
+                    guaranteedBalanceNQT = NxtResp['guaranteedBalanceNQT']# "": "4979307947821",
+                    guaranteedBalanceNXT = int(guaranteedBalanceNQT) * 0.00000001
+                    balanceNQT = NxtResp['balanceNQT'] #"": "4979307947821",
+                    balanceNXT = int(balanceNQT) * 0.00000001
+                    #effectiveBalanceNXT =NxtResp['effectiveBalanceNXT']# "": 49793,
+                    unconfirmedBalanceNQT = NxtResp['unconfirmedBalanceNQT'] #"": "4979307947821",
+                    unconfirmedBalanceNXT = int(unconfirmedBalanceNQT) * 0.00000001
+                except:
+                    guaranteedBalanceNXT = 0
+                    balanceNXT = 0
+                    unconfirmedBalanceNXT = 0
+
+                #forgedBalanceNQT = NxtResp['forgedBalanceNQT'] #"": "100000000"
+                retAcct = copy(acctTemplate)
+                retAcct['amount'] = guaranteedBalanceNXT
+                retAcct['account']=accountName
+                retAcct['address']=NxtNumeric
+                retAcct['vout']=balanceNXT
+                retAcct['txid']=unconfirmedBalanceNXT
+                accounts_queried.append(retAcct)
 
 
-            #forgedBalanceNQT = NxtResp['forgedBalanceNQT'] #"": "100000000"
-            retAcct = copy(acctTemplate)
-            retAcct['amount'] = guaranteedBalanceNXT
-            retAcct['account']=accountName
-            retAcct['address']=NxtNumeric
-            retAcct['vout']=balanceNXT
-            retAcct['txid']=unconfirmedBalanceNXT
 
-
-            accounts_queried.append(retAcct)
 
         #
         # acctTemplate = {
@@ -743,7 +834,6 @@ class JSON_Runner(QtCore.QRunnable):
         #                     }
         #
 
-            print(ACCOUNT)
         Nxt2Btc = accounts_queried # IT IS EASY TO JUST RETURN A LIST! SAME AS BITCOIN DOES!
         #Nxt2Btc =  {
         #            'accountsListunspent' : accounts_queried
@@ -970,7 +1060,7 @@ class JSON_Runner(QtCore.QRunnable):
         # }
         #
 
-        print(str(kwargs))
+        #print(str(kwargs))
         account = kwargs['account']
         # this needs knowledge of the secret- but with BTC call 'validateaddress', you can also ask for ALL accounts w/o secret!
         #payload = { "requestType" : "getForging" }
@@ -1004,8 +1094,6 @@ class JSON_Runner(QtCore.QRunnable):
             publicKey = ''
         elif "publicKey" in NxtResp3.keys():
             isvalid = 'true'
-            
-
 
         Nxt2Btc =  {
                     "isvalid" : isvalid,
@@ -1137,20 +1225,22 @@ class JSON_Runner(QtCore.QRunnable):
 
         # argument extraction from list here in these local functions.
 
-
-        #print(str(self))
-        #ok = self.test() # 
-        #print(ok)
-        
         #<nxtPwt.nxtUC_Bridge.JSON_Runner object at 0x7fcb351e8048>
 
         self.consLogger.info('self.walletDB_fName  : %s ', self.walletDB_fName )
 
-        def parse_getbalance(jsonParms):
-            account = str(jsonParms[0])
-            minconf = str(jsonParms[1])
-            #print("account" + str(account))
-            parmsDi = {'account':account, 'minconf': minconf}             
+        def parse_getbalance(jsonParms): # getbalance ( "account" minconf )
+
+            parmsDi = {'walletDB_fName' : self.walletDB_fName}
+            parmsDi['accountName'] = 'None'
+            parmsDi['minconf'] = '0'
+            numargs=len(jsonParms)
+            if numargs == 1:
+                parmsDi['accountName'] =str(jsonParms[0])
+            elif numargs == 2:
+                parmsDi['accountName'] =str(jsonParms[0])
+                parmsDi['minconf'] =str(jsonParms[1])
+            #print("------->2" + str(parmsDi))
             return parmsDi
  
         def parse_getbestblockhash(jsonParms):
@@ -1168,7 +1258,7 @@ class JSON_Runner(QtCore.QRunnable):
             
         def parse_getblockhash(jsonParms):
             height = str(jsonParms[0])
-            print(height)
+            #print(height)
             parmsDi = {'height':height}
             return parmsDi
 
@@ -1223,7 +1313,7 @@ class JSON_Runner(QtCore.QRunnable):
                         'minimumConfs': 0,\
                         'maximumConfs': 0,\
                         'addresses' :   [],
-                        }
+                        } # for len(numargs)==0
             if numargs == 1:
                 parmsDi['minimumConfs'] =str(jsonParms[0])
             elif numargs == 2:
@@ -1235,15 +1325,16 @@ class JSON_Runner(QtCore.QRunnable):
                 parmsDi['maximumConfs'] =str(jsonParms[1])
                 addresses = str(jsonParms[2])
                 addresses = eval(addresses)
-
                 parmsDi['addresses'] = addresses
-
 
             parmsDi['walletDB_fName'] = self.walletDB_fName
 
             return parmsDi
 
             #./bitcoind -rpcport=7879 listunspent 0 1111111  "[\"1PGFqEzfmQch1gKD3ra4k18PNj3tTUUSqg\",\"1LtvqCaApEdUGFkpKMM4MstjcaL4dKg8SP\"]"
+            #./bitcoind -rpcport=7879 listunspent 0 1111111  "[\"2865886802744497404\",\"16159101027034403504\"]"
+
+
 
 
             # azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$ ./bitcoind  listunspent 0 1111111
@@ -1479,12 +1570,8 @@ class JSON_Runner(QtCore.QRunnable):
                 
             elif bitcoind_method == 'listunspent':
                 parmsDi = parse_listunspent(jsonParms) #{'TTT':'GGG'} #
-                print("parmsDi    -- > "  +str(parmsDi))
-#                {'addresses': "['1PGFqEzfmQch1gKD3ra4k18PNj3tTUUSqg', '1LtvqCaApEdUGFkpKMM4MstjcaL4dKg8SP']", 'minimumConfs': '0', 'maximumConfs': '1111111', 'walletDB_fName': 'nxtWallet.dat'}
-
-
-
-
+                #print("parmsDi    -- > "  +str(parmsDi))
+#
             elif bitcoind_method == 'sendfrom':
                 parmsDi = parse_sendfrom(jsonParms)
 
@@ -1582,11 +1669,17 @@ class JSON_Runner(QtCore.QRunnable):
         if bitcoind_method == 'getbalance': #
             """  RETURN NON - JSON  """
             # we MUST forcible violate the response object here because bitcoind does not use proper json
+            #print(str(response.response))
             parseResponse = eval(response.response[0])
             # parseResponse --> {'result': {'ACCOUNT': 2547600000000.0}, 'id': 1, 'jsonrpc': '2.0'}
-            resultJson = parseResponse['result']
-            amount  = resultJson['ACCOUNT']
-            parseResponse['result'] = amount # force in a string or int instead of a dict!
+            #print(str(parseResponse))
+            resultJson = parseResponse['result'] # result OUT
+
+            amount  = resultJson['amount'] # do s.t. with it
+
+            #print(str(amount))
+            #amount=str(amount)
+            parseResponse['result'] = amount # result back IN : force in a string or int instead of a dict!
             parseResponse = str(parseResponse) # re-package
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
@@ -1622,7 +1715,7 @@ class JSON_Runner(QtCore.QRunnable):
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
-            #self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
+            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
  
         elif bitcoind_method == 'getblockhash':
@@ -1644,7 +1737,7 @@ class JSON_Runner(QtCore.QRunnable):
             """  RETURN NON - JSON  """
             parseResponse = eval(response.response[0])
             # parseResponse --> {'result': {'ACCOUNT': 2547600000000.0}, 'id': 1, 'jsonrpc': '2.0'}
-            print(str(parseResponse))
+            #print(str(parseResponse))
             resultJson = parseResponse['result']
             numberOfPeers  = resultJson['numberOfPeers']
             parseResponse['result'] = numberOfPeers         # force in a string or int instead of a dict!
@@ -1656,7 +1749,7 @@ class JSON_Runner(QtCore.QRunnable):
  
         elif bitcoind_method == 'getinfo':
             """  RETURN   JSON  """
-            #self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
+            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
  
         elif bitcoind_method == 'getnewaddress':
@@ -1668,9 +1761,8 @@ class JSON_Runner(QtCore.QRunnable):
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"')
             response.response[0] = parseResponse
-            #self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
+            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
-              #account
 
 
 
@@ -1683,7 +1775,7 @@ class JSON_Runner(QtCore.QRunnable):
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
-            #self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
+            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
       
         elif bitcoind_method == 'getreceivedbyaddress':
@@ -1695,7 +1787,7 @@ class JSON_Runner(QtCore.QRunnable):
             parseResponse = str(parseResponse)
             parseResponse = parseResponse.replace( "'",'"') 
             response.response[0] = parseResponse
-            #self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
+            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
 
         elif bitcoind_method == 'gettransaction':

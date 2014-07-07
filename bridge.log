@@ -202,3 +202,96 @@
 2014-07-06 15:57:32,290 - nxtBridge returning: b'{"jsonrpc": "2.0", "result": [{"vout": 0, "confirmations": 0, "txid": 0, "account": "", "address": "2068319804577522229", "scriptPubKey": "notAvailable", "amount": 0}, {"vout": 0, "confirmations": 0, "txid": 0, "account": "a1", "address": "5044762735567793217", "scriptPubKey": "notAvailable", "amount": 0}, {"vout": 0, "confirmations": 0, "txid": 0, "account": "a1a2", "address": "591930277346834487", "scriptPubKey": "notAvailable", "amount": 0}, {"vout": 0, "confirmations": 0, "txid": 0, "account": "a1a3", "address": "10322672259867032908", "scriptPubKey": "notAvailable", "amount": 0}, {"vout": 0, "confirmations": 0, "txid": 0, "account": "a1a4", "address": "1345617649066495296", "scriptPubKey": "notAvailable", "amount": 0}, {"vout": 0, "confirmations": 0, "txid": 0, "account": "a1a5", "address": "5968115716751079173", "scriptPubKey": "notAvailable", "amount": 0}, {"vout": 0, "confirmations": 0, "txid": 0, "account": "a1a6", "address": "13229287245520819191", "scriptPubKey": "notAvailable", "amount": 0}, {"vout": 49793.07947821, "confirmations": 0, "txid": 49793.07947821, "account": "", "address": "2865886802744497404", "scriptPubKey": "notAvailable", "amount": 49793.07947821}], "id": 1}' 
 2014-07-06 15:59:24,754 - nxtBridge listening on localhost:6876
 2014-07-06 15:59:29,496 - nxtBridge returning: b'{"result": [{"amount": 0, "txid": 0, "scriptPubKey": "notAvailable", "account": "", "confirmations": 0, "vout": 0, "address": "2068319804577522229"}, {"amount": 0, "txid": 0, "scriptPubKey": "notAvailable", "account": "a1", "confirmations": 0, "vout": 0, "address": "5044762735567793217"}, {"amount": 0, "txid": 0, "scriptPubKey": "notAvailable", "account": "a1a2", "confirmations": 0, "vout": 0, "address": "591930277346834487"}, {"amount": 0, "txid": 0, "scriptPubKey": "notAvailable", "account": "a1a3", "confirmations": 0, "vout": 0, "address": "10322672259867032908"}, {"amount": 0, "txid": 0, "scriptPubKey": "notAvailable", "account": "a1a4", "confirmations": 0, "vout": 0, "address": "1345617649066495296"}, {"amount": 0, "txid": 0, "scriptPubKey": "notAvailable", "account": "a1a5", "confirmations": 0, "vout": 0, "address": "5968115716751079173"}, {"amount": 0, "txid": 0, "scriptPubKey": "notAvailable", "account": "a1a6", "confirmations": 0, "vout": 0, "address": "13229287245520819191"}, {"amount": 49793.07947821, "txid": 49793.07947821, "scriptPubKey": "notAvailable", "account": "", "confirmations": 0, "vout": 49793.07947821, "address": "2865886802744497404"}], "id": 1, "jsonrpc": "2.0"}' 
+2014-07-07 07:45:35,476 - nxtBridge listening on localhost:6876
+2014-07-07 07:47:39,575 - nxtBridge listening on localhost:6876
+2014-07-07 08:01:48,444 - nxtBridge listening on localhost:6876
+2014-07-07 08:52:07,609 - nxtBridge listening on localhost:6876
+2014-07-07 08:56:59,501 - nxtBridge listening on localhost:6876
+2014-07-07 09:20:26,139 - nxtBridge listening on localhost:6876
+2014-07-07 09:21:47,907 - nxtBridge listening on localhost:6876
+2014-07-07 09:21:52,756 - nxtBridge returning: {"id": 1, "result": 0.0, "jsonrpc": "2.0"} 
+2014-07-07 09:45:24,149 - nxtBridge listening on localhost:6876
+2014-07-07 09:45:29,204 - nxtBridge returning: {"jsonrpc": "2.0", "result": 49793.07947821, "id": 1} 
+2014-07-07 09:45:43,118 - nxtBridge returning: {"jsonrpc": "2.0", "result": 49793.07947821, "id": 1} 
+2014-07-07 09:49:50,201 - nxtBridge listening on localhost:6876
+2014-07-07 09:49:56,667 - nxtBridge returning: {"result": 49793.07947821, "id": 1, "jsonrpc": "2.0"} 
+2014-07-07 09:51:20,159 - nxtBridge listening on localhost:6876
+2014-07-07 09:51:58,101 - nxtBridge returning: {"result": 49793.07947821, "id": 1, "jsonrpc": "2.0"} 
+2014-07-07 09:52:02,976 - nxtBridge returning: {"result": 49793.07947821, "id": 1, "jsonrpc": "2.0"} 
+2014-07-07 09:56:51,341 - nxtBridge listening on localhost:6876
+2014-07-07 09:59:03,244 - nxtBridge listening on localhost:6876
+2014-07-07 10:05:15,357 - nxtBridge listening on localhost:6876
+2014-07-07 10:05:28,485 - nxtBridge returning: {"jsonrpc": "2.0", "result": 0.0, "id": 1} 
+2014-07-07 10:06:49,051 - nxtBridge returning: {"jsonrpc": "2.0", "result": 0.0, "id": 1} 
+2014-07-07 10:07:25,297 - nxtBridge returning: {"jsonrpc": "2.0", "result": 0.0, "id": 1} 
+2014-07-07 10:09:02,719 - nxtBridge listening on localhost:6876
+2014-07-07 10:09:55,734 - nxtBridge listening on localhost:6876
+2014-07-07 10:10:15,788 - nxtBridge returning: {"result": 0.0, "id": 1, "jsonrpc": "2.0"} 
+2014-07-07 10:12:06,910 - nxtBridge listening on localhost:6876
+2014-07-07 10:12:10,575 - nxtBridge returning: {"jsonrpc": "2.0", "id": 1, "result": 0.0} 
+2014-07-07 10:12:22,033 - nxtBridge returning: {"jsonrpc": "2.0", "id": 1, "result": 0.0} 
+2014-07-07 10:14:16,995 - nxtBridge listening on localhost:6876
+2014-07-07 10:14:20,150 - nxtBridge returning: {"jsonrpc": "2.0", "id": 1, "result": 49793.07947821} 
+2014-07-07 10:14:25,545 - nxtBridge returning: {"jsonrpc": "2.0", "id": 1, "result": 0.0} 
+2014-07-07 10:14:30,855 - nxtBridge returning: {"jsonrpc": "2.0", "id": 1, "result": 0.0} 
+2014-07-07 10:15:01,320 - nxtBridge returning: {"jsonrpc": "2.0", "id": 1, "result": 49793.07947821} 
+2014-07-07 10:20:01,793 - nxtBridge listening on localhost:6876
+2014-07-07 10:20:05,183 - nxtBridge returning: {"id": 1, "result": 49793.07947821, "jsonrpc": "2.0"} 
+2014-07-07 10:20:13,655 - nxtBridge returning: {"id": 1, "result": 0.0, "jsonrpc": "2.0"} 
+2014-07-07 10:20:15,627 - nxtBridge returning: {"id": 1, "result": 49793.07947821, "jsonrpc": "2.0"} 
+2014-07-07 10:23:02,461 - nxtBridge listening on localhost:6876
+2014-07-07 10:23:40,831 - nxtBridge listening on localhost:6876
+2014-07-07 10:23:46,803 - nxtBridge returning: {"id": 1, "jsonrpc": "2.0", "result": 90518.99999884001} 
+2014-07-07 10:23:49,582 - nxtBridge returning: {"id": 1, "jsonrpc": "2.0", "result": 0.0} 
+2014-07-07 10:23:56,858 - nxtBridge returning: {"id": 1, "jsonrpc": "2.0", "result": 0.0} 
+2014-07-07 10:23:59,489 - nxtBridge returning: {"id": 1, "jsonrpc": "2.0", "result": 0.0} 
+2014-07-07 10:24:00,888 - nxtBridge returning: {"id": 1, "jsonrpc": "2.0", "result": 0.0} 
+2014-07-07 10:24:27,821 - nxtBridge returning: {"id": 1, "jsonrpc": "2.0", "result": 0.0} 
+2014-07-07 10:24:29,759 - nxtBridge returning: {"id": 1, "jsonrpc": "2.0", "result": 49793.07947821} 
+2014-07-07 10:24:33,494 - nxtBridge returning: {"id": 1, "jsonrpc": "2.0", "result": 0.0} 
+2014-07-07 10:24:39,344 - nxtBridge returning: {"id": 1, "jsonrpc": "2.0", "result": 40725.92052063} 
+2014-07-07 10:24:45,632 - nxtBridge returning: {"id": 1, "jsonrpc": "2.0", "result": 40725.92052063} 
+2014-07-07 10:25:10,535 - nxtBridge returning: {"id": 1, "jsonrpc": "2.0", "result": 40725.92052063} 
+2014-07-07 10:25:12,755 - nxtBridge returning: {"id": 1, "jsonrpc": "2.0", "result": 49793.07947821} 
+2014-07-07 10:25:17,774 - nxtBridge returning: {"id": 1, "jsonrpc": "2.0", "result": 90518.99999884001} 
+2014-07-07 10:25:20,034 - nxtBridge returning: {"id": 1, "jsonrpc": "2.0", "result": 0.0} 
+2014-07-07 10:25:36,810 - nxtBridge returning: b'{"error": {"code": -32000, "message": "Server error", "data": {"type": "NameError", "message": "name \'testNetAcc\' is not defined", "args": ["name \'testNetAcc\' is not defined"]}}, "id": 1, "jsonrpc": "2.0"}' 
+2014-07-07 10:27:00,127 - nxtBridge returning: b'{"error": {"code": -32000, "message": "Server error", "data": {"type": "NameError", "message": "name \'testNetAcc\' is not defined", "args": ["name \'testNetAcc\' is not defined"]}}, "id": 1, "jsonrpc": "2.0"}' 
+2014-07-07 10:33:07,216 - nxtBridge listening on localhost:6876
+2014-07-07 10:33:15,534 - nxtBridge returning: b'{"id": 1, "result": [{"address": "17191249976782551463", "scriptPubKey": "notAvailable", "vout": 0, "account": "", "confirmations": 0, "txid": 0, "amount": 0}, {"address": "2865886802744497404", "scriptPubKey": "notAvailable", "vout": 49793.07947821, "account": "testAcc", "confirmations": 0, "txid": 49793.07947821, "amount": 49793.07947821}, {"address": "16159101027034403504", "scriptPubKey": "notAvailable", "vout": 40725.92052174, "account": "testAcc2", "confirmations": 0, "txid": 40725.92052174, "amount": 40725.92052063}], "jsonrpc": "2.0"}' 
+2014-07-07 10:33:56,861 - nxtBridge returning: b'{"id": 1, "result": [{"address": "17191249976782551463", "scriptPubKey": "notAvailable", "vout": 0, "account": "", "confirmations": 0, "txid": 0, "amount": 0}, {"address": "2865886802744497404", "scriptPubKey": "notAvailable", "vout": 49793.07947821, "account": "testAcc", "confirmations": 0, "txid": 49793.07947821, "amount": 49793.07947821}, {"address": "16159101027034403504", "scriptPubKey": "notAvailable", "vout": 40725.92052174, "account": "testAcc2", "confirmations": 0, "txid": 40725.92052174, "amount": 40725.92052063}], "jsonrpc": "2.0"}' 
+2014-07-07 10:34:37,907 - nxtBridge returning: b'{"id": 1, "result": [{"address": "17191249976782551463", "scriptPubKey": "notAvailable", "vout": 0, "account": "", "confirmations": 0, "txid": 0, "amount": 0}, {"address": "2865886802744497404", "scriptPubKey": "notAvailable", "vout": 49793.07947821, "account": "testAcc", "confirmations": 0, "txid": 49793.07947821, "amount": 49793.07947821}, {"address": "16159101027034403504", "scriptPubKey": "notAvailable", "vout": 40725.92052174, "account": "testAcc2", "confirmations": 0, "txid": 40725.92052174, "amount": 40725.92052063}], "jsonrpc": "2.0"}' 
+2014-07-07 10:36:30,482 - nxtBridge returning: b'{"id": 1, "result": [{"address": "17191249976782551463", "scriptPubKey": "notAvailable", "vout": 0, "account": "", "confirmations": 0, "txid": 0, "amount": 0}, {"address": "2865886802744497404", "scriptPubKey": "notAvailable", "vout": 49793.07947821, "account": "testAcc", "confirmations": 0, "txid": 49793.07947821, "amount": 49793.07947821}, {"address": "16159101027034403504", "scriptPubKey": "notAvailable", "vout": 40725.92052174, "account": "testAcc2", "confirmations": 0, "txid": 40725.92052174, "amount": 40725.92052063}], "jsonrpc": "2.0"}' 
+2014-07-07 10:39:06,939 - nxtBridge listening on localhost:6876
+2014-07-07 10:39:11,018 - nxtBridge returning: b'{"id": 1, "result": [{"amount": 0, "scriptPubKey": "notAvailable", "confirmations": 0, "address": "17191249976782551463", "vout": 0, "account": "", "txid": 0}, {"amount": 49793.07947821, "scriptPubKey": "notAvailable", "confirmations": 0, "address": "2865886802744497404", "vout": 49793.07947821, "account": "testAcc", "txid": 49793.07947821}, {"amount": 40725.92052063, "scriptPubKey": "notAvailable", "confirmations": 0, "address": "16159101027034403504", "vout": 40725.92052174, "account": "testAcc2", "txid": 40725.92052174}], "jsonrpc": "2.0"}' 
+2014-07-07 10:39:15,258 - nxtBridge returning: b'{"id": 1, "error": {"code": -32000, "data": {"args": ["local variable \'ACCOUNT\' referenced before assignment"], "type": "UnboundLocalError", "message": "local variable \'ACCOUNT\' referenced before assignment"}, "message": "Server error"}, "jsonrpc": "2.0"}' 
+2014-07-07 10:40:45,289 - nxtBridge returning: b'{"id": 1, "error": {"code": -32000, "data": {"args": ["local variable \'ACCOUNT\' referenced before assignment"], "type": "UnboundLocalError", "message": "local variable \'ACCOUNT\' referenced before assignment"}, "message": "Server error"}, "jsonrpc": "2.0"}' 
+2014-07-07 10:40:51,061 - nxtBridge returning: b'{"id": 1, "error": {"code": -32000, "data": {"args": ["local variable \'ACCOUNT\' referenced before assignment"], "type": "UnboundLocalError", "message": "local variable \'ACCOUNT\' referenced before assignment"}, "message": "Server error"}, "jsonrpc": "2.0"}' 
+2014-07-07 10:41:59,091 - nxtBridge listening on localhost:6876
+2014-07-07 10:42:04,082 - nxtBridge returning: b'{"id": 1, "error": {"data": {"type": "UnboundLocalError", "args": ["local variable \'ACCOUNT\' referenced before assignment"], "message": "local variable \'ACCOUNT\' referenced before assignment"}, "code": -32000, "message": "Server error"}, "jsonrpc": "2.0"}' 
+2014-07-07 10:47:56,905 - nxtBridge listening on localhost:6876
+2014-07-07 10:48:01,064 - nxtBridge returning: b'{"jsonrpc": "2.0", "error": {"code": -32602, "message": "Invalid params"}, "id": 1}' 
+2014-07-07 10:48:54,822 - nxtBridge returning: b'{"jsonrpc": "2.0", "result": [{"account": "", "vout": 0, "amount": 0, "address": "17191249976782551463", "scriptPubKey": "notAvailable", "txid": 0, "confirmations": 0}, {"account": "testAcc", "vout": 49793.07947821, "amount": 49793.07947821, "address": "2865886802744497404", "scriptPubKey": "notAvailable", "txid": 49793.07947821, "confirmations": 0}, {"account": "testAcc2", "vout": 40725.92052174, "amount": 40725.92052063, "address": "16159101027034403504", "scriptPubKey": "notAvailable", "txid": 40725.92052174, "confirmations": 0}], "id": 1}' 
+2014-07-07 10:48:59,734 - nxtBridge returning: b'{"jsonrpc": "2.0", "error": {"code": -32602, "message": "Invalid params"}, "id": 1}' 
+2014-07-07 10:49:29,015 - nxtBridge listening on localhost:6876
+2014-07-07 10:49:31,927 - nxtBridge returning: b'{"error": {"message": "Invalid params", "code": -32602}, "id": 1, "jsonrpc": "2.0"}' 
+2014-07-07 10:49:39,903 - nxtBridge returning: b'{"error": {"message": "Invalid params", "code": -32602}, "id": 1, "jsonrpc": "2.0"}' 
+2014-07-07 10:50:47,175 - nxtBridge listening on localhost:6876
+2014-07-07 10:50:49,294 - nxtBridge returning: b'{"jsonrpc": "2.0", "error": {"code": -32602, "message": "Invalid params"}, "id": 1}' 
+2014-07-07 10:53:18,951 - nxtBridge listening on localhost:6876
+2014-07-07 10:53:22,335 - nxtBridge returning: b'{"id": 1, "error": {"message": "Invalid params", "code": -32602}, "jsonrpc": "2.0"}' 
+2014-07-07 10:53:31,435 - nxtBridge returning: b'{"id": 1, "error": {"message": "Invalid params", "code": -32602}, "jsonrpc": "2.0"}' 
+2014-07-07 10:53:33,953 - nxtBridge returning: b'{"id": 1, "error": {"message": "Invalid params", "code": -32602}, "jsonrpc": "2.0"}' 
+2014-07-07 10:56:33,685 - nxtBridge listening on localhost:6876
+2014-07-07 10:56:37,712 - nxtBridge returning: b'{"jsonrpc": "2.0", "id": 1, "error": {"message": "Invalid params", "code": -32602}}' 
+2014-07-07 10:58:04,406 - nxtBridge listening on localhost:6876
+2014-07-07 10:58:07,697 - nxtBridge returning: b'{"jsonrpc": "2.0", "error": {"data": {"message": "local variable \'accountName\' referenced before assignment", "type": "UnboundLocalError", "args": ["local variable \'accountName\' referenced before assignment"]}, "message": "Server error", "code": -32000}, "id": 1}' 
+2014-07-07 11:06:19,226 - nxtBridge listening on localhost:6876
+2014-07-07 11:06:23,263 - nxtBridge returning: b'{"result": [{"address": "2865886802744497404", "account": "testAcc", "vout": 49793.07947821, "amount": 49793.07947821, "confirmations": 0, "scriptPubKey": "notAvailable", "txid": 49793.07947821}, {"address": "16159101027034403504", "account": "testAcc2", "vout": 40725.92052174, "amount": 40725.92052063, "confirmations": 0, "scriptPubKey": "notAvailable", "txid": 40725.92052174}], "id": 1, "jsonrpc": "2.0"}' 
+2014-07-07 11:06:39,355 - nxtBridge returning: b'{"result": [{"address": "16159101027034403504", "account": "testAcc2", "vout": 40725.92052174, "amount": 40725.92052063, "confirmations": 0, "scriptPubKey": "notAvailable", "txid": 40725.92052174}], "id": 1, "jsonrpc": "2.0"}' 
+2014-07-07 11:06:46,421 - nxtBridge returning: b'{"result": [{"address": "17191249976782551463", "account": "", "vout": 0, "amount": 0, "confirmations": 0, "scriptPubKey": "notAvailable", "txid": 0}, {"address": "2865886802744497404", "account": "testAcc", "vout": 49793.07947821, "amount": 49793.07947821, "confirmations": 0, "scriptPubKey": "notAvailable", "txid": 49793.07947821}, {"address": "16159101027034403504", "account": "testAcc2", "vout": 40725.92052174, "amount": 40725.92052063, "confirmations": 0, "scriptPubKey": "notAvailable", "txid": 40725.92052174}], "id": 1, "jsonrpc": "2.0"}' 
+2014-07-07 11:10:02,661 - nxtBridge listening on localhost:6876
+2014-07-07 11:10:04,579 - nxtBridge returning: b'{"result": [{"vout": 49793.07947821, "address": "2865886802744497404", "confirmations": 0, "txid": 49793.07947821, "amount": 49793.07947821, "scriptPubKey": "notAvailable", "account": "testAcc"}, {"vout": 40725.92052174, "address": "16159101027034403504", "confirmations": 0, "txid": 40725.92052174, "amount": 40725.92052063, "scriptPubKey": "notAvailable", "account": "testAcc2"}], "jsonrpc": "2.0", "id": 1}' 
+2014-07-07 11:10:06,517 - nxtBridge returning: b'{"result": [{"vout": 49793.07947821, "address": "2865886802744497404", "confirmations": 0, "txid": 49793.07947821, "amount": 49793.07947821, "scriptPubKey": "notAvailable", "account": "testAcc"}, {"vout": 40725.92052174, "address": "16159101027034403504", "confirmations": 0, "txid": 40725.92052174, "amount": 40725.92052063, "scriptPubKey": "notAvailable", "account": "testAcc2"}], "jsonrpc": "2.0", "id": 1}' 
+2014-07-07 11:10:10,170 - nxtBridge returning: b'{"result": [{"vout": 40725.92052174, "address": "16159101027034403504", "confirmations": 0, "txid": 40725.92052174, "amount": 40725.92052063, "scriptPubKey": "notAvailable", "account": "testAcc2"}], "jsonrpc": "2.0", "id": 1}' 
+2014-07-07 11:10:12,998 - nxtBridge returning: b'{"result": [{"vout": 0, "address": "17191249976782551463", "confirmations": 0, "txid": 0, "amount": 0, "scriptPubKey": "notAvailable", "account": ""}, {"vout": 49793.07947821, "address": "2865886802744497404", "confirmations": 0, "txid": 49793.07947821, "amount": 49793.07947821, "scriptPubKey": "notAvailable", "account": "testAcc"}, {"vout": 40725.92052174, "address": "16159101027034403504", "confirmations": 0, "txid": 40725.92052174, "amount": 40725.92052063, "scriptPubKey": "notAvailable", "account": "testAcc2"}], "jsonrpc": "2.0", "id": 1}' 

@@ -114,8 +114,6 @@ class WalletDB_Handler(nxtUseCaseMeta): # need to talk to NRS, hence UC derived
             #                             """
             #
 
-        #if wallet_is_new:
-        #try:
             self.consLogger.info('creating wallet.db with filename: %s ', self.walletDB_fName )
             self.walletDBConn = sq.connect(self.walletDB_fName)
             self.walletDBCur = self.walletDBConn.cursor()
@@ -141,18 +139,44 @@ class WalletDB_Handler(nxtUseCaseMeta): # need to talk to NRS, hence UC derived
             NxtRS_BTC = NxtResp['accountRS']
             NxtRS_BTC =NxtRS_BTC.replace("-","x")
             NxtRS_BTC+='nxtnxtnxt'
+            # make sure it has no pubKey here!!!
+            # and if it has raise a huge alarm!
 
-# make sure it has no pubKey here!!!
-#  and if it has raise a huge alarm!
-            accName = ""
-            has_pubKey = "N"
+            accName = ''
+            has_pubKey = 'N'
             newNxtAccount = (  accName,nxtNumAcc ,nxtRSAcc ,NxtRS_BTC ,nxtSecret , has_pubKey)
             insertNewNxtAccount = """insert into nxtWallet values (  ?,?,?,?,?,?)"""
             self.walletDBCur.execute(insertNewNxtAccount, newNxtAccount )
             self.walletDBConn.commit()
             #http://stackoverflow.com/questions/11490100/no-autoincrement-for-integer-primary-key-in-sqlite3 shit.
-        except:
-            self.consLogger.info('could not create wallet db with filename %s Assuming it exists already.', self.walletDB_fName )
+
+
+            testACCName = 'testAcc'
+            testNetAcc = '2865886802744497404' # <------testNet------------- FOR TESTING with  non-existing accounts in wallet!!!
+            testNetAccRS = 'NXT-3P9W-VMQ3-9DRR-4EFKH'
+            testNetAccRS_BTC =   testNetAccRS.replace("-","x")
+            testNetAccRS_BTC += 'nxtnxtnxt'
+            testNetAccSec = ''           #
+            testACC = ( testACCName, testNetAcc , testNetAccRS,testNetAccRS_BTC ,testNetAccSec , 'Y' )
+            self.walletDBCur.execute(insertNewNxtAccount, testACC )
+            self.walletDBConn.commit()
+
+
+            testACCName = 'testAcc2'
+            testNetAcc = '16159101027034403504' # <------testNet------------- FOR TESTING with  non-existing accounts in wallet!!!
+            testNetAccRS = 'NXT-L6PJ-SMZ2-5TDB-GA7J2'
+            testNetAccRS_BTC =   testNetAccRS.replace("-","x")
+            testNetAccRS_BTC += 'nxtnxtnxt'
+            testNetAccSec = '' #
+            testACC = ( testACCName, testNetAcc , testNetAccRS,testNetAccRS_BTC ,testNetAccSec , 'Y' )
+            self.walletDBCur.execute(insertNewNxtAccount, testACC )
+            self.walletDBConn.commit()
+
+
+
+        except Exception as inst:
+            except_reason = str(inst.args)
+            self.consLogger.info('could not create wallet db with filename %s because: %s.', self.walletDB_fName, except_reason )
             self.walletDBConn = sq.connect(self.walletDB_fName)
             self.walletDBCur = self.walletDBConn.cursor()
             self.walletDBCur.execute('SELECT SQLITE_VERSION()')
@@ -165,7 +189,8 @@ class WalletDB_Handler(nxtUseCaseMeta): # need to talk to NRS, hence UC derived
         #########################################################
         self.walletDBConn.commit()
         self.consLogger.info('walletDB - some info here!')
-           
+
+
 
 class WalletDB_Emitter(QObject):
 

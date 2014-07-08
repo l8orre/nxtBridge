@@ -178,13 +178,13 @@ class JSON_Runner(QtCore.QRunnable):
 # getconnectioncount	# OK
 # getinfo		    	# OK
 # getnewaddress	    	# OK    -uses wallet.dat DB
-# getreceivedbyaccount	# under revision  -uses wallet.dat DB
+# getreceivedbyaccount	# OK  -uses wallet.dat DB
 # getreceivedbyaddress	# OK    -uses wallet.dat DB  WOKRING ON !!!! ALMOST READY
 # gettransaction		# OK
-# listsinceblock		# under revision  -uses wallet.dat DB
+# listsinceblock		# OK  -uses wallet.dat DB
 # listunspent		    #  OK   -uses wallet.dat DB
-# sendfrom		        # under revision  -uses wallet.dat DB
-# sendtoaddress	    	# under revision  -uses wallet.dat DB
+# sendfrom		        # OK  -uses wallet.dat DB
+# sendtoaddress	    	# OK  -uses wallet.dat DB
 # settxfee		        # OK (n/a)
 # validateaddress		# OK
 

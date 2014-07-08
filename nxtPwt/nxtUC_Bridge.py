@@ -228,8 +228,6 @@ class JSON_Runner(QtCore.QRunnable):
         # fetch guaranteed balance #
         #ignore minconf
         # fecth ONE or loop over all in wallet
-
-        #print("getbalance----> " + str(kwargs))
         walletDB_fName = kwargs['walletDB_fName']
         walletDBConn = sq.connect(walletDB_fName)
         walletDBCur = walletDBConn.cursor()
@@ -240,13 +238,11 @@ class JSON_Runner(QtCore.QRunnable):
         accountName = kwargs['accountName'] #kwargs['account']
         balance_local = 0.0
 
-        #print("---->        accountName "+ str(accountName ))
         if accountName == 'None':
             get_all_accs_from_wallet = """select  NxtNumeric from nxtWallet"""
             walletDBCur.execute(get_all_accs_from_wallet  )
             accts_in_wallet = walletDBCur.fetchall()#[0]
             for accountNum in accts_in_wallet:
-                #print("accountNum[0]: " + accountNum[0])
                 NxtApi['account'] = accountNum[0]
                 NxtReq.params=NxtApi # same obj, only replace params
                 preppedReq = NxtReq.prepare()
@@ -258,14 +254,11 @@ class JSON_Runner(QtCore.QRunnable):
                     guaranteedBalanceNXT = float(guaranteedBalanceNQT) * 0.00000001
                     balance_local += guaranteedBalanceNXT
         else:
-            #                print("--------------->4" + str(accountName))
             get_accNum_from_wallet = """select  NxtNumeric from nxtWallet where accountName = ?  """
             accountNameTuple = (accountName,)
             walletDBCur.execute(get_accNum_from_wallet, accountNameTuple  )
             acct_in_wallet = walletDBCur.fetchall()#[0]
-            #print("fetcing aaconuit from NRS:" + str(acct_in_wallet))
             try:
-                #print("fetcing aaconuit from NRS:" + str(acct_in_wallet[0]))
                 NxtApi['account'] = acct_in_wallet[0]
                 NxtReq.params=NxtApi # same obj, only replace params
                 preppedReq = NxtReq.prepare()
@@ -284,8 +277,7 @@ class JSON_Runner(QtCore.QRunnable):
             Nxt2Btc =  {
                         'amount': 0.0
                         }
-        #print(str(Nxt2Btc))
-        return Nxt2Btc  
+        return Nxt2Btc
 
  
     @dispatcher.add_method
@@ -589,7 +581,6 @@ class JSON_Runner(QtCore.QRunnable):
         #print(str(TXs))
         NQT_received = 0.0
         for TX in TXs:
-            #print("1"+str(TX))
 
             NxtApi = {}
             NxtApi['requestType'] =  payload2['requestType'] # here we translate BTC params to NXT params
@@ -598,17 +589,11 @@ class JSON_Runner(QtCore.QRunnable):
             preppedReq = NxtReq.prepare()
             response = session.send(preppedReq)
             NxtResp = response.json()
-            #print("2"+str(NxtResp))
-            #print(str(NxtResp['recipient']))
 
             if NxtResp['recipient'] == str(NXTaccount):
-                #print(str( NQT_received )) # pass
                 NQT_received += float(NxtResp['amountNQT'])
 
-        #Nxt2Btc = {}
-
         NXT_received =  NQT_received * 0.00000001
-        #print(str(NXT_received))
         Nxt2Btc =  {
                     'NXT_received' : NXT_received
                     }
@@ -619,40 +604,19 @@ class JSON_Runner(QtCore.QRunnable):
 
     @dispatcher.add_method
     def getreceivedbyaccount( **kwargs):
-
-
-
         # we need to loop over all address/account pairs int the wallet.dat db here
         walletDB_fName = kwargs['walletDB_fName']
         walletDBConn = sq.connect(walletDB_fName)
         walletDBCur = walletDBConn.cursor()
-
-        #print("-----------__>1: " + str(kwargs))
-
         accountName = kwargs['accountName']
-
         accountName = (accountName,) # wrap inot tuple
-
-
-        #get_accNum_from_wallet = """select  NxtNumeric from nxtWallet where accountName = ?  """
-        #accountNameTuple = (accountName,)
-        #walletDBCur.execute(get_accNum_from_wallet, accountNameTuple  )
-        #acct_in_wallet = walletDBCur.fetchall()#[0]
-
         get_address_from_wallet = """select  NxtNumeric from nxtWallet where accountName = ? """
-
         walletDBCur.execute(get_address_from_wallet, accountName  )
-
         NXTaccount = walletDBCur.fetchall()[0]
-        #print(str(NXTaccount))
         NXTaccount = NXTaccount[0]
-        #print(str(NXTaccount))
-
         # get ALL account TXs
         # loop and select the 'IN' TXs
         # sum over these
-        #print("NXTaccount" +NXTaccount)
-
         payload1 = { "requestType" : "getAccountTransactionIds" } #getTime"   }
         NxtApi = {}
         NxtApi['requestType'] =  payload1['requestType'] # here we translate BTC params to NXT params
@@ -663,10 +627,8 @@ class JSON_Runner(QtCore.QRunnable):
         NxtResp = response.json()
         payload2 = { "requestType" : "getTransaction" } #getTime"   }
         TXs = NxtResp['transactionIds']
-        #print(str(TXs))
         NQT_received = 0.0
         for TX in TXs:
-            #print("1"+str(TX))
 
             NxtApi = {}
             NxtApi['requestType'] =  payload2['requestType'] # here we translate BTC params to NXT params
@@ -675,17 +637,12 @@ class JSON_Runner(QtCore.QRunnable):
             preppedReq = NxtReq.prepare()
             response = session.send(preppedReq)
             NxtResp = response.json()
-            #print("2"+str(NxtResp))
-            #print(str(NxtResp['recipient']))
 
             if NxtResp['recipient'] == str(NXTaccount):
-                #print(str( NQT_received )) # pass
                 NQT_received += float(NxtResp['amountNQT'])
 
-        #Nxt2Btc = {}
-
         NXT_received =  NQT_received * 0.00000001
-        #print(str(NXT_received))
+
         Nxt2Btc =  {
                     'NXT_received' : NXT_received
                     }
@@ -748,27 +705,171 @@ class JSON_Runner(QtCore.QRunnable):
 
         return Nxt2Btc
 
+ #
+ #
+ #
+ # {
+ #                    "account" : "Portster1",
+ #                    "address" : "1E5bdoMrBFkffc7hjXnNxFcm2Dh32SDRUH",
+ #                    "category" : "receive",
+ #                    "amount" : 0.69300000,
+ #                    "confirmations" : 30813,
+ #                    "blockhash" : "000000000000000055d86c60917ca853b77cc61d615332c61f2cb7befb2ccea1",
+ #                    "blockindex" : 43,
+ #                    "blocktime" : 1389005570,
+ #                    "txid" : "f72906487d76d0cabf937a8a76be5231a4d311e46ec41b269a529bc41b350db9",
+ #                    "walletconflicts" : [
+ #                    ],
+ #                    "time" : 1389005344,
+ #                    "timereceived" : 1389005344
+ #                },
+ #             {
+ #                    "account" : "",
+ #                    "address" : "1Ce1NpJJAH9uLKMR37vzAmnqTjB4Ck8L4g",
+ #                    "category" : "send",
+ #                    "amount" : -0.00050000,
+ #                    "fee" : -0.00010000,
+ #                    "confirmations" : 12232,
+ #                    "blockhash" : "0000000000000000091ae589c034bc0466e2feca51dc018bb2c3303e8ab8648b",
+ #                    "blockindex" : 156,
+ #                    "blocktime" : 1398350348,
+ #                    "txid" : "f0b20213346b14361795a9a387ac28078dc9a8a14fd9ced4f7b32eab9966820f",
+ #                    "walletconflicts" : [
+ #                    ],
+ #                    "time" : 1398350348,
+ #                    "timereceived" : 1404113883
+ #                },
+ #
+ #
+
+
     @dispatcher.add_method
     def listsinceblock( **kwargs):
-        print(str(kwargs))
-
-
-#        ACCOUNT = kwargs["account"] #kwargs['account']
-#        payload = { "requestType" : "getBalance" } #getTime"   }
-#        NxtApi = {}
-#        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
-#        NxtApi['account'] = ACCOUNT 
-#        NxtReq.params=NxtApi # same obj, only replace params
-#        preppedReq = NxtReq.prepare()
-#        response = session.send(preppedReq)
-#        NxtResp = response.json()
-#        Nxt2Btc = {}
-
-
-        Nxt2Btc =  {
-                    'A' : "B"
+        """-"""
+        TXtemplate_BTC_format = {
+                    "account" : "",
+                    "address" : "",
+                    "category" : "receive",
+                    "amount" : 0.00000001,
+                    "confirmations" : 1,
+                    "blockhash" : "",
+                    "blockindex" : 0,
+                    "blocktime" : 1234567890,
+                    "txid" : "",
+                    "walletconflicts" : [
+                    ],
+                    "time" : 1234567890,
+                    "timereceived" : 1234567890
                     }
-     
+
+        payload = { "requestType" : "getState" }
+        NxtApi = {}
+        NxtApi['requestType'] =  payload['requestType'] # here we translate BTC params to NXT params
+        NxtReq.params=NxtApi # same obj, only replace params
+        preppedReq = NxtReq.prepare()
+        response = session.send(preppedReq)
+        NxtResp = response.json()
+        lastBlock = NxtResp['lastBlock']
+        Nxt2Btc = {
+                    'transactions': [],
+                    'lastblock' : lastBlock
+        }
+
+        walletDB_fName = kwargs['walletDB_fName']
+        walletDBConn = sq.connect(walletDB_fName)
+        walletDBCur = walletDBConn.cursor()
+
+        get_all_Accs_from_wallet = """select  accountName, NxtNumeric from nxtWallet   """
+        walletDBCur.execute(get_all_Accs_from_wallet ,  )
+        NXTaccounts = walletDBCur.fetchall()
+
+        print("NXTaccounts" + str(NXTaccounts))
+        for account in NXTaccounts:
+            # cursor.fetchall returns : NXTaccounts:[('', '17191249976782551463'), ('testAcc', '2865886802744497404'), ('testAcc3', '16480962165525066863')]
+            NXTaccountNum = account[1] # 1 is the NXTACCT from the DB
+            NXTaccountName = account[0] # 0 is the name from the DB
+
+            ########## LOOP AOVER ALL ACCOUNTS IN WALLET
+            payload1 = { "requestType" : "getAccountTransactionIds" } #getTime"   }
+            NxtApi = {}
+            NxtApi['requestType'] =  payload1['requestType'] # here we translate BTC params to NXT params
+            NxtApi['account'] = NXTaccountNum
+            NxtReq.params=NxtApi # same obj, only replace params
+            preppedReq = NxtReq.prepare()
+            response = session.send(preppedReq)
+            NxtResp = response.json()
+            print("listsinceblock--1->" +str(NXTaccountNum))
+            try:
+                TXs = NxtResp['transactionIds']
+            except Exception as inst:
+                print("no TXs for this account:" + str(inst))
+                continue
+
+            ##### LOOP OVER ALL TXs for A GIVEN ACCOUNT
+            payload2 = { "requestType" : "getTransaction" } #getTime"   }
+
+            for TX in TXs:
+
+                NxtApi = {}
+                NxtApi['requestType'] =  payload2['requestType'] # here we translate BTC params to NXT params
+                NxtApi['transaction'] = TX
+                NxtReq.params=NxtApi # same obj, only replace params
+                preppedReq = NxtReq.prepare()
+                response = session.send(preppedReq)
+                NxtResp = response.json()
+
+                if NxtResp['type'] == 0:
+
+                    nxtTX = copy(TXtemplate_BTC_format)
+                    nxtTX['account'] = NXTaccountName
+                    nxtTX['address'] =  NXTaccountNum
+                    nxtTX['amount'] = 0.01
+                    nxtTX['confirmations'] = NxtResp['confirmations']
+                    nxtTX['blockhash'] = NxtResp['fullHash']
+                    nxtTX['blocktime'] = NxtResp['timestamp']
+
+                    print(" --->TX type:"+ str(NxtResp['type']))
+                    if NxtResp['recipient'] == NXTaccountNum:
+                        category = "receive"
+                        nxtTX['category'] = category
+                        amountNXT = float(NxtResp['amountNQT']) * 0.00000001
+                        nxtTX['amount'] = float(amountNXT)
+                    elif NxtResp['sender'] == NXTaccountNum:
+                        category = "send"
+                        nxtTX['category'] = category
+                        nxtTX['fee'] = -1.0
+                        amountNXT = float(NxtResp['amountNQT']) * (-0.00000001)
+                        nxtTX['amount'] = float(amountNXT)
+                #print(str(nxtTX))
+                Nxt2Btc['transactions'].append(nxtTX)
+
+        return Nxt2Btc #TEMPLATE
+
+        #
+        #
+        # nxtTX_format="""{
+        #     "fullHash": "cd6ac7b30742ea2533423204c75498393c02cb69cb00c5ef19ae7cbe56b78ca6",
+        #     "confirmations": 31657,
+        #     "signatureHash": "27d4d8c1b806c0959121972ab4506e82f643b58e3130420510935aaf79a675f8",
+        #     "transaction": "2732068724802022093",
+        #     "amountNQT": "123400000",
+        #     "block": "15440838755125110433",
+        #     "recipientRS": "NXT-L6PJ-SMZ2-5TDB-GA7J2",
+        #     "type": 0,
+        #     "feeNQT": "100000000",
+        #     "recipient": "16159101027034403504",
+        #     "sender": "2865886802744497404",
+        #     "timestamp": 16490708,
+        #     "height": 115921,
+        #     "subtype": 0,
+        #     "senderPublicKey": "10eb3c8cb67b4898e2993b1b463448f4f018939022c13892d682073a511ffa4a",
+        #     "deadline": 1,
+        #     "blockTimestamp": 16490738,
+        #     "senderRS": "NXT-3P9W-VMQ3-9DRR-4EFKH",
+        #     "signature": "bbc696ff18eb93688c941832a30259363a04385aeb8eb09c2229dd68a377e60bfeaf6ba9f7113a7762a4f752922aa58a704987e13c5363631e2403273eb8a5ff"
+        # }"""
+        #
+        #
 #
 #   azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$ ./bitcoind help listsinceblock
 # listsinceblock ( "blockhash" target-confirmations )
@@ -808,9 +909,6 @@ class JSON_Runner(QtCore.QRunnable):
 #
 # azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$
 #
-        return Nxt2Btc  
-        
-
 
 
     @dispatcher.add_method
@@ -1160,7 +1258,7 @@ class JSON_Runner(QtCore.QRunnable):
         #preppedReq = NxtReq.prepare()
         #response = session.send(preppedReq)
         #NxtResp = response.json()
-        Nxt2Btc = {}
+
         Nxt2Btc =  {
                     "settxfee" : "n/a"
                     }
@@ -1255,7 +1353,7 @@ class JSON_Runner(QtCore.QRunnable):
          
         if "errorCode" in NxtResp3.keys():
             isvalid = 'false'
-            publicKey = ''
+
         elif "publicKey" in NxtResp3.keys():
             isvalid = 'true'
 
@@ -1460,10 +1558,13 @@ class JSON_Runner(QtCore.QRunnable):
 
 
         def parse_listsinceblock(jsonParms):
-            blockAddress = str(jsonParms[0])
-            parmsDi = {'blockAddress':blockAddress}
+            parmsDi = {}
+            blockHeight = str(jsonParms[0])
+            parmsDi['walletDB_fName'] =self.walletDB_fName
+            parmsDi['blockHeight'] = blockHeight
             minimumConfs = str(jsonParms[0])
             parmsDi['minimumConfs'] = minimumConfs
+            #print("PARSE: ----->" +str(parmsDi))
             return parmsDi
 
         def parse_listunspent(jsonParms):
@@ -1735,9 +1836,8 @@ class JSON_Runner(QtCore.QRunnable):
                 parmsDi = parse_listsinceblock(jsonParms)
                 
             elif bitcoind_method == 'listunspent':
-                parmsDi = parse_listunspent(jsonParms) #{'TTT':'GGG'} #
-                #print("parmsDi    -- > "  +str(parmsDi))
-#
+                parmsDi = parse_listunspent(jsonParms)
+
             elif bitcoind_method == 'sendfrom':
                 parmsDi = parse_sendfrom(jsonParms)
 
@@ -1807,12 +1907,15 @@ class JSON_Runner(QtCore.QRunnable):
         responseFromNxt = JSONRPCResponseManager.handle(jsonStr, dispatcher)
 
         #
+        # ! Here we can change the architecture and use FULLY synthetic RESPONSE objects and NOT use
+        # the 'Werkzeug' decorated dispatcher!
+        #
         # this construction allows to introduce ANY dict as result into the response object.
         # the local dispatcher functions that are wrapped as decorators are not really needed here!
         # dispatcher_override = True
         # if dispatcher_override:
         #     result = self._any_method()
-        #     responseFromNxt._data['result'] = result
+        #     responseFromNxt._data['result'] = result <-------------------------------
 
         response = Response( responseFromNxt.json, mimetype='application/json') #, mimetype='text/plain')
 
@@ -1929,8 +2032,6 @@ class JSON_Runner(QtCore.QRunnable):
             response.response[0] = parseResponse
             self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
             return response
-
-
 
         elif bitcoind_method == 'getreceivedbyaccount':
             """  RETURN NON - JSON  """
@@ -2188,12 +2289,50 @@ class JSON_Runner(QtCore.QRunnable):
 #            
 
 
+#
+# azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$ ./bitcoind listsinceblock 300000
+# {
+#     "transactions" : [
+#         {
+#             "account" : "Portster1",
+#             "address" : "1E5bdoMrBFkffc7hjXnNxFcm2Dh32SDRUH",
+#             "category" : "receive",
+#             "amount" : 0.06800000,
+#             "confirmations" : 31490,
+#             "blockhash" : "00000000000000022ea24fdf05c625a7b0a33d823a19960dd6610666586bbc40",
+#             "blockindex" : 95,
+#             "blocktime" : 1388645060,
+#             "txid" : "00a0f99b455e220e7bc1a4a6b4372c5b8d9e54e7ff82b69471e17c6cf03a1e82",
+#             "walletconflicts" : [
+#             ],
+#             "time" : 1388644873,
+#             "timereceived" : 1388644873
+#         },
+#         {
+#             "account" : "Portster1",
+#             "address" : "1E5bdoMrBFkffc7hjXnNxFcm2Dh32SDRUH",
+#             "category" : "receive",
+#             "amount" : 0.69300000,
+#             "confirmations" : 30817,
+#             "blockhash" : "000000000000000055d86c60917ca853b77cc61d615332c61f2cb7befb2ccea1",
+#             "blockindex" : 43,
+#             "blocktime" : 1389005570,
+#             "txid" : "f72906487d76d0cabf937a8a76be5231a4d311e46ec41b269a529bc41b350db9",
+#             "walletconflicts" : [
+#             ],
+#             "time" : 1389005344,
+#             "timereceived" : 1389005344
+#         }
+#     ],
+#     "lastblock" : "0000000000000000138bb3ebb4db0343d865c82a7b6a8e24083bb27a0aa4cbac"
+# }
 
-
-
-
-
-
-
-
-       
+# TODO: bitcoind documentation seems to be wrong!
+# listsinceblock takes the BLOCKHEIGHT as input and NOT the blockhash!
+# azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$ ./bitcoind getblockhash 300000
+# 000000000000000082ccf8f1557c5d40b21edabb18d2d691cfbf87118bac7254
+# azure@boxfish:~/workbench/Altcoins/bitcoin-0.9.1-linux/bin/64$ ./bitcoind listsinceblock 000000000000000082ccf8f1557c5d40b21edabb18d2d691cfbf87118bac7254{
+#     "transactions" : [
+#     ],
+#     "lastblock" : "0000000000000000138bb3ebb4db0343d865c82a7b6a8e24083bb27a0aa4cbac"
+# }

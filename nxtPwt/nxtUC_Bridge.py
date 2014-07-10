@@ -2018,7 +2018,7 @@ class JSON_Runner(QtCore.QRunnable):
  
         elif bitcoind_method == 'getinfo':
             """  RETURN   JSON  """
-            self.bridgeLogger.info('nxtBridge returning: %s ', parseResponse )
+            self.bridgeLogger.info('nxtBridge returning: %s ', response.response[0] )
             return response
  
         elif bitcoind_method == 'getnewaddress':

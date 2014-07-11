@@ -64,7 +64,7 @@ def main(argv):
     print('nxtBridge starting with cmd line:' + str(argv))
  
 
-    app = QtGui.QApplication(sys.argv) # creation of the app object
+    app = QtGui.QApplication(sys.argv, False) # creation of the app object
     main = MainApplication(app, argv )
     
     main.startBridge( )

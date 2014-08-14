@@ -465,6 +465,7 @@ class JSON_Runner(QtCore.QRunnable):
         preppedReq = NxtReq.prepare()
         response = session.send(preppedReq)
         NxtResp = response.json()
+        print(str(NxtResp))
         VERSION = NxtResp['version']
         HEIGHT = NxtResp['numberOfBlocks']
         NUMPEERS = NxtResp['numberOfPeers']

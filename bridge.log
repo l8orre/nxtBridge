@@ -31,3 +31,7 @@
 2014-07-11 16:42:13,084 - nxtBridge returning: b'{"id": 1, "result": {"timeoffset": 0, "walletversion": "1.2.0e", "proxy": "", "keypoololdest": 678952960, "difficulty": "2568508824582834", "connections": 63, "paytxfee": 0.0, "balance": 0.0, "protocolversion": "1.2.0e", "version": "1.2.0e", "errors": "", "testnet": false, "keypoolsize": 202591712, "blocks": 151560}, "jsonrpc": "2.0"}' 
 2014-07-11 16:57:45,531 - nxtBridge listening on localhost:6876
 2014-07-11 16:58:20,047 - nxtBridge listening on localhost:6876
+2014-07-11 17:10:02,822 - nxtBridge listening on localhost:6876
+2014-07-11 17:10:14,110 - nxtBridge returning: b'{"id": 1, "jsonrpc": "2.0", "result": {"proxy": "", "keypoololdest": 682622976, "protocolversion": "1.2.0e", "connections": 63, "timeoffset": 0, "balance": 0.0, "walletversion": "1.2.0e", "difficulty": "2568542157821712", "keypoolsize": 228901040, "errors": "", "testnet": false, "version": "1.2.0e", "blocks": 151579, "paytxfee": 0.0}}' 
+2014-07-12 15:58:41,279 - nxtBridge listening on localhost:6876
+2014-08-14 14:42:53,172 - nxtBridge listening on localhost:6876

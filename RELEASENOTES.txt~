@@ -6,6 +6,9 @@ on behalf of the NXT InfraStructure fund
 l8orre@yandex.com
 nxtforum.org
 
+Note: The 'blockheight.db' is a legacy artifact from NXT 1.1.6, which does not have the api call 'getBlockId'
+This feature will be removed with the transition to NXT 1.2.0
+
 
 
 The Bridge - access the NXT blockchain using legacy bitcoind jsonrpc calls
@@ -22,8 +25,13 @@ run bitcoind with rpc enabled
 run NRS (NXT server)
 run nxtBridge.py [args]
 
-args: [ testNet/mainNet, filename for wallet.dat, ...]
+args: [nxtNET, walletFile]
 
+nxtNET = testNet or mainNet           default: testNet
+walletFile = filename for nxtWallet   default: nxtWallet.dat
+
+At startup, nxtBridge checks for existence of the sqlite3 db 'walletFile'.
+If it exists, it opens this db, if it does not exist, it creates a new one with one address and "" as accountName.
 
 
 1:
@@ -34,14 +42,26 @@ bitcoind can be used as a relay to forward jsonrpc calls that are sent to it to 
 
 Calls bitcoind from the command line with 'getinfo', and bitcoind forwards the 'getinfo' jsonrpc call to port 7879
 
-Note: bitcoind is listening on the rpcport as designated in bitcoin.conf, default is 8332
+Notes: 
 
-sending 'getinfo' as jsonrpc to port 8332 does the same as the cmd line in the example above.
+- bitcoind is listening on the rpcport as designated in bitcoin.conf, default is 8332
+
+- sending 'getinfo' as jsonrpc to port 8332 does the same as the cmd line in the example above.
+
+- nxtBridge can vbe called directly by sending bitcoind comprehensible json to port 7879 w/o running bitcoind
+
+- bitcoind uses malformed jsonrpc with several of its api calls. 
+  The 'curl' tool is not able to hanlde this. nxtBridge might support this in the future also, but not at present.
+ 
 
 
 2:
 -------------------------------------
-nxtBridge listens on port 7879 for jsonrpc calls that are relayed to there form bitcoind
+nxtBridge listens on port 7879 for jsonrpc calls that are sent there in bitcoind format.
+
+This can be done either by relaying to there from bitcoind, i.e. by sending the calls to bitcoind on port 8332,
+
+OR directly by sending them to port 7879
 
 nxtBridge receives a jsonrpc call from bitcoind.
 
@@ -87,12 +107,17 @@ Note the differences of values to current bitcoin blockchain parameters.
 Dependencies:
 
 Python3
-PyQt4
+PyQt4 - install python3-pyqt4
 requests
 Werkzeug
-jsonrpc
-numpy
 
+jsonrpc: make sure to use this one:
+apt-get install python3-pip
+pip3 install json-rpc
+https://pypi.python.org/pypi/json-rpc/1.5.0
+
+numpy
+ 
 
 
 The following bitcoind jsonrpc calls will be supported:
@@ -117,11 +142,96 @@ validateaddress		# OK
 
 
 
-Note: 
+Wallet emulation
+----------------
 
-NXT does not have a 'wallet' feature, the Bridge emulates a wallet-like database.
-The Bridge internally maintains an sqlite3 database to do this.
-Recommended handling of cryptographic keys will be documented in an upcoming version. 
+DISCLAIMER
+OBSERVE THE FOLLOWING SECURITY MEASURES:
+
+1: PREVENT SECURITY BREACHES OF YOUR OPERATIONAL ENVIRONMENT.
+2: PREVENT LOSS OF THE WALLET FILE.
+
+THE SQLITE3 DATABASE THAT CONTAINS THE NXT PASSWORDS FOR THE NXT ACCOUNTS ARE STORED WITHOUT ENCRYPTION IN THE SQLITE3 DATABASE FILE.
+A SECURITY BREACH OF THE OPERATIONAL ENVIRONMENT MAY LEAD TO THEFT OF FUNDS HELD IN THESE ACCOUNTS.
+PASSWORD PROTECTION OF THE SQLITE3 DATABASE CAN BE ADDED EASILY BY ANYBODY WITH MODERATE PYTHON PROFICIENCY.
+HENCE, PREVENT SECURITY BREACHES OF YOUR OPERATIONAL ENVIRONMENT.
+
+LOSS OF THE WALLET FILE LEADS TO LOSS OF ACCESS TO THE NXT FUNDS REPRESENTED BY THE NXT PASSPHRASES.
+HENCE, PREVENT LOSS OF THE WALLET FILE.
+
+
+NXT does not have a 'wallet' feature as bitcoin does.
+nxtBridge emulates this by maintaining a bitcoin-wallet-like database (sqlite3).
+
+The filename can be supplied at startup, and if THE corresponding sqlite3.db does not exist, it will be created.
+If the wallet.dat sqlite3 db already exists, it will be continued.
+
+Since extensive use of the 'accounts' feature is somewhat discouraged by the bitcoin developers,
+nxtBridge makes a slight restriction on its use.
+
+nxtBridge enforces a strict 1-1 mapping of the arbitrary account names against the NXT addresses.
+
+The first account that is created automatically upon the creation of nxtWallet will be "" the an account
+that is associated with the empty string.
+
+Subsequent calls to the 'getnewaddress' must supply an account name that does not yet exist in nxtWallet.
+If an account name is supplied with the 'getnewaddress' call that already exists, an error will be returned.
+
+
+Recommendations for operational security:
+
+The same security guidelines as for running a bitcoin wallet apply.
+Furthermore, the sqlite3 database is not encrypted, hence anybody obtaining access to this file can access the funds to all NXT funds
+contained in the NXT accounts represented by the passwords.
+
+Possible security measures: Set up an encrypted file container and mount it in the filesystem.
+Then use this file system in the encrypted file container to store the wallet.dat db file. Use eg truecrypt.
+
+Use an in-memory file system location to host the wallet.dat durig operations,
+and store backups of the wallet.dat file in an encrypted file container.
+
+Also, some slite3 security extensions exist:
+sqlite-crypt.com/documentation.htm
+www.hwaci.com/sw/sqlite/see.html
+
+
+Run your whole system from an encrypted LVM.
+
+Protect against loss of wallet.dat - when the api call 'getnewaddress' is issued, a new entry will be made in the wallet.dat.
+Since making a backup of wallet.dat every time a 'getnewaddress' is issued is unfeasible, the following solution can be used:
+Configure a python logger to send an email to an external mail system, with the email containing the added (accountName, accountNum, accountMen, PASSWORD)
+in an encrypted form.
+
+
+
+
+
+getbalance # under revision
+----------
+without parameter returns the sum of the balances of all NXT addresses in the wallet
+with "" as parameter return the balance of the NXT address associated with the account named by the empty string ""
+with "accountName" as parameter return the balance of the NXT address associated with the account named "accountName"
+
+
+./bitcoind -rpcport=7879 getbalance 2865886802744497404 1
+
+listunspent # under revision
+-----------
+without parameter returns list of balances of all NXT addresses in the wallet from the NXT blockchain
+with a  parameter (=nxtAddress) returns the balance of the NXT address from the NXT blockchain.
+
+
+getreceivedbyaccount # under revision
+--------------------
+returns the sum of all payments received by this address and the associated account
+
+getreceivedbyaddress # under revision
+--------------------
+returns the sum of all payments received by this address and the associated account
+
+
+
+
 
 
 
@@ -130,10 +240,6 @@ These have been tested on Ubuntu13.10
 
 
 
-some examples using bitcoind as jsonrpc relay:
-----------------------------------
- 
-./bitcoind -rpcport=7879 getbalance 2865886802744497404 1
 
 ./bitcoind -rpcport=7879 getconnectioncount
 
@@ -153,11 +259,8 @@ some examples using bitcoind as jsonrpc relay:
 
 
 
-Note: 
-bitcoind uses malformed jsonrpc with several of its api calls. The 'curl' tool is not able to hanlde this.
-The Bridge might support this in the future also, but not at present.
  
- 
+
 
 Donations Welcome! NXT-LHVV-9ES7-RVHU-3R7HG
 

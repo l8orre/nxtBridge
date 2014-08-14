@@ -107,31 +107,36 @@ Note the differences of values to current bitcoin blockchain parameters.
 Dependencies:
 
 Python3
-PyQt4
+PyQt4 - install python3-pyqt4
 requests
 Werkzeug
-jsonrpc
+
+jsonrpc: make sure to use this one:
+apt-get install python3-pip
+pip3 install json-rpc
+https://pypi.python.org/pypi/json-rpc/1.5.0
+
 numpy
+ 
 
 
+The following bitcoind jsonrpc calls are be supported:
 
-The following bitcoind jsonrpc calls will be supported:
-
-getbalance		# under revision
+getbalance		# OK
 getbestblockhash	# OK
 getblock		# OK
 getblockcount		# OK
 getblockhash		# OK
 getconnectioncount	# OK
 getinfo			# OK
-getnewaddress		# under revision
-getreceivedbyaccount	# under revision
-getreceivedbyaddress	# under revision
-listsinceblock		# under revision
-listunspent		# under revision
+getnewaddress		# OK 
+getreceivedbyaccount	# OK 
+getreceivedbyaddress	# OK 
+listsinceblock		# OK 
+listunspent		# OK 
 gettransaction		# OK
-sendfrom		# under revision
-sendtoaddress		# under revision
+sendfrom		# OK
+sendtoaddress		# OK
 settxfee		# OK (n/a)
 validateaddress		# OK
 

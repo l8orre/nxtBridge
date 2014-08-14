@@ -72,9 +72,25 @@ connection management.
         self.app = app
         self.app.sessMan = self #
         
-        self.nxtApi = nxtApi(self) # make the apiSigs instance here!
+
+
+        self.apiLoggerNXT = lg.getLogger('apiLogger')
+        self.apiLoggerNXT.setLevel(lg.INFO) # INFO DEBUG
+        aLhandler = lg.StreamHandler()
+        aLhandler.setLevel(lg.INFO)      # INFO DEBUG
+        after = lg.Formatter('\n%(asctime)s - %(message)s')
+        aLhandler.setFormatter(after)
+        self.apiLoggerNXT.addHandler(aLhandler)
+
+        self.nxtApi = nxtApi(self, self.apiLoggerNXT ) # make the apiSigs instance here!
         self.activeNRS = nxtMods.NRSconn(self)
-        self.nxtApi.initSignals() # leapFrog init: account and NRSconn must be made before connecting their Sigs on nxtApi
+
+
+
+
+        NXXconnDumm = None
+        self.nxtApi.initSignals(self.activeNRS) # leapFrog init: account and NRSconn must be made before connecting their Sigs on nxtApi
+
         self.qPool=QtCore.QThreadPool.globalInstance()
         self.qPool.setMaxThreadCount(2500) # robustness
 
@@ -125,7 +141,6 @@ connection management.
         self.consLogger.addHandler(ch)
 
         self.walletDB_fName = walletDB_fName # filenmae
-
 
         self.walletDB = nxtDB.WalletDB_Handler(self, walletDB_fName,   self.walletLogger, self.consLogger, host, port )
 

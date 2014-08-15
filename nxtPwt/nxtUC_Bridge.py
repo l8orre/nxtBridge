@@ -25,20 +25,15 @@ THE SOFTWARE.
 
  
 from PyQt4.QtCore import   QObject , pyqtSignal, pyqtSlot, SIGNAL
-
 from PyQt4 import Qt, QtCore
 
 from nxtPwt.nxtApiSigs import nxtApi
 from nxtPwt.nxtApiPrototypes import nxtQs
-
+import os
 from copy import copy
 import time
-
 import sqlite3 as sq
-
 import logging as lg
-
-#import operator as op.m
 from operator import mod as opmod
 
 
@@ -164,7 +159,8 @@ class JSON_Runner(QtCore.QRunnable):
         NxtResp = response.json()
         return NxtResp
 
-  
+
+
 #######################
 #
 # Function Calls implemented below
@@ -379,9 +375,6 @@ class JSON_Runner(QtCore.QRunnable):
                     }
          
         return Nxt2Btc  
-
-  
- 
 
 
  
@@ -2112,8 +2105,10 @@ class JSON_Runner(QtCore.QRunnable):
             response.response[0] = parseResponse
             return response
 
-
-
+        elif bitcoind_method == 'stopBridge':
+            pi = os.getpid()
+            os.kill(pi,15)
+  
         else:
             parmsDi = {'throwException':'here'}
         

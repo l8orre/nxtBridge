@@ -1,14 +1,11 @@
 
-07/02/14
+08/21/14
 
 on behalf of the NXT InfraStructure fund
  
 l8orre@yandex.com
 nxtforum.org
-
-Note: The 'blockheight.db' is a legacy artifact from NXT 1.1.6, which does not have the api call 'getBlockId'
-This feature will be removed with the transition to NXT 1.2.0
-
+ 
 
 
 The Bridge - access the NXT blockchain using legacy bitcoind jsonrpc calls

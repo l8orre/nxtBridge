@@ -239,8 +239,6 @@ Below are examples for the implemented bitcoind calls using the curl tool, given
 These have been tested on Ubuntu13.10
 
 
-
-
 ./bitcoind -rpcport=7879 getconnectioncount
 
 ./bitcoind -rpcport=7879 getinfo
@@ -257,9 +255,13 @@ These have been tested on Ubuntu13.10
 
 ./bitcoind -rpcport=7879 validateaddress XXXXXXXXXXXXXXXX
 
+# use the call below to stop the bridge:
+./bitcoind -rpcport=7879 stopBridge
 
 
  
+
+
 
 
 Donations Welcome! NXT-LHVV-9ES7-RVHU-3R7HG

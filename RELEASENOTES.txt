@@ -1,5 +1,7 @@
+10/31/14
 
-08/21/14
+Included all API calls and changes up to NRS1.3.2
+
 
 on behalf of the NXT InfraStructure fund
  

@@ -2106,9 +2106,11 @@ class JSON_Runner(QtCore.QRunnable):
             return response
 
         elif bitcoind_method == 'stopBridge':
+            self.bridgeLogger.info('ok stopping Bridge!  '  )
+
             pi = os.getpid()
             os.kill(pi,15)
-  
+
         else:
             parmsDi = {'throwException':'here'}
         
